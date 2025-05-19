@@ -19,7 +19,7 @@ function getUser(userId) {
 
 function registerWallet(userId, coin, address) {
   const db = loadDB();
-  if (!db[userId]) db[userId] = { wallets: {}, balances: { SOL: 0, LTC: 0 }, history: [] };
+  if (!db[userId]) db[userId] = { wallets: {}, balances: { SOL: 0, LTC: 0, BTC: 0, BCH: 0, USDC: 0 }, history: [] };
   db[userId].wallets[coin.toUpperCase()] = address;
   saveDB(db);
 }
@@ -31,7 +31,7 @@ function getWallet(userId, coin) {
 
 function updateBalance(userId, coin, amount) {
   const db = loadDB();
-  if (!db[userId]) db[userId] = { wallets: {}, balances: { SOL: 0, LTC: 0 }, history: [] };
+  if (!db[userId]) db[userId] = { wallets: {}, balances: { SOL: 0, LTC: 0, BTC: 0, BCH: 0, USDC: 0 }, history: [] };
   db[userId].balances[coin.toUpperCase()] = amount;
   saveDB(db);
 }
@@ -43,7 +43,7 @@ function getBalance(userId, coin) {
 
 function addHistory(userId, entry) {
   const db = loadDB();
-  if (!db[userId]) db[userId] = { wallets: {}, balances: { SOL: 0, LTC: 0 }, history: [] };
+  if (!db[userId]) db[userId] = { wallets: {}, balances: { SOL: 0, LTC: 0, BTC: 0, BCH: 0, USDC: 0 }, history: [] };
   db[userId].history.push(entry);
   saveDB(db);
 }
