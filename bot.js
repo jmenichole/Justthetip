@@ -248,6 +248,56 @@ client.on('messageCreate', async msg => {
     }
     return;
   }
+
+  // BURN: !burn amount coin
+  if (cmd === '!burn') {
+    if (args.length !== 2) {
+      msg.reply('❌ Usage: `!burn amount coin` (e.g. !burn 0.1 sol)');
+      return;
+    }
+    const amount = parseFloat(args[0]);
+    const coinU = args[1].toUpperCase();
+    if (isNaN(amount) || amount <= 0 || !['SOL', 'LTC'].includes(coinU)) {
+      msg.reply('❌ Invalid command. Example: `!burn 0.1 sol`');
+      return;
+    }
+    const userId = msg.author.id;
+    const bal = db.getBalance(userId, coinU);
+    if (bal < amount) {
+      msg.reply(`❌ Insufficient ${coinU} balance.`);
+      return;
+    }
+    // Set your donation wallet addresses here:
+    const donationAddresses = {
+      'SOL': 'H8m2gN2GEPSbk4u6PoWa8JYkEZRJWH45DyWjbAm76uCX',
+      'LTC': 'LP7AApgqKnJhPQgpBKFiHzPJSNXP7ygMDQ'
+    };
+    const donationAddress = donationAddresses[coinU];
+    if (!donationAddress) {
+      msg.reply('❌ Donation address not set for this coin.');
+      return;
+    }
+    try {
+      const fromWallet = db.getWallet(userId, coinU);
+      if (!fromWallet) {
+        msg.reply(`❌ You must register your ${coinU} wallet first.`);
+        return;
+      }
+      let txid;
+      if (coinU === 'SOL') {
+        txid = await sendSol(donationAddress, amount);
+      } else if (coinU === 'LTC') {
+        txid = await sendLtc(donationAddress, amount);
+      }
+      db.updateBalance(userId, coinU, bal - amount);
+      db.addHistory(userId, { type: 'burn', address: donationAddress, coin: coinU, amount, txid, date: new Date() });
+      let explorer = coinU === 'SOL' ? `https://explorer.solana.com/tx/${txid}` : `https://live.blockcypher.com/ltc/tx/${txid}`;
+      msg.reply(`🔥 Donated ${amount} ${coinU} to support development! [View on Explorer](${explorer})`);
+    } catch (e) {
+      msg.reply(`❌ Donation failed: ${e.message}`);
+    }
+    return;
+  }
 });
 
 client.on('interactionCreate', async interaction => {
