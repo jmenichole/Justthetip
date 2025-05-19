@@ -31,4 +31,43 @@ async function sendSol(to, amount) {
   return tx;
 }
 
-module.exports = { getSolBalance, sendSol };
+const USDC_MINT = 'EPjFWdd5AufqSSqeM2qAqA7GkFf7i8k3h8J4p3k9Z3b'; // Mainnet USDC mint
+const splToken = require('@solana/spl-token');
+
+async function getUsdcBalance(pubkeyStr) {
+  const pubkey = new solanaWeb3.PublicKey(pubkeyStr);
+  const tokenAccounts = await connection.getTokenAccountsByOwner(pubkey, { mint: new solanaWeb3.PublicKey(USDC_MINT) });
+  let balance = 0;
+  for (const acc of tokenAccounts.value) {
+    const accInfo = await connection.getParsedAccountInfo(acc.pubkey);
+    balance += accInfo.value.data.parsed.info.tokenAmount.uiAmount;
+  }
+  return balance;
+}
+
+async function sendUsdc(to, amount) {
+  const fromTokenAccount = await splToken.getOrCreateAssociatedTokenAccount(
+    connection,
+    keypair,
+    new solanaWeb3.PublicKey(USDC_MINT),
+    keypair.publicKey
+  );
+  const toTokenAccount = await splToken.getOrCreateAssociatedTokenAccount(
+    connection,
+    keypair,
+    new solanaWeb3.PublicKey(USDC_MINT),
+    new solanaWeb3.PublicKey(to)
+  );
+  const tx = new solanaWeb3.Transaction().add(
+    splToken.createTransferInstruction(
+      fromTokenAccount.address,
+      toTokenAccount.address,
+      keypair.publicKey,
+      amount * 1e6 // USDC has 6 decimals
+    )
+  );
+  const sig = await solanaWeb3.sendAndConfirmTransaction(connection, tx, [keypair]);
+  return sig;
+}
+
+module.exports = { getSolBalance, sendSol, getUsdcBalance, sendUsdc };

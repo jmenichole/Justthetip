@@ -69,7 +69,7 @@ client.on('messageCreate', async msg => {
     const [mention, amountStr, coin] = args;
     const coinU = coin.toUpperCase();
     const amount = parseFloat(amountStr);
-    if (!mention.startsWith('<@') || isNaN(amount) || amount <= 0 || !['SOL', 'LTC', 'BTC', 'BCH'].includes(coinU)) {
+    if (!mention.startsWith('<@') || isNaN(amount) || amount <= 0 || !['SOL', 'LTC', 'BTC', 'BCH', 'USDC'].includes(coinU)) {
       msg.reply('❌ Invalid command. Example: `!tip @user 0.1 sol`');
       return;
     }
@@ -129,6 +129,18 @@ client.on('messageCreate', async msg => {
         // Placeholder for BTC tip logic
         msg.reply('⚠️ BTC tipping not yet implemented.');
         return;
+      } else if (coinU === 'USDC') {
+        const fromWallet = db.getWallet(msg.author.id, 'SOL');
+        if (!fromWallet) {
+          msg.reply('❌ You must register your SOL wallet first.');
+          return;
+        }
+        const txid = await sendUsdc(recipientWallet, amount);
+        db.updateBalance(msg.author.id, coinU, senderBal - amount);
+        db.updateBalance(targetId, coinU, db.getBalance(targetId, coinU) + amount);
+        db.addHistory(msg.author.id, { type: 'tip', to: targetId, coin: coinU, amount, txid, date: new Date() });
+        db.addHistory(targetId, { type: 'receive', from: msg.author.id, coin: coinU, amount, txid, date: new Date() });
+        msg.reply(`✅ Sent ${amount} ${coinU} to <@${targetId}>! [View on Solana Explorer](https://explorer.solana.com/tx/${txid})`);
       }
     } catch (e) {
       msg.reply(`❌ On-chain tip failed: ${e.message}`);
@@ -140,7 +152,7 @@ client.on('messageCreate', async msg => {
     const [address, amountStr, coin] = args;
     const coinU = coin?.toUpperCase();
     const amount = parseFloat(amountStr);
-    if (!address || isNaN(amount) || amount <= 0 || !['SOL', 'LTC', 'BTC', 'BCH'].includes(coinU)) {
+    if (!address || isNaN(amount) || amount <= 0 || !['SOL', 'LTC', 'BTC', 'BCH', 'USDC'].includes(coinU)) {
       msg.reply('❌ Usage: `!withdraw address amount coin`');
       return;
     }
@@ -184,6 +196,16 @@ client.on('messageCreate', async msg => {
       } else if (coinU === 'BTC') {
         msg.reply('⚠️ BTC withdrawal not yet implemented.');
         return;
+      } else if (coinU === 'USDC') {
+        const fromWallet = db.getWallet(userId, 'SOL');
+        if (!fromWallet) {
+          msg.reply('❌ You must register your SOL wallet first.');
+          return;
+        }
+        const txid = await sendUsdc(address, amount);
+        db.updateBalance(userId, coinU, bal - amount);
+        db.addHistory(userId, { type: 'withdraw', address, coin: coinU, amount, txid, date: new Date() });
+        msg.reply(`⏳ Withdrawal of ${amount} ${coinU} to ${address} sent! [View on Solana Explorer](https://explorer.solana.com/tx/${txid})`);
       }
     } catch (e) {
       msg.reply(`❌ Withdrawal failed: ${e.message}`);
@@ -225,7 +247,7 @@ client.on('messageCreate', async msg => {
     const [amountStr, coin] = args;
     const coinU = coin.toUpperCase();
     const amount = parseFloat(amountStr);
-    if (isNaN(amount) || amount <= 0 || !['SOL', 'LTC', 'BTC', 'BCH'].includes(coinU)) {
+    if (isNaN(amount) || amount <= 0 || !['SOL', 'LTC', 'BTC', 'BCH', 'USDC'].includes(coinU)) {
       msg.reply('❌ Invalid command. Example: `!airdrop 1 sol`');
       return;
     }
@@ -272,6 +294,14 @@ client.on('messageCreate', async msg => {
             // Placeholder for BTC airdrop collect logic
             msg.reply('⚠️ BTC airdrop collection not yet implemented.');
             return;
+          } else if (coinU === 'USDC') {
+            const txid = await sendUsdc(userWallet, drop.amount);
+            db.updateBalance(userId, coinU, db.getBalance(userId, coinU) + drop.amount);
+            drop.claimed = true;
+            db.addHistory(userId, { type: 'collect', coin: coinU, amount: drop.amount, from: drop.creator, txid, date: new Date() });
+            msg.reply(`🎉 You collected ${drop.amount} ${coinU} from the airdrop! [View on Solana Explorer](https://explorer.solana.com/tx/${txid})`);
+            collected = true;
+            break;
           }
         } catch (e) {
           msg.reply(`❌ Failed to collect airdrop: ${e.message}`);
@@ -288,12 +318,12 @@ client.on('messageCreate', async msg => {
   // BURN: !burn amount coin
   if (cmd === '!burn') {
     if (args.length !== 2) {
-      msg.reply('❌ Usage: `!burn amount coin` (e.g. !burn 0.1 sol)');
+      msg.reply('❌ Usage: `!burn amount coin` (e.g. !burn 0.1 sol)`');
       return;
     }
     const amount = parseFloat(args[0]);
     const coinU = args[1].toUpperCase();
-    if (isNaN(amount) || amount <= 0 || !['SOL', 'LTC', 'BTC', 'BCH'].includes(coinU)) {
+    if (isNaN(amount) || amount <= 0 || !['SOL', 'LTC', 'BTC', 'BCH', 'USDC'].includes(coinU)) {
       msg.reply('❌ Invalid command. Example: `!burn 0.1 sol`');
       return;
     }
@@ -308,7 +338,8 @@ client.on('messageCreate', async msg => {
       'SOL': 'H8m2gN2GEPSbk4u6PoWa8JYkEZRJWH45DyWjbAm76uCX',
       'LTC': 'LP7AApgqKnJhPQgpBKFiHzPJSNXP7ygMDQ',
       'BTC': 'bc1qexampleaddressforbtc',
-      'BCH': 'bitcoincash:qexampleaddressforbch'
+      'BCH': 'bitcoincash:qexampleaddressforbch',
+      'USDC': 'H8m2gN2GEPSbk4u6PoWa8JYkEZRJWH45DyWjbAm76uCX' // Example: same as SOL
     };
     const donationAddress = donationAddresses[coinU];
     if (!donationAddress) {
@@ -316,9 +347,9 @@ client.on('messageCreate', async msg => {
       return;
     }
     try {
-      const fromWallet = db.getWallet(userId, coinU);
+      const fromWallet = db.getWallet(userId, coinU === 'USDC' ? 'SOL' : coinU);
       if (!fromWallet) {
-        msg.reply(`❌ You must register your ${coinU} wallet first.`);
+        msg.reply(`❌ You must register your ${coinU === 'USDC' ? 'SOL' : coinU} wallet first.`);
         return;
       }
       let txid;
@@ -328,10 +359,15 @@ client.on('messageCreate', async msg => {
         txid = await sendLtc(donationAddress, amount);
       } else if (coinU === 'BCH') {
         txid = await sendBch(donationAddress, amount);
+      } else if (coinU === 'USDC') {
+        txid = await sendUsdc(donationAddress, amount);
+      } else if (coinU === 'BTC') {
+        msg.reply('⚠️ BTC donation not yet implemented.');
+        return;
       }
       db.updateBalance(userId, coinU, bal - amount);
       db.addHistory(userId, { type: 'burn', address: donationAddress, coin: coinU, amount, txid, date: new Date() });
-      let explorer = coinU === 'SOL' ? `https://explorer.solana.com/tx/${txid}` : coinU === 'LTC' ? `https://live.blockcypher.com/ltc/tx/${txid}` : coinU === 'BCH' ? `https://blockchair.com/bitcoin-cash/transaction/${txid}` : '';
+      let explorer = coinU === 'SOL' || coinU === 'USDC' ? `https://explorer.solana.com/tx/${txid}` : coinU === 'LTC' ? `https://live.blockcypher.com/ltc/tx/${txid}` : coinU === 'BCH' ? `https://blockchair.com/bitcoin-cash/transaction/${txid}` : '';
       msg.reply(`🔥 Donated ${amount} ${coinU} to support development!${explorer ? ` [View on Explorer](${explorer})` : ''}`);
     } catch (e) {
       msg.reply(`❌ Donation failed: ${e.message}`);
