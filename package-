@@ -1,41 +1,10 @@
 
-}); //const { MongoClient, ServerApiVersion } = require('mongodb');
-const uri = "mongodb+srv://justthetip:justthetip@cluster0.8jvqb.mongodb.net/?retryWrites=true&w=majority";
-const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
-client.connect(err => {
-  const collection = client.db("test").collection("devices");
-  // perform actions on the collection object
-  client.close();
-
-undici  6.0.0 - 6.21.1
-undici Denial of Service attack via bad certificate data - https://github.com/advisories/GHSA-cxrh-j4jr-qwg3
-fix available via `npm audit fix`
-node_modules/@discordjs/rest/node_modules/undici
-node_modules/discord.js/node_modules/undici
-  @discordjs/rest  2.2.1-dev.1700266154-ae58053dc - 3.0.0-dev.1744071169-d93a52c1d
-  Depends on vulnerable versions of undici
-  node_modules/@discordjs/rest
-    @discordjs/ws  >=1.0.3-dev.1699834185-2d63d9355
-    Depends on vulnerable versions of @discordjs/rest
-    node_modules/@discordjs/ws
-    discord.js  >=14.14.2-dev.1699834163-2d63d9355
-    Depends on vulnerable versions of @discordjs/rest
-    Depends on vulnerable versions of @discordjs/ws
-    Depends on vulnerable versions of undici
-    node_modules/discord.js
-
-4 low severity vulnerabilities
-
-To address all issues, run:
-  npm audit fix
-fullsail@Mac justthetip %    {
+{
   "resolutions": {
     "lodash": "^4.17.21",
     "minimist": "^1.2.6",
     "ws": "^7.5.9"
-  }
-}
-{
+  },
   "name": "justthetip",
   "version": "1.0.0",
   "description": "",
@@ -52,14 +21,9 @@ fullsail@Mac justthetip %    {
     "@discordjs/collection": "^1.0.0-dev.1699834163-2d63d9355",
     "@discordjs/form-data": "^4.0.0-dev.1699834163-2d63d9355",
     "@discordjs/opus": "^0.6.0",
-    "@discordjs/rest": "^2.2.1-dev.1700266154-ae58053dc",
     "@discordjs/voice": "^0.15.0-dev.1699834163-2d63d9355",
     "@sindresorhus/is": "^5.3.0",
-    "axios": "^1.4.0",code chains/solana.js
-# or
-nano chains/solana.js
-# or
-vim chains/solana.js
+    "axios": "^1.4.0",
     "chalk": "^5.3.0",
     "discord-api-types": "^0.37.34",
     "discord.js": "^14.14.2-dev.1699834163-2d63d9355"

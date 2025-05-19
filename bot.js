@@ -38,9 +38,19 @@ client.on('messageCreate', async msg => {
   if (cmd === '!balance') {
     const userId = msg.author.id;
     const sol = db.getBalance(userId, 'SOL');
+    const usdc = db.getBalance(userId, 'USDC');
     const ltc = db.getBalance(userId, 'LTC');
+    const btc = db.getBalance(userId, 'BTC');
+    const bch = db.getBalance(userId, 'BCH');
     try {
-      await msg.author.send(`💰 Your balances:\n• Solana: ${sol} SOL\n• Litecoin: ${ltc} LTC`);
+      await msg.author.send(
+        `💰 Your balances:\n` +
+        `• Solana: ${sol} SOL\n` +
+        `• USDC: ${usdc} USDC\n` +
+        `• Litecoin: ${ltc} LTC\n` +
+        `• Bitcoin: ${btc} BTC\n` +
+        `• Bitcoin Cash: ${bch} BCH`
+      );
       if (msg.channel.type !== 1) {
         msg.reply('📬 I have sent your balance in a private message.');
       }
@@ -56,8 +66,13 @@ client.on('messageCreate', async msg => {
       msg.reply('❌ Usage: `!registerwallet coin address`');
       return;
     }
-    db.registerWallet(msg.author.id, coin, address);
-    msg.reply(`✅ Registered ${coin.toUpperCase()} address: ${address}`);
+    const coinU = coin.toUpperCase();
+    if (!['SOL', 'LTC', 'BCH', 'BTC', 'USDC'].includes(coinU)) {
+      msg.reply('❌ Supported coins: SOL, USDC, LTC, BTC, BCH');
+      return;
+    }
+    db.registerWallet(msg.author.id, coinU, address);
+    msg.reply(`✅ Registered ${coinU} address: ${address}`);
     return;
   }
 
