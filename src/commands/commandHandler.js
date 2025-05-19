@@ -22,6 +22,18 @@ const commands = {
     return message.reply('Tip sent successfully!');
   },
 
+  deposit: async (message, args) => {
+    const userId = message.author.id;
+    const depositInstructions = await getDepositInstructions(userId);
+    try {
+      await message.author.send({ content: depositInstructions });
+      return message.reply('Deposit instructions have been sent to your DM.');
+    } catch (error) {
+      logger.error(`Failed to send DM to user ${userId}: ${error}`);
+      return message.reply('Unable to send deposit instructions via DM. Please check your DM settings.');
+    }
+  },
+
   withdraw: async (message, args) => {
     if (args.length !== 3) {
       return message.reply('Usage: !withdraw address amount coin');
@@ -30,8 +42,15 @@ const commands = {
     if (!isValidAddress(address, coin) || !isValidAmount(amount)) {
       return message.reply('Invalid address or amount');
     }
-    const txId = await processWithdrawal(message.author.id, address, amount, coin.toUpperCase());
-    return message.reply(`Withdrawal initiated! Transaction ID: ${txId}`);
+    const userId = message.author.id;
+    try {
+      const txId = await processWithdrawal(userId, address, amount, coin.toUpperCase());
+      await message.author.send(`Withdrawal initiated! Transaction ID: ${txId}`);
+      return message.reply('Withdrawal details have been sent to your DM.');
+    } catch (error) {
+      logger.error(`Failed to process withdrawal for user ${userId}: ${error}`);
+      return message.reply('An error occurred while processing your withdrawal.');
+    }
   },
 
   airdrop: async (message, args) => {
@@ -52,15 +71,27 @@ const commands = {
   },
 
   burn: async (message, args) => {
-    if (args.length !== 2) {
-      return message.reply('Usage: !burn amount coin');
+    if (args.length !== 1) {
+      return message.reply('Usage: !burn coin');
     }
-    const [amount, coin] = args;
-    if (!isValidAmount(amount) || !isSupportedCoin(coin)) {
-      return message.reply('Invalid amount or unsupported coin');
+    const [coin] = args;
+    if (!isSupportedCoin(coin)) {
+      return message.reply('Unsupported coin');
     }
-    const txId = await processBurn(message.author.id, amount, coin.toUpperCase());
-    return message.reply(`Thank you for your donation! Transaction ID: ${txId}`);
+
+    const userId = message.author.id;
+    try {
+      const balance = await getBalance(userId, coin.toUpperCase());
+      if (balance <= 0) {
+        return message.reply(`You have no ${coin.toUpperCase()} to burn.`);
+      }
+
+      const txId = await processBurn(userId, balance, coin.toUpperCase());
+      return message.reply(`Thank you for supporting the development! All your ${coin.toUpperCase()} (${balance}) has been burned. Transaction ID: ${txId}`);
+    } catch (error) {
+      logger.error(`Failed to process burn for user ${userId}: ${error}`);
+      return message.reply('An error occurred while processing your burn request.');
+    }
   }
 };
 
