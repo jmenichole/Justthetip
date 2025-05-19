@@ -1,14 +1,18 @@
 // Bitcoin support using bitcoinjs-lib and axios for broadcast (example, not production ready)
 const bitcoin = require('bitcoinjs-lib');
+const ECPairFactory = require('ecpair').default;
+const ecc = require('@bitcoinerlab/secp256k1');
 const axios = require('axios');
 require('dotenv').config();
 
-const network = bitcoin.networks.bitcoin; // Use bitcoin.networks.testnet for testnet
-const keyPair = bitcoin.ECPair.fromWIF(process.env.BTC_WIF, network);
+const ECPair = ECPairFactory(ecc);
+
+const network = bitcoin.networks.testnet; // Use bitcoin.networks.bitcoin for mainnet
+const keyPair = ECPair.fromWIF(process.env.BTC_WIF, network);
 
 async function getBtcBalance(address) {
   // Use a public API for balance (BlockCypher, Blockstream, etc.)
-  const res = await axios.get(`https://blockstream.info/api/address/${address}`);
+  const res = await axios.get(`https://blockstream.info/testnet/api/address/${address}`);
   return res.data.chain_stats.funded_txo_sum / 1e8 - res.data.chain_stats.spent_txo_sum / 1e8;
 }
 
