@@ -7,6 +7,11 @@ const BASE_URL = 'https://api.helius.xyz/v0';
 class SolanaService {
   static async getBalance(address) {
     try {
+      if (!HELIUS_API_KEY) {
+        console.error('SolanaService.getBalance error: Missing HELIUS_API_KEY in environment variables');
+        throw new Error('Missing HELIUS_API_KEY in environment variables');
+      }
+
       const url = `${BASE_URL}/addresses/${address}/balances?api-key=${HELIUS_API_KEY}`;
       const res = await axios.get(url);
       return res.data.nativeBalance / 1e9;

@@ -17,6 +17,10 @@ class LitecoinService {
 
   static async getBalance(address) {
     try {
+      if (!API_TOKEN) {
+        console.error('LitecoinService.getBalance error: Missing BLOCKCYPHER_TOKEN in environment variables');
+        throw new Error('Missing BLOCKCYPHER_TOKEN in environment variables');
+      }
       const res = await axios.get(`${BASE_URL}/addrs/${address}/balance`);
       return res.data.final_balance / 1e8;
     } catch (e) {
