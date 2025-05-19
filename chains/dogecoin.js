@@ -1,9 +1,13 @@
-// Dogecoin support using dogecoinjs-lib and axios for broadcast (example, not production ready)
-const dogecoin = require('bitcoinjs-lib'); // Use dogecoinjs-lib for real DOGE support
+// Dogecoin support using ECPair from ecpair package
+const bitcoin = require('bitcoinjs-lib');
+const ECPairFactory = require('ecpair').default;
+const ecc = require('@bitcoinerlab/secp256k1');
 const axios = require('axios');
 require('dotenv').config();
 
-const network = { // Dogecoin mainnet params
+const ECPair = ECPairFactory(ecc);
+
+const network = {
   messagePrefix: '\x19Dogecoin Signed Message:\n',
   bech32: null,
   bip32: { public: 0x02facafd, private: 0x02fac398 },
@@ -11,7 +15,7 @@ const network = { // Dogecoin mainnet params
   scriptHash: 0x16,
   wif: 0x9e
 };
-const keyPair = dogecoin.ECPair.fromWIF(process.env.DOGE_WIF, network);
+const keyPair = ECPair.fromWIF(process.env.DOGE_WIF, network);
 
 async function getDogeBalance(address) {
   // Use a public API for balance (BlockCypher, SoChain, etc.)
