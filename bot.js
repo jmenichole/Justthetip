@@ -3,7 +3,6 @@ require('dotenv').config();
 const { getSolBalance, sendSol } = require('./chains/solana');
 const { getLtcBalance, sendLtc } = require('./chains/litecoin');
 const { getBtcBalance, sendBtc } = require('./chains/bitcoin');
-const { getDogeBalance, sendDoge } = require('./chains/dogecoin');
 const { getBchBalance, sendBch } = require('./chains/bitcoincash');
 const db = require('./db/database');
 const SolanaService = require('./chains/solanaService');
@@ -70,7 +69,7 @@ client.on('messageCreate', async msg => {
     const [mention, amountStr, coin] = args;
     const coinU = coin.toUpperCase();
     const amount = parseFloat(amountStr);
-    if (!mention.startsWith('<@') || isNaN(amount) || amount <= 0 || !['SOL', 'LTC', 'BTC', 'DOGE', 'BCH'].includes(coinU)) {
+    if (!mention.startsWith('<@') || isNaN(amount) || amount <= 0 || !['SOL', 'LTC', 'BTC', 'BCH'].includes(coinU)) {
       msg.reply('❌ Invalid command. Example: `!tip @user 0.1 sol`');
       return;
     }
@@ -126,10 +125,6 @@ client.on('messageCreate', async msg => {
         db.addHistory(msg.author.id, { type: 'tip', to: targetId, coin: coinU, amount, txid, date: new Date() });
         db.addHistory(targetId, { type: 'receive', from: msg.author.id, coin: coinU, amount, txid, date: new Date() });
         msg.reply(`✅ Sent ${amount} ${coinU} to <@${targetId}>! [View on Blockchair](https://blockchair.com/bitcoin-cash/transaction/${txid})`);
-      } else if (coinU === 'DOGE') {
-        // Placeholder for DOGE tip logic
-        msg.reply('⚠️ DOGE tipping not yet implemented.');
-        return;
       } else if (coinU === 'BTC') {
         // Placeholder for BTC tip logic
         msg.reply('⚠️ BTC tipping not yet implemented.');
@@ -145,7 +140,7 @@ client.on('messageCreate', async msg => {
     const [address, amountStr, coin] = args;
     const coinU = coin?.toUpperCase();
     const amount = parseFloat(amountStr);
-    if (!address || isNaN(amount) || amount <= 0 || !['SOL', 'LTC', 'BTC', 'DOGE', 'BCH'].includes(coinU)) {
+    if (!address || isNaN(amount) || amount <= 0 || !['SOL', 'LTC', 'BTC', 'BCH'].includes(coinU)) {
       msg.reply('❌ Usage: `!withdraw address amount coin`');
       return;
     }
@@ -189,9 +184,6 @@ client.on('messageCreate', async msg => {
       } else if (coinU === 'BTC') {
         msg.reply('⚠️ BTC withdrawal not yet implemented.');
         return;
-      } else if (coinU === 'DOGE') {
-        msg.reply('⚠️ DOGE withdrawal not yet implemented.');
-        return;
       }
     } catch (e) {
       msg.reply(`❌ Withdrawal failed: ${e.message}`);
@@ -233,7 +225,7 @@ client.on('messageCreate', async msg => {
     const [amountStr, coin] = args;
     const coinU = coin.toUpperCase();
     const amount = parseFloat(amountStr);
-    if (isNaN(amount) || amount <= 0 || !['SOL', 'LTC', 'BTC', 'DOGE', 'BCH'].includes(coinU)) {
+    if (isNaN(amount) || amount <= 0 || !['SOL', 'LTC', 'BTC', 'BCH'].includes(coinU)) {
       msg.reply('❌ Invalid command. Example: `!airdrop 1 sol`');
       return;
     }
@@ -276,10 +268,6 @@ client.on('messageCreate', async msg => {
             msg.reply(`🎉 You collected ${drop.amount} ${coinU} from the airdrop! [View on Blockchair](https://blockchair.com/bitcoin-cash/transaction/${txid})`);
             collected = true;
             break;
-          } else if (coinU === 'DOGE') {
-            // Placeholder for DOGE airdrop collect logic
-            msg.reply('⚠️ DOGE airdrop collection not yet implemented.');
-            return;
           } else if (coinU === 'BTC') {
             // Placeholder for BTC airdrop collect logic
             msg.reply('⚠️ BTC airdrop collection not yet implemented.');
@@ -305,7 +293,7 @@ client.on('messageCreate', async msg => {
     }
     const amount = parseFloat(args[0]);
     const coinU = args[1].toUpperCase();
-    if (isNaN(amount) || amount <= 0 || !['SOL', 'LTC', 'BTC', 'DOGE', 'BCH'].includes(coinU)) {
+    if (isNaN(amount) || amount <= 0 || !['SOL', 'LTC', 'BTC', 'BCH'].includes(coinU)) {
       msg.reply('❌ Invalid command. Example: `!burn 0.1 sol`');
       return;
     }
@@ -320,7 +308,6 @@ client.on('messageCreate', async msg => {
       'SOL': 'H8m2gN2GEPSbk4u6PoWa8JYkEZRJWH45DyWjbAm76uCX',
       'LTC': 'LP7AApgqKnJhPQgpBKFiHzPJSNXP7ygMDQ',
       'BTC': 'bc1qexampleaddressforbtc',
-      'DOGE': 'DExampleDogecoinAddress',
       'BCH': 'bitcoincash:qexampleaddressforbch'
     };
     const donationAddress = donationAddresses[coinU];
