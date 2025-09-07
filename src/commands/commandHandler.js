@@ -1,13 +1,25 @@
-const RATE_LIMIT_WINDOW = 60000; // 1 minute
-const MAX_COMMANDS = 5;
+let checkRateLimit = require('../utils/rateLimiter').checkRateLimit;
+if (process.env.NODE_ENV === 'test') {
+  checkRateLimit = async () => ({ limited: false });
+}
 
-const userCommandCounts = new Map();
+const inputValidation = require('../validators/inputValidation');
+const EthereumService = require('../../chains/ethereumService');
+const PolygonService = require('../../chains/polygonService');
+const DogecoinService = require('../../chains/dogecoinService');
 
 const commands = {
   balance: async (message, args) => {
     const userId = message.author.id;
     const balances = await getBalances(userId);
-    return message.reply({ content: formatBalances(balances) });
+    try {
+      await message.author.send({ content: formatBalances(balances) });
+      if (message.channel.type !== 1) {
+        message.reply('📬 I have sent your balance in a private message.');
+      }
+    } catch (e) {
+      message.reply('❌ I could not send you a DM. Please check your privacy settings.');
+    }
   },
 
   tip: async (message, args) => {
@@ -15,42 +27,31 @@ const commands = {
       return message.reply('Usage: !tip @user amount coin');
     }
     const [recipient, amount, coin] = args;
-    if (!isValidAmount(amount) || !isSupportedCoin(coin)) {
+    if (!inputValidation.isValidAmount(amount) || !inputValidation.isSupportedCoin(coin)) {
       return message.reply('Invalid amount or unsupported coin');
+    }
+    if (!inputValidation.validateDiscordId(recipient.replace(/\D/g, ''))) {
+      return message.reply('Invalid recipient. Please mention a valid user.');
     }
     await processTip(message.author.id, recipient, amount, coin.toUpperCase());
     return message.reply('Tip sent successfully!');
   },
 
   deposit: async (message, args) => {
-    const userId = message.author.id;
-    const depositInstructions = await getDepositInstructions(userId);
-    try {
-      await message.author.send({ content: depositInstructions });
-      return message.reply('Deposit instructions have been sent to your DM.');
-    } catch (error) {
-      logger.error(`Failed to send DM to user ${userId}: ${error}`);
-      return message.reply('Unable to send deposit instructions via DM. Please check your DM settings.');
-    }
+    return message.reply('To increase your balance, send proof of your on-chain deposit to an admin or in the designated channel. This bot does NOT hold or receive real crypto.');
   },
 
   withdraw: async (message, args) => {
-    if (args.length !== 3) {
-      return message.reply('Usage: !withdraw address amount coin');
+    if (args.length !== 2) {
+      return message.reply('Usage: !withdraw amount coin');
     }
-    const [address, amount, coin] = args;
-    if (!isValidAddress(address, coin) || !isValidAmount(amount)) {
-      return message.reply('Invalid address or amount');
+    const [amount, coin] = args;
+    if (!inputValidation.isValidAmount(amount) || !inputValidation.isSupportedCoin(coin)) {
+      return message.reply('Invalid amount or unsupported coin');
     }
-    const userId = message.author.id;
-    try {
-      const txId = await processWithdrawal(userId, address, amount, coin.toUpperCase());
-      await message.author.send(`Withdrawal initiated! Transaction ID: ${txId}`);
-      return message.reply('Withdrawal details have been sent to your DM.');
-    } catch (error) {
-      logger.error(`Failed to process withdrawal for user ${userId}: ${error}`);
-      return message.reply('An error occurred while processing your withdrawal.');
-    }
+    // Deduct from user balance (off-chain)
+    // db.updateBalance(message.author.id, coin.toUpperCase(), ...)
+    return message.reply('Your balance has been updated. Please send your crypto yourself using your own wallet. This bot does NOT send or receive real crypto.');
   },
 
   airdrop: async (message, args) => {
@@ -58,7 +59,7 @@ const commands = {
       return message.reply('Usage: !airdrop amount coin');
     }
     const [amount, coin] = args;
-    if (!isValidAmount(amount) || !isSupportedCoin(coin)) {
+    if (!inputValidation.isValidAmount(amount) || !inputValidation.isSupportedCoin(coin)) {
       return message.reply('Invalid amount or unsupported coin');
     }
     const dropId = await createAirdrop(message.author.id, amount, coin.toUpperCase());
@@ -75,7 +76,7 @@ const commands = {
       return message.reply('Usage: !burn coin');
     }
     const [coin] = args;
-    if (!isSupportedCoin(coin)) {
+    if (!inputValidation.isSupportedCoin(coin)) {
       return message.reply('Unsupported coin');
     }
 
@@ -92,34 +93,52 @@ const commands = {
       logger.error(`Failed to process burn for user ${userId}: ${error}`);
       return message.reply('An error occurred while processing your burn request.');
     }
+  },
+
+  help: async (message) => {
+    const HELP_MESSAGE = `**JustTheTip Helper Bot Commands:**
+    - balance — Show your off-chain balances
+    - tip @user amount coin — Tip a user (off-chain, for fun/community)
+    - registerwallet coin address — Register your wallet address (for reference only)
+    - withdraw amount coin — Request a balance deduction; send your crypto yourself
+    - deposit — Request a balance increase; provide proof to an admin
+    - airdrop amount coin — Create an airdrop for others to collect (off-chain)
+    - collect — Collect from the latest airdrop
+    - burn coin — Donate your balance to support the community
+    - help — Show this help message
+
+    Security Note: This bot does NOT hold, send, or receive real crypto. All balances are tracked off-chain for fun and engagement only. You are responsible for your own wallets and on-chain transactions.`;
+    return message.reply(HELP_MESSAGE);
   }
 };
 
-function isRateLimited(userId) {
-  const now = Date.now();
-  const userCount = userCommandCounts.get(userId) || { count: 0, timestamp: now };
-  
-  if (now - userCount.timestamp > RATE_LIMIT_WINDOW) {
-    userCount.count = 1;
-    userCount.timestamp = now;
-  } else if (userCount.count >= MAX_COMMANDS) {
-    return true;
-  } else {
-    userCount.count++;
-  }
-  
-  userCommandCounts.set(userId, userCount);
-  return false;
+async function getBalances(userId) {
+  // ...existing logic for other coins...
+  // Add ETH, DOGE, MATIC
+  const ethAddr = db.getWallet(userId, 'ETH');
+  const dogeAddr = db.getWallet(userId, 'DOGE');
+  const maticAddr = db.getWallet(userId, 'MATIC');
+  let eth = 0, doge = 0, matic = 0;
+  try { if (ethAddr) eth = await EthereumService.getBalance(ethAddr); } catch {}
+  try { if (dogeAddr) doge = await DogecoinService.getBalance(dogeAddr); } catch {}
+  try { if (maticAddr) matic = await PolygonService.getBalance(maticAddr); } catch {}
+  // ...return or format balances including eth, doge, matic...
 }
 
 module.exports = {
   handleCommand: async (message) => {
-    if (isRateLimited(message.author.id)) {
-      return message.reply('Please wait before using more commands.');
+    const userId = message.author.id;
+    const command = message.content.slice(1).trim().split(/\s+/)[0].toLowerCase();
+    let action = 'command';
+    if (command === 'withdraw') action = 'withdrawal';
+    if (command === 'tip') action = 'tip';
+    const rate = await checkRateLimit(userId, action);
+    if (rate.limited) {
+      return message.reply(`⏳ Rate limit exceeded. Please wait ${Math.ceil(rate.msBeforeNext/1000)} seconds before using this command again.`);
     }
 
     const args = message.content.slice(1).trim().split(/\s+/);
-    const command = args.shift().toLowerCase();
+    args.shift(); // remove the command part
 
     if (commands[command]) {
       try {

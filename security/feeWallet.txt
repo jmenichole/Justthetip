@@ -1,0 +1,20 @@
+# Universal Fee Wallets (Admin)
+
+## Solana (SOL/USDC)
+Public Key: Fuhvb9obCfizajHFgTxnnfBTaLqawNhQCMvBtYHusJi5
+
+## Litecoin (LTC)
+Not generated (litecoin-cli not available)
+
+## Bitcoin (BTC)
+Not generated (bitcoinjs-lib not available via npx)
+
+## Bitcoin Cash (BCH)
+Not generated
+
+---
+
+**Solana keypair file:** `security/feeWallet-solana.json`
+**Mnemonic:** bind over rack venue route click all acoustic fitness evil thing fan
+
+You can use the above Solana address to collect all bot fees. For other coins, generate addresses using a wallet or CLI and update `security/feeWallet.json` accordingly.

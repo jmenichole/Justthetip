@@ -1,0 +1,5 @@
+{
+  "name": "Justthetip - External Wallet Helper",
+  "description": "A Discord bot that connects to your existing crypto wallet to enable seamless tipping, airdrops, and more, directly within Discord. Non-custodial and secure.",
+  "requestFramePermissions": []
+}
