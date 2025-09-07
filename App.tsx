@@ -9,6 +9,102 @@ import { CryptoTicker } from './components/CryptoTicker';
 
 // --- NEW COMPONENTS ---
 
+// Privacy Policy Modal Component
+const PrivacyModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+  return (
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 backdrop-blur-sm" onClick={onClose}>
+      <div className="bg-brand-card border border-white/10 rounded-2xl p-8 w-full max-w-2xl max-h-[80vh] overflow-y-auto relative" onClick={(e) => e.stopPropagation()}>
+        <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-white text-2xl">&times;</button>
+        <h2 className="text-2xl font-bold text-white mb-6">Privacy Policy</h2>
+        <div className="text-gray-300 space-y-4">
+          <p><strong>Effective Date:</strong> September 6, 2025</p>
+          <p>This Privacy Policy explains how JustTheTip handles your data when you use our Discord bot and related services.</p>
+          
+          <h3 className="text-xl font-semibold text-white mt-6 mb-3">1. Data Collection</h3>
+          <ul className="list-disc pl-5 space-y-2">
+            <li>We collect only the minimum data required to operate the bot (e.g., Discord user IDs, server IDs, and off-chain balance records).</li>
+            <li>We do not collect or store private keys or sensitive wallet information.</li>
+          </ul>
+
+          <h3 className="text-xl font-semibold text-white mt-6 mb-3">2. Data Usage</h3>
+          <ul className="list-disc pl-5 space-y-2">
+            <li>Data is used solely to provide bot functionality (e.g., processing tips, airdrops, and balance tracking).</li>
+            <li>We do not sell or share your data with third parties.</li>
+          </ul>
+
+          <h3 className="text-xl font-semibold text-white mt-6 mb-3">3. Data Security</h3>
+          <ul className="list-disc pl-5 space-y-2">
+            <li>We use reasonable security measures to protect your data.</li>
+            <li>No method of transmission or storage is 100% secure; use at your own risk.</li>
+          </ul>
+
+          <h3 className="text-xl font-semibold text-white mt-6 mb-3">4. User Rights</h3>
+          <ul className="list-disc pl-5 space-y-2">
+            <li>You may request deletion of your data by contacting us at jmenichole007@outlook.com.</li>
+          </ul>
+
+          <h3 className="text-xl font-semibold text-white mt-6 mb-3">5. Changes to Policy</h3>
+          <ul className="list-disc pl-5 space-y-2">
+            <li>We may update this policy at any time. Continued use of the bot constitutes acceptance of the new policy.</li>
+          </ul>
+
+          <h3 className="text-xl font-semibold text-white mt-6 mb-3">6. Contact</h3>
+          <p>For privacy questions, contact: <a href="mailto:jmenichole007@outlook.com" className="text-cyan-300 hover:text-cyan-400">jmenichole007@outlook.com</a></p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Terms of Service Modal Component
+const TermsModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+  return (
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 backdrop-blur-sm" onClick={onClose}>
+      <div className="bg-brand-card border border-white/10 rounded-2xl p-8 w-full max-w-2xl max-h-[80vh] overflow-y-auto relative" onClick={(e) => e.stopPropagation()}>
+        <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-white text-2xl">&times;</button>
+        <h2 className="text-2xl font-bold text-white mb-6">Terms of Service</h2>
+        <div className="text-gray-300 space-y-4">
+          <p><strong>Effective Date:</strong> September 6, 2025</p>
+          <p>Welcome to JustTheTip! By using our Discord bot and related services, you agree to the following terms:</p>
+          
+          <h3 className="text-xl font-semibold text-white mt-6 mb-3">1. Service Description</h3>
+          <p>JustTheTip is a non-custodial helper bot for Discord, allowing users to tip, airdrop, and manage crypto balances off-chain. The bot does not hold or control your private keys or funds.</p>
+
+          <h3 className="text-xl font-semibold text-white mt-6 mb-3">2. User Responsibilities</h3>
+          <ul className="list-disc pl-5 space-y-2">
+            <li>You are responsible for your own wallet security and transactions.</li>
+            <li>You must comply with Discord's Terms of Service and Community Guidelines.</li>
+            <li>You agree not to use the bot for illegal or prohibited activities.</li>
+          </ul>
+
+          <h3 className="text-xl font-semibold text-white mt-6 mb-3">3. No Custody or Financial Advice</h3>
+          <ul className="list-disc pl-5 space-y-2">
+            <li>JustTheTip does not provide financial, investment, or legal advice.</li>
+            <li>The bot does not custody or control user funds; all transactions are off-chain and at your own risk.</li>
+          </ul>
+
+          <h3 className="text-xl font-semibold text-white mt-6 mb-3">4. Limitation of Liability</h3>
+          <ul className="list-disc pl-5 space-y-2">
+            <li>We are not liable for any loss, damages, or claims arising from your use of the bot.</li>
+            <li>The service is provided "as is" without warranties of any kind.</li>
+          </ul>
+
+          <h3 className="text-xl font-semibold text-white mt-6 mb-3">5. Privacy</h3>
+          <p>See our Privacy Policy for details on data handling.</p>
+
+          <h3 className="text-xl font-semibold text-white mt-6 mb-3">6. Changes to Terms</h3>
+          <ul className="list-disc pl-5 space-y-2">
+            <li>We may update these terms at any time. Continued use of the bot constitutes acceptance of the new terms.</li>
+          </ul>
+
+          <h3 className="text-xl font-semibold text-white mt-6 mb-3">7. Contact</h3>
+          <p>For questions, contact: <a href="mailto:jmenichole007@outlook.com" className="text-cyan-300 hover:text-cyan-400">jmenichole007@outlook.com</a></p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Contact Modal Component
 const ContactModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -152,6 +248,8 @@ const PricingCard: React.FC<{ icon: string; title: string; description: string; 
 const App: React.FC = () => {
   const [view, setView] = useState('main'); // main, admin-login, admin-dashboard
   const [isContactModalOpen, setContactModalOpen] = useState(false);
+  const [isPrivacyModalOpen, setPrivacyModalOpen] = useState(false);
+  const [isTermsModalOpen, setTermsModalOpen] = useState(false);
   const [clicks, setClicks] = useState({ secondary: 0 });
 
   const handleAdminLogin = (password: string) => {
@@ -180,6 +278,8 @@ const App: React.FC = () => {
   return (
     <div className="bg-brand-dark text-gray-300 font-sans">
       {isContactModalOpen && <ContactModal onClose={() => setContactModalOpen(false)} />}
+      {isPrivacyModalOpen && <PrivacyModal onClose={() => setPrivacyModalOpen(false)} />}
+      {isTermsModalOpen && <TermsModal onClose={() => setTermsModalOpen(false)} />}
 
       <main className="container mx-auto px-4 py-16 sm:py-24">
         {/* Hero Section */}
@@ -298,6 +398,8 @@ const App: React.FC = () => {
 
       <Footer 
         onOpenContactModal={() => setContactModalOpen(true)}
+        onOpenPrivacyModal={() => setPrivacyModalOpen(true)}
+        onOpenTermsModal={() => setTermsModalOpen(true)}
         onGoToAdmin={() => setView('admin-login')}
       />
 
