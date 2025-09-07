@@ -1,11 +1,11 @@
 
 import React, { useState } from 'react';
-import { HowItWorksCard } from './components/HowItWorksCard';
-import { PrimaryButton, SecondaryButton } from './components/Buttons';
-import { Footer } from './components/Footer';
-import { FeatureCard } from './components/FeatureCard';
-import { Logo } from './components/Logo';
-import { CryptoTicker } from './components/CryptoTicker';
+import { HowItWorksCard } from './justthetip---external-wallet-helper/components/HowItWorksCard';
+import { PrimaryButton, SecondaryButton } from './justthetip---external-wallet-helper/components/Buttons';
+import { Footer } from './justthetip---external-wallet-helper/components/Footer';
+import { FeatureCard } from './justthetip---external-wallet-helper/components/FeatureCard';
+import { Logo } from './justthetip---external-wallet-helper/components/Logo';
+import { CryptoTicker } from './justthetip---external-wallet-helper/components/CryptoTicker';
 
 // --- NEW COMPONENTS ---
 
