@@ -1,4 +1,4 @@
-const commandHandler = require('../commands/commandHandler');
+const commandHandler = require('../src/commands/commandHandler');
 const db = require('../db/database');
 
 jest.mock('../db/database', () => ({
