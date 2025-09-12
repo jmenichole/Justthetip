@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JustTheTip - Multi-Chain Discord Tip Bot</title>
+    <meta name="description" content="Self-custodial multi-chain Discord tip bot. Instantly tip SOL, USDC, LTC, BTC & BCH to community members. You control your keys, we handle the convenience.">
+    <link rel="stylesheet" href="assets/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="nav">
+            <div class="nav-brand">
+                <span class="logo">��💸</span>
+                <span class="brand-name">JustTheTip</span>
+            </div>
+            <div class="nav-links">
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#commands" class="nav-link">Commands</a>
+                <a href="#setup" class="nav-link">Setup</a>
+                <a href="https://github.com/Mischief-Manager-inc/justthetip" class="nav-link" target="_blank">
+                    <i class="fab fa-github"></i> GitHub
+                </a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">
+                <span class="text-cyan">Just</span><span class="text-purple">TheTip</span>
+                <span class="gradient-text">Discord Bot</span>
+            </h1>
+            
+            <!-- Logo Section -->
+            <div class="logo-container">
+                <img src="assets/logo.png" alt="JustTheTip Logo - Iceberg" class="hero-logo" onerror="this.style.display='none'">
+            </div>
+            
+            <p class="hero-description">
+                Your Wallet, Your Discord, <strong>Supercharged.</strong>
+                <br>
+                <span class="gradient-text">Non-custodial crypto tipping made simple.</span>
+            </p>
+            <p class="hero-subtitle">
+                Justthetip is a non-custodial helper bot for your external wallets. 
+                Tip and airdrop crypto directly in Discord, securely.
+            </p>
+            <div class="hero-buttons">
+                <a href="https://discord.com/api/oauth2/authorize?client_id=1373784722718720090&permissions=2147483648&scope=bot%20applications.commands" 
+                   class="btn btn-primary" target="_blank" id="add-bot-btn">
+                    <i class="fab fa-discord"></i>
+                    ADD BOT TO SERVER
+                </a>
+            </div>
+        </div>
+        <div class="hero-visual">
+            <div class="crypto-grid">
+                <div class="crypto-card sol">
+                    <i class="fab fa-solana"></i>
+                    <span>SOL</span>
+                </div>
+                <div class="crypto-card usdc">
+                    <i class="fas fa-dollar-sign"></i>
+                    <span>USDC</span>
+                </div>
+                <div class="crypto-card ltc">
+                    <i class="fab fa-litecoin"></i>
+                    <span>LTC</span>
+                </div>
+                <div class="crypto-card btc">
+                    <i class="fab fa-bitcoin"></i>
+                    <span>BTC</span>
+                </div>
+                <div class="crypto-card bch">
+                    <i class="fas fa-coins"></i>
+                    <span>BCH</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Crypto Ticker Section -->
+    <section class="crypto-ticker-section">
+        <div class="crypto-ticker" id="crypto-ticker">
+            <div class="ticker-content">
+                <div class="ticker-item">Loading market data...</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="container">
+            <h2 class="section-title">Why Choose JustTheTip?</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>Self-Custodial</h3>
+                    <p>You control your private keys. No custodial risk, no KYC, no withdrawal limits.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-link"></i>
+                    </div>
+                    <h3>Multi-Chain Support</h3>
+                    <p>Supports SOL, USDC (Solana), LTC, BTC (testnet), and BCH all in one bot.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h3>Instant Tipping</h3>
+                    <p>Lightning-fast tips with simple slash commands. Just /tip @user amount coin.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-gift"></i>
+                    </div>
+                    <h3>Community Airdrops</h3>
+                    <p>Create airdrops for your community members to collect and engage.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-wallet"></i>
+                    </div>
+                    <h3>Easy Withdrawals</h3>
+                    <p>Withdraw to external wallets anytime with simple commands.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Balance Tracking</h3>
+                    <p>Check all your crypto balances across multiple chains in one place.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="pricing">
+        <div class="container">
+            <h2 class="section-title">Transparent Fees</h2>
+            <div class="pricing-grid">
+                <div class="pricing-card">
+                    <div class="pricing-header">
+                        <div class="pricing-icon">💰</div>
+                        <h3>Tipping</h3>
+                        <div class="pricing-fee">Network Fee</div>
+                    </div>
+                    <p>A small, dynamic network fee is applied to cover gas costs for on-chain transactions.</p>
+                </div>
+                <div class="pricing-card">
+                    <div class="pricing-header">
+                        <div class="pricing-icon">🚀</div>
+                        <h3>Airdrops & Utility</h3>
+                        <div class="pricing-fee">0.5%</div>
+                    </div>
+                    <p>A flat 0.5% service fee is taken on the total value of mass distributions and other utility functions.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Commands Section -->
+    <section id="commands" class="commands">
+        <div class="container">
+            <h2 class="section-title">Available Commands</h2>
+            <div class="commands-grid">
+                <div class="command-card">
+                    <div class="command-header">
+                        <code>/balance</code>
+                    </div>
+                    <p>Show your balances across all supported cryptocurrencies</p>
+                </div>
+                <div class="command-card">
+                    <div class="command-header">
+                        <code>/tip @user amount coin</code>
+                    </div>
+                    <p>Tip a user (e.g., /tip @bob 0.1 sol)</p>
+                </div>
+                <div class="command-card">
+                    <div class="command-header">
+                        <code>/registerwallet coin address</code>
+                    </div>
+                    <p>Register your external wallet address for a specific coin</p>
+                </div>
+                <div class="command-card">
+                    <div class="command-header">
+                        <code>/withdraw address amount coin</code>
+                    </div>
+                    <p>Withdraw funds to your external wallet</p>
+                </div>
+                <div class="command-card">
+                    <div class="command-header">
+                        <code>/airdrop amount coin</code>
+                    </div>
+                    <p>Create an airdrop for community members to collect</p>
+                </div>
+                <div class="command-card">
+                    <div class="command-header">
+                        <code>/help</code>
+                    </div>
+                    <p>Display help information and command list</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Setup Section -->
+    <section id="setup" class="setup">
+        <div class="container">
+            <h2 class="section-title">Quick Setup</h2>
+            <div class="setup-steps">
+                <div class="setup-step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>Invite the Bot</h3>
+                        <p>Add JustTheTip to your Discord server with the required permissions</p>
+                        <a href="https://discord.com/api/oauth2/authorize?client_id=1373784722718720090&permissions=2147483648&scope=bot%20applications.commands" 
+                           class="btn btn-outline" target="_blank">
+                            <i class="fab fa-discord"></i> Invite Bot
+                        </a>
+                    </div>
+                </div>
+                <div class="setup-step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>Check Your Balance</h3>
+                        <p>Use <code>/balance</code> to see your current wallet status</p>
+                    </div>
+                </div>
+                <div class="setup-step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>Start Tipping!</h3>
+                        <p>Use <code>/tip @user amount coin</code> to send your first tip</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Use Cases Section -->
+    <section class="use-cases">
+        <div class="container">
+            <h2 class="section-title">Perfect For</h2>
+            <div class="use-cases-grid">
+                <div class="use-case-card">
+                    <i class="fas fa-gamepad"></i>
+                    <h3>Gaming Guilds</h3>
+                    <p>Reward top players and contributors</p>
+                </div>
+                <div class="use-case-card">
+                    <i class="fas fa-palette"></i>
+                    <h3>NFT Communities</h3>
+                    <p>Share profits and reward holders</p>
+                </div>
+                <div class="use-case-card">
+                    <i class="fas fa-code"></i>
+                    <h3>Developer Communities</h3>
+                    <p>Bounties and contribution rewards</p>
+                </div>
+                <div class="use-case-card">
+                    <i class="fas fa-graduation-cap"></i>
+                    <h3>Educational Servers</h3>
+                    <p>Incentivize learning and participation</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Modal -->
+    <div id="contact-modal" class="modal hidden">
+        <div class="modal-overlay" onclick="closeContactModal()"></div>
+        <div class="modal-content">
+            <button onclick="closeContactModal()" class="modal-close">&times;</button>
+            <h2 class="modal-title">Contact Us</h2>
+            <form id="contact-form" class="contact-form">
+                <input type="text" name="name" placeholder="Your Name" required>
+                <input type="email" name="email" placeholder="Your Email" required>
+                <textarea name="message" placeholder="Your Message" required rows="4"></textarea>
+                <button type="submit" class="btn btn-primary">Send Message</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Login Modal -->
+    <div id="admin-modal" class="modal hidden">
+        <div class="modal-overlay" onclick="closeAdminModal()"></div>
+        <div class="modal-content">
+            <button onclick="closeAdminModal()" class="modal-close">&times;</button>
+            <h2 class="modal-title">Admin Access</h2>
+            <form id="admin-form" class="admin-form">
+                <input type="password" id="admin-password" placeholder="Password" required>
+                <button type="submit" class="btn btn-primary">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <span class="logo">🤏💸</span>
+                    <span class="brand-name">JustTheTip</span>
+                    <p>Made for degenerates, by degenerates ❤️</p>
+                    <p class="ecosystem-text">PART OF THE <span class="tiltcheck">TILTCHECK.IT</span> ECOSYSTEM</p>
+                </div>
+                <div class="footer-links">
+                    <a href="https://discord.gg/66gNdYCYZA" target="_blank">
+                        <i class="fab fa-discord"></i> Discord
+                    </a>
+                    <button onclick="openContactModal()" class="footer-link-btn">
+                        <i class="fas fa-envelope"></i> Contact Us
+                    </button>
+                    <a href="https://github.com/sponsors/jmenichole" target="_blank">
+                        <i class="fas fa-heart"></i> Sponsor
+                    </a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 JustTheTip. All rights reserved.</p>
+                <p><strong>Disclaimer:</strong> This is a non-custodial helper tool. Users are responsible for their own wallet security and transactions.</p>
+                <button onclick="openAdminModal()" class="admin-link">Admin</button>
+            </div>
+        </div>
+    </footer>
+
+    <script src="assets/script.js"></script>
+</body>
+</html>
