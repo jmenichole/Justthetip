@@ -285,33 +285,32 @@ const App: React.FC = () => {
         
         {/* Hero Section */}
         <section className="text-center mb-24 relative">
-          <div className="absolute -top-40 -left-40 w-96 h-96 bg-glow-gradient-purple rounded-full opacity-50 filter blur-3xl"></div>
-          <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-glow-gradient-cyan rounded-full opacity-50 filter blur-3xl"></div>
+          <div className="absolute -top-40 -left-40 w-96 h-96 bg-glow-gradient-green rounded-full opacity-50 filter blur-3xl"></div>
+          <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-glow-gradient-purple rounded-full opacity-50 filter blur-3xl"></div>
           
-          <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-white mb-4 relative z-10">
-            <span className="text-cyan-300">Just</span><span className="text-purple-400">TheTip</span>
+          <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-white mb-6 relative z-10">
+            <span className="text-accent-primary">JustThe</span><span className="text-accent-secondary">Tip</span>
           </h1>
 
-          <div className="w-64 h-48 md:w-80 md:h-60 overflow-hidden mx-auto mb-6 relative z-10">
-            <img 
-              src="/logo.png" 
-              alt="An iceberg logo" 
-              className="w-64 h-64 md:w-80 md:h-80 object-contain -translate-y-1/4"
-            />
+          <div className="w-20 h-20 md:w-24 md:h-24 mx-auto mb-6 relative z-10 bg-brand-card border border-brand-border rounded-xl flex items-center justify-center">
+            <span className="text-4xl md:text-5xl text-accent-primary font-mono">⚡</span>
           </div>
 
           <p className="max-w-2xl mx-auto text-2xl md:text-3xl text-gray-300 mb-6 relative z-10 leading-tight">
-            Your Wallet, Your Discord,
+            Your Smart Contract SDK for
             <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500 font-bold">Supercharged.</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent-primary to-accent-secondary font-bold font-mono">Solana-Powered Discord Bots</span>
           </p>
           <p className="max-w-2xl mx-auto text-lg text-gray-400 mb-10 relative z-10">
-            Justthetip is a non-custodial helper bot for your external wallets. Tip and airdrop crypto directly in Discord, securely.
+            Build non-custodial Discord bots with smart contracts. Tip and airdrop tokens through Program Derived Addresses.
           </p>
           <div className="flex justify-center items-center gap-4 relative z-10">
-            <SecondaryButton onClick={handleSecondaryClick}>
-              ADD BOT TO SERVER
-            </SecondaryButton>
+            <button
+              className="bg-accent-primary hover:bg-accent-primary/90 text-black font-semibold py-3 px-8 rounded-lg shadow-lg transition-all duration-200 text-lg"
+              onClick={handleSecondaryClick}
+            >
+              Deploy Smart Contract Bot
+            </button>
           </div>
         </section>
 
@@ -320,93 +319,108 @@ const App: React.FC = () => {
 
         {/* How It Works Section */}
         <section className="mb-24">
-          <h2 className="text-4xl font-bold text-center text-white mb-12 tracking-wide">How It Works</h2>
+          <h2 className="text-4xl font-bold text-center text-white mb-12 tracking-wide">Smart Contract Architecture</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             <HowItWorksCard
               step={1}
-              title="CONNECT"
-              description="Securely link your existing wallet via WalletConnect. We never see your private keys."
-              gradient="from-cyan-500/50 to-transparent"
+              title="DEPLOY CONTRACTS"
+              description="Deploy your smart contracts with Program Derived Addresses for user account management."
+              gradient="from-accent-primary/50 to-transparent"
             />
             <HowItWorksCard
               step={2}
-              title="VERIFY"
-              description="The bot assigns you roles based on the tokens you hold, unlocking exclusive channels."
-              gradient="from-purple-500/50 to-transparent"
+              title="INTEGRATE SDK"
+              description="Use our JavaScript SDK to interact with smart contracts directly from Discord commands."
+              gradient="from-accent-secondary/50 to-transparent"
               isHighlighted
             />
             <HowItWorksCard
               step={3}
-              title="ENGAGE"
-              description="Use simple slash commands to tip, airdrop, or check balances directly in your server."
-              gradient="from-cyan-500/50 to-transparent"
+              title="NON-CUSTODIAL TIPS"
+              description="Users tip directly through smart contract calls. No private key management required."
+              gradient="from-accent-tertiary/50 to-transparent"
             />
           </div>
         </section>
 
         {/* Features Section */}
         <section className="mb-24">
-           <h2 className="text-4xl font-bold text-center text-white mb-12 tracking-wide">Next-Gen Helper Features</h2>
+           <h2 className="text-4xl font-bold text-center text-white mb-12 tracking-wide">Developer-First SDK Features</h2>
            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
              <FeatureCard 
-               icon="💸"
-               title="Seamless Tipping"
-               description="Send crypto to any Discord user with a simple @mention. It's the ultimate social payment experience."
+               icon="⚡"
+               title="Smart Contract Tipping"
+               description="Execute tip transactions through smart contracts with automatic PDA generation and management."
              />
              <FeatureCard 
-               icon="🎁"
-               title="Effortless Airdrops"
-               description="Reward your community by airdropping tokens to specific roles with a single command."
+               icon="🔗"
+               title="Program Derived Addresses"
+               description="Automatically generate and manage PDAs for each Discord user without exposing private keys."
              />
              <FeatureCard 
-               icon="🛡️"
-               title="Role-Based Access"
-               description="Grant exclusive channel access and permissions based on wallet contents (Token Gating)."
+               icon="📦"
+               title="TypeScript SDK"
+               description="Fully typed JavaScript/TypeScript SDK with comprehensive documentation and examples."
              />
              <FeatureCard 
-               icon="📊"
-               title="In-Discord Dashboard"
-               description="Use slash commands to view your wallet balance and recent transactions without leaving Discord."
+               icon="🛠️"
+               title="Custom Instructions"
+               description="Build custom smart contract instructions for advanced Discord bot functionality."
              />
              <FeatureCard 
-               icon="🤖"
-               title="Non-Custodial Security"
-               description="Your keys, your crypto. We never have access to your funds. All transactions are signed by you."
+               icon="🔒"
+               title="Zero Private Keys"
+               description="Never handle private keys. All transactions are executed through smart contract calls."
              />
            </div>
         </section>
 
+        {/* Solana Focus Section */}
+        <section className="mb-24">
+          <h2 className="text-4xl font-bold text-center text-white mb-12 tracking-wide">Built for Solana</h2>
+          <div className="flex justify-center">
+            <div className="bg-brand-card/70 border border-accent-primary/20 rounded-xl px-8 py-6 text-center">
+              <div className="text-4xl mb-4">◎</div>
+              <div className="text-2xl font-bold text-accent-primary mb-2">SOL & SPL Tokens</div>
+              <div className="text-gray-400">Native Solana Program integration with smart contract architecture</div>
+            </div>
+          </div>
+        </section>
+
         {/* Pricing Section */}
         <section className="mb-24">
-          <h2 className="text-4xl font-bold text-center text-white mb-12 tracking-wide">Transparent Fees</h2>
+          <h2 className="text-4xl font-bold text-center text-white mb-12 tracking-wide">Smart Contract Costs</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto">
             <PricingCard 
-              icon="💰"
-              title="Tipping"
-              description="A small, dynamic network fee is applied to cover gas costs for on-chain transactions."
-              fee="Network Fee"
+              icon="⛽"
+              title="Transaction Fees"
+              description="Standard Solana network fees for smart contract execution. Typically ~0.000005 SOL per transaction."
+              fee="~0.000005 SOL"
             />
             <PricingCard 
-              icon="🚀"
-              title="Airdrops & Utility"
-              description="A flat 0.5% service fee is taken on the total value of mass distributions and other utility functions."
-              fee="0.5%"
+              icon="🔧"
+              title="SDK Usage"
+              description="The JustTheTip SDK is completely free to use. Deploy unlimited smart contract bots."
+              fee="Free"
             />
           </div>
         </section>
         
         {/* CTA Section */}
-        <section className="text-center bg-brand-card/50 border border-white/10 rounded-2xl p-12 max-w-4xl mx-auto relative overflow-hidden">
-           <div className="absolute -top-20 -left-20 w-60 h-60 bg-glow-gradient-cyan rounded-full opacity-30 filter blur-3xl"></div>
+        <section className="text-center bg-brand-card/50 border border-brand-border rounded-2xl p-12 max-w-4xl mx-auto relative overflow-hidden">
+           <div className="absolute -top-20 -left-20 w-60 h-60 bg-glow-gradient-green rounded-full opacity-30 filter blur-3xl"></div>
            <div className="absolute -bottom-20 -right-20 w-60 h-60 bg-glow-gradient-purple rounded-full opacity-30 filter blur-3xl"></div>
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 relative z-10">Ready to Level Up Your Server?</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 relative z-10">Ready to Build Smart Contract Bots?</h2>
           <p className="max-w-xl mx-auto text-gray-400 mb-8 relative z-10">
-            Add the Justthetip bot and unlock a new dimension of web3 community engagement.
+            Deploy your first smart contract Discord bot and enable non-custodial tipping in minutes.
           </p>
           <div className="relative z-10">
-            <SecondaryButton onClick={handleSecondaryClick}>
-               <span role="img" aria-label="rocket" className="mr-2">🚀</span> ADD BOT TO SERVER
-            </SecondaryButton>
+            <button
+              className="bg-accent-primary hover:bg-accent-primary/90 text-black font-semibold py-3 px-8 rounded-lg shadow-lg transition-all duration-200 text-lg"
+              onClick={handleSecondaryClick}
+            >
+               <span role="img" aria-label="rocket" className="mr-2">⚡</span> Get Started with SDK
+            </button>
           </div>
         </section>
       </main>
