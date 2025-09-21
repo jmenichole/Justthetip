@@ -203,7 +203,7 @@ const instructions = sdk.createAirdropInstructions(sender, recipients);
 
 ## 📄 License
 
-MIT License - see [LICENSE](LICENSE) for details.
+JustTheTip Custom License (Based on MIT with Commercial Sale Restrictions) - see [LICENSE](LICENSE) for details.
 
 ---
 
@@ -299,7 +299,7 @@ All commands use dropdown menus for currency selection (SOL, USDC, LTC)
 ### 📋 Required Documents
 - [Terms of Service](TERMS.md) - User agreements and disclaimers
 - [Privacy Policy](PRIVACY.md) - Data collection and usage
-- [MIT License](LICENSE) - Software licensing
+- [Custom License](LICENSE) - Software licensing (MIT-based, commercial sale restricted)
 
 ### ⚠️ Important Disclaimers
 - **Non-Custodial:** We never store or control your private keys
@@ -369,7 +369,7 @@ SOLANA_RPC_URL=your_helius_rpc_endpoint
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the JustTheTip Custom License (based on MIT with commercial sale restrictions) - see the [LICENSE](LICENSE) file for details.
 
 ---
 

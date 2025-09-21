@@ -17,7 +17,7 @@
     "demo:sdk": "node contracts/example.js"
   },
   "author": "",
-  "license": "ISC",
+  "license": "Custom",
   "dependencies": {
     "@bitcoinerlab/secp256k1": "^1.2.0",
     "@solana/spl-token": "^0.1.8",
