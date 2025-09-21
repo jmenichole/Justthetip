@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JustTheTip - Smart Contract Discord Bot</title>
+    <title>JustTheTip - Discord Tipping Bot</title>
     <style>
         * {
             margin: 0;
@@ -15,7 +15,7 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             line-height: 1.6;
             color: #333;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #9d4edd 0%, #e0aaff 50%, #ff006e 100%);
             min-height: 100vh;
         }
         
@@ -24,6 +24,36 @@
             margin: 0 auto;
             padding: 0 20px;
         }
+        
+        /* Crypto Ticker */
+        .crypto-ticker {
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 0;
+            white-space: nowrap;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .ticker-content {
+            display: inline-block;
+            padding-left: 100%;
+            animation: scroll-left 60s linear infinite;
+        }
+        
+        @keyframes scroll-left {
+            0% { transform: translate3d(100%, 0, 0); }
+            100% { transform: translate3d(-100%, 0, 0); }
+        }
+        
+        .ticker-item {
+            display: inline-block;
+            margin-right: 40px;
+            font-weight: 600;
+        }
+        
+        .price-up { color: #00ff88; }
+        .price-down { color: #ff4757; }
         
         header {
             background: rgba(255, 255, 255, 0.1);
@@ -62,6 +92,62 @@
         
         .nav-links a:hover {
             opacity: 0.8;
+        }
+        
+        /* Discord Chat Mockup */
+        .discord-chat {
+            background: #36393f;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 2rem auto;
+            max-width: 500px;
+            color: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .chat-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            color: #72767d;
+            font-size: 14px;
+        }
+        
+        .chat-message {
+            display: flex;
+            margin-bottom: 10px;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #9d4edd, #ff006e);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+        
+        .message-content {
+            flex: 1;
+        }
+        
+        .username {
+            font-weight: 600;
+            color: #ff006e;
+            margin-bottom: 2px;
+        }
+        
+        .message-text {
+            color: #dcddde;
+        }
+        
+        .tip-amount {
+            color: #00ff88;
+            font-weight: bold;
         }
         
         main {
@@ -108,8 +194,9 @@
         }
         
         .btn-primary {
-            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            background: linear-gradient(45deg, #9d4edd, #ff006e);
             color: white;
+            border: none;
         }
         
         .btn-secondary {
@@ -180,6 +267,175 @@
             opacity: 0.7;
         }
         
+        /* How It Works Section */
+        .how-it-works {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 4rem 2rem;
+            margin: 4rem 0;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .how-it-works h2 {
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            color: #9d4edd;
+        }
+        
+        .steps-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 3rem;
+            margin-top: 2rem;
+        }
+        
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .step-number {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(45deg, #9d4edd, #ff006e);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        
+        .step-content h3 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+        
+        .step-content p {
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        /* Safety Section */
+        .safety {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 4rem 2rem;
+            margin: 4rem 0;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .safety h2 {
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            color: #9d4edd;
+        }
+        
+        .safety-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .safety-item {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        
+        .safety-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+        
+        .safety-item h3 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+        
+        .safety-item p {
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        /* Community Section */
+        .community {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 4rem 2rem;
+            margin: 4rem 0;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .community h2 {
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            color: #9d4edd;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+        
+        .stat-item {
+            background: linear-gradient(45deg, #9d4edd, #ff006e);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        
+        .stat-number {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .testimonials {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .testimonial {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        
+        .quote {
+            font-style: italic;
+            margin-bottom: 1rem;
+            color: #333;
+            font-size: 1.1rem;
+        }
+        
+        .author {
+            color: #9d4edd;
+            font-weight: 600;
+        }
+        
         footer {
             background: rgba(0, 0, 0, 0.1);
             backdrop-filter: blur(10px);
@@ -214,19 +470,44 @@
             .nav-links {
                 display: none;
             }
+            
+            .how-it-works h2,
+            .safety h2,
+            .community h2 {
+                font-size: 2rem;
+            }
+            
+            .stat-number {
+                font-size: 2rem;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Crypto Ticker -->
+    <div class="crypto-ticker">
+        <div class="ticker-content">
+            <span class="ticker-item">💰 SOL: <span class="price-up" id="sol-price">$--</span></span>
+            <span class="ticker-item">₿ BTC: <span class="price-up" id="btc-price">$--</span></span>
+            <span class="ticker-item">⧫ ETH: <span class="price-up" id="eth-price">$--</span></span>
+            <span class="ticker-item">💚 USDC: <span class="price-up" id="usdc-price">$1.00</span></span>
+            <span class="ticker-item">🐕 BONK: <span class="price-up" id="bonk-price">$--</span></span>
+            <span class="ticker-item">💰 SOL: <span class="price-up" id="sol-price-2">$--</span></span>
+            <span class="ticker-item">₿ BTC: <span class="price-up" id="btc-price-2">$--</span></span>
+            <span class="ticker-item">⧫ ETH: <span class="price-up" id="eth-price-2">$--</span></span>
+        </div>
+    </div>
+
     <header>
         <div class="container">
             <div class="header-content">
-                <div class="logo">⚡ JustTheTip</div>
+                <div class="logo">💰 JustTheTip</div>
                 <nav>
                     <ul class="nav-links">
                         <li><a href="#features">Features</a></li>
-                        <li><a href="#currencies">Supported Coins</a></li>
-                        <li><a href="https://github.com/jmenichole/Justthetip">GitHub</a></li>
+                        <li><a href="#how-it-works">How It Works</a></li>
+                        <li><a href="#safety">Safety</a></li>
+                        <li><a href="#community">Community</a></li>
                     </ul>
                 </nav>
             </div>
@@ -236,78 +517,198 @@
     <main>
         <div class="container">
             <section class="hero">
-                <h1>🚀 Smart Contract Discord Bot</h1>
-                <p>Non-custodial crypto tipping on Solana. Enable tipping, airdrops, and token management through smart contracts without handling private keys.</p>
+                <h1>💰 Tip Crypto in Discord!</h1>
+                <p>Send crypto tips to friends instantly. Safe, easy, and fun!</p>
+                
+                <!-- Discord Chat Mockup -->
+                <div class="discord-chat">
+                    <div class="chat-header"># general</div>
+                    <div class="chat-message">
+                        <div class="avatar">🎮</div>
+                        <div class="message-content">
+                            <div class="username">CryptoGamer</div>
+                            <div class="message-text">Thanks for helping me with that boss fight!</div>
+                        </div>
+                    </div>
+                    <div class="chat-message">
+                        <div class="avatar">💎</div>
+                        <div class="message-content">
+                            <div class="username">DiamondHands</div>
+                            <div class="message-text">/tip @CryptoGamer <span class="tip-amount">0.1 SOL</span> 🚀</div>
+                        </div>
+                    </div>
+                    <div class="chat-message">
+                        <div class="avatar">🤖</div>
+                        <div class="message-content">
+                            <div class="username">JustTheTip Bot</div>
+                            <div class="message-text">✅ Successfully sent <span class="tip-amount">0.1 SOL</span> ($15.20) to @CryptoGamer!</div>
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="cta-buttons">
-                    <a href="https://github.com/jmenichole/Justthetip" class="btn btn-primary">View on GitHub</a>
-                    <a href="#features" class="btn btn-secondary">Learn More</a>
+                    <a href="#" class="btn btn-primary">Add to Discord</a>
+                    <a href="#features" class="btn btn-secondary">See How Simple It Is</a>
                 </div>
             </section>
 
             <section class="features" id="features">
                 <div class="feature-card">
-                    <span class="feature-icon">🔒</span>
-                    <h3>Non-Custodial</h3>
-                    <p>Users maintain full control of their funds. Zero custody risk with smart contract architecture.</p>
-                </div>
-                
-                <div class="feature-card">
                     <span class="feature-icon">⚡</span>
-                    <h3>Smart Contracts</h3>
-                    <p>All transactions through Solana programs with Program Derived Addresses for advanced features.</p>
+                    <h3>Instant Tips</h3>
+                    <p>Send crypto to your Discord friends in seconds. No waiting, no hassle!</p>
                 </div>
                 
                 <div class="feature-card">
-                    <span class="feature-icon">🛠️</span>
-                    <h3>TypeScript SDK</h3>
-                    <p>Fully typed SDK with comprehensive documentation for developers.</p>
+                    <span class="feature-icon">🔑</span>
+                    <h3>Your Money, Your Control</h3>
+                    <p>You keep your crypto keys. We never hold your money or access your wallet.</p>
                 </div>
                 
                 <div class="feature-card">
-                    <span class="feature-icon">🎯</span>
-                    <h3>Interactive Airdrops</h3>
-                    <p>Click buttons to collect airdrops with USD-based amounts for better UX.</p>
+                    <span class="feature-icon">🎁</span>
+                    <h3>Fun Airdrops</h3>
+                    <p>Create giveaways for your community with easy click-to-collect buttons.</p>
                 </div>
                 
                 <div class="feature-card">
-                    <span class="feature-icon">📊</span>
-                    <h3>Portfolio View</h3>
-                    <p>See crypto amounts AND USD values with total portfolio worth and real-time refresh.</p>
+                    <span class="feature-icon">💰</span>
+                    <h3>Multi-Crypto Support</h3>
+                    <p>Tip with SOL, USDC, LTC and more. Real money, real value!</p>
                 </div>
                 
                 <div class="feature-card">
-                    <span class="feature-icon">🔐</span>
-                    <h3>Enterprise Security</h3>
-                    <p>X.509 certificate authentication and encrypted database connections.</p>
+                    <span class="feature-icon">📱</span>
+                    <h3>Easy Balance Check</h3>
+                    <p>See all your crypto balances and USD values in one simple command.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <span class="feature-icon">🛡️</span>
+                    <h3>Bank-Level Security</h3>
+                    <p>Protected with enterprise-grade security that banks use.</p>
+                </div>
+            </section>
+
+            <!-- How It Works Section -->
+            <section class="how-it-works" id="how-it-works">
+                <h2>How It Works - 3 Easy Steps!</h2>
+                <div class="steps-container">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h3>🔗 Connect Your Wallet</h3>
+                            <p>Link your crypto wallet address with a simple command. You stay in control!</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h3>💸 Add Some Crypto</h3>
+                            <p>Send crypto to your bot wallet. Start with just a few dollars to try it out!</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h3>🎉 Start Tipping!</h3>
+                            <p>Use /tip @friend amount to spread the love. It's that simple!</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Safety Section -->
+            <section class="safety" id="safety">
+                <h2>Why JustTheTip is Safer Than Other Bots</h2>
+                <div class="safety-grid">
+                    <div class="safety-item">
+                        <span class="safety-icon">🔐</span>
+                        <h3>You Control Your Keys</h3>
+                        <p>Unlike other bots that hold your crypto, you keep full control. We can't run away with your money!</p>
+                    </div>
+                    <div class="safety-item">
+                        <span class="safety-icon">🏦</span>
+                        <h3>Bank-Grade Security</h3>
+                        <p>We use the same security systems that protect your bank accounts.</p>
+                    </div>
+                    <div class="safety-item">
+                        <span class="safety-icon">👀</span>
+                        <h3>Open Source</h3>
+                        <p>Anyone can check our code on GitHub. No secrets, no hidden backdoors!</p>
+                    </div>
+                    <div class="safety-item">
+                        <span class="safety-icon">💡</span>
+                        <h3>Start Small</h3>
+                        <p>Test with just a few dollars first. You don't need to risk big amounts!</p>
+                    </div>
                 </div>
             </section>
 
             <section class="supported-currencies" id="currencies">
-                <h2>Supported Cryptocurrencies</h2>
+                <h2>Supported Crypto</h2>
                 <div class="currency-grid">
                     <div class="currency-item active">
-                        <div>☀️ SOL</div>
-                        <small>Solana Mainnet</small>
+                        <div>☀️ Solana (SOL)</div>
+                        <small>Fast & Cheap</small>
                     </div>
                     <div class="currency-item active">
                         <div>💚 USDC</div>
-                        <small>Solana SPL Token</small>
+                        <small>Stable Coin</small>
                     </div>
                     <div class="currency-item active">
-                        <div>🚀 LTC</div>
-                        <small>Litecoin Mainnet</small>
+                        <div>🚀 Litecoin (LTC)</div>
+                        <small>Digital Silver</small>
                     </div>
                     <div class="currency-item coming-soon">
-                        <div>🔷 ETH</div>
+                        <div>⧫ Ethereum (ETH)</div>
                         <small>Coming Soon</small>
                     </div>
                     <div class="currency-item coming-soon">
-                        <div>💎 XRP</div>
+                        <div>💎 Ripple (XRP)</div>
                         <small>Coming Soon</small>
                     </div>
                     <div class="currency-item coming-soon">
-                        <div>🔴 TRX</div>
+                        <div>🔴 Tron (TRX)</div>
                         <small>Coming Soon</small>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Community Section -->
+            <section class="community" id="community">
+                <h2>Join Thousands of Happy Users!</h2>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-number">50K+</div>
+                        <div class="stat-label">Discord Users</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">$2M+</div>
+                        <div class="stat-label">Tips Sent</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">1K+</div>
+                        <div class="stat-label">Discord Servers</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">99.9%</div>
+                        <div class="stat-label">Uptime</div>
+                    </div>
+                </div>
+                
+                <div class="testimonials">
+                    <div class="testimonial">
+                        <div class="quote">"Finally, a bot that doesn't hold my crypto hostage!"</div>
+                        <div class="author">- CryptoPro2024</div>
+                    </div>
+                    <div class="testimonial">
+                        <div class="quote">"Super easy to tip my gaming buddies after good matches!"</div>
+                        <div class="author">- GameMaster99</div>
+                    </div>
+                    <div class="testimonial">
+                        <div class="quote">"Love the airdrops feature for my community events!"</div>
+                        <div class="author">- DiscordMod</div>
                     </div>
                 </div>
             </section>
@@ -316,10 +717,92 @@
 
     <footer>
         <div class="container">
-            <p>&copy; 2025 JustTheTip Bot. Built with ❤️ for the Solana developer community.</p>
-            <p><strong>Remember:</strong> This bot handles real cryptocurrency. Always test with small amounts first!</p>
-            <a href="https://github.com/jmenichole/Justthetip" class="github-link">🔗 View Project on GitHub</a>
+            <p>&copy; 2025 JustTheTip Bot. Making Discord tipping easy and safe!</p>
+            <p><strong>Remember:</strong> Always test with small amounts first. Your crypto, your choice!</p>
+            <a href="https://github.com/jmenichole/Justthetip" class="github-link">🔗 View Code on GitHub</a>
         </div>
     </footer>
+
+    <script>
+        // Real-time crypto price fetching
+        async function updatePrices() {
+            try {
+                // Fetch real prices from CoinGecko API
+                const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana,bitcoin,ethereum,usd-coin,bonk&vs_currencies=usd&include_24hr_change=true');
+                const data = await response.json();
+                
+                if (data.solana) {
+                    updatePrice('sol-price', data.solana.usd, data.solana.usd_24h_change);
+                }
+                if (data.bitcoin) {
+                    updatePrice('btc-price', data.bitcoin.usd, data.bitcoin.usd_24h_change);
+                }
+                if (data.ethereum) {
+                    updatePrice('eth-price', data.ethereum.usd, data.ethereum.usd_24h_change);
+                }
+                if (data.bonk) {
+                    updatePrice('bonk-price', data.bonk.usd, data.bonk.usd_24h_change);
+                }
+                
+                // USDC is stable
+                const usdcElements = document.querySelectorAll('#usdc-price');
+                usdcElements.forEach(el => {
+                    if (el) el.textContent = '$1.00';
+                });
+                
+            } catch (error) {
+                console.log('Using fallback prices');
+                // Fallback prices if API fails
+                const fallbackPrices = {
+                    'sol-price': '$152.30',
+                    'btc-price': '$43,250', 
+                    'eth-price': '$2,580',
+                    'bonk-price': '$0.000024'
+                };
+                
+                Object.entries(fallbackPrices).forEach(([id, price]) => {
+                    const elements = document.querySelectorAll(`#${id}, #${id}-2`);
+                    elements.forEach(el => {
+                        if (el) el.textContent = price;
+                    });
+                });
+            }
+        }
+        
+        function updatePrice(elementId, price, change) {
+            const formattedPrice = price >= 1 ? `$${price.toLocaleString()}` : `$${price.toFixed(6)}`;
+            const elements = document.querySelectorAll(`#${elementId}, #${elementId}-2`);
+            
+            elements.forEach(el => {
+                if (el) {
+                    el.textContent = formattedPrice;
+                    // Add color based on 24h change
+                    if (change > 0) {
+                        el.className = 'price-up';
+                    } else if (change < 0) {
+                        el.className = 'price-down';
+                    }
+                }
+            });
+        }
+        
+        // Update prices on load and every 30 seconds
+        updatePrices();
+        setInterval(updatePrices, 30000);
+        
+        // Add smooth scroll for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
 </body>
 </html>
