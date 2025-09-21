@@ -384,6 +384,37 @@
             color: #9d4edd;
         }
         
+        .community-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+        
+        .community-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        
+        .community-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+        
+        .community-card h3 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+        
+        .community-card p {
+            color: #666;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+        
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -443,6 +474,34 @@
             text-align: center;
             padding: 2rem 0;
             margin-top: 4rem;
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .footer-link {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .footer-link:hover {
+            opacity: 0.8;
+        }
+        
+        .degen-link {
+            color: #ff006e;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .degen-link:hover {
+            opacity: 0.8;
         }
         
         .github-link {
@@ -547,7 +606,7 @@
                 </div>
                 
                 <div class="cta-buttons">
-                    <a href="#" class="btn btn-primary">Add to Discord</a>
+                    <a href="https://discord.com/oauth2/authorize?client_id=1373784722718720090" class="btn btn-primary">Add to Discord</a>
                     <a href="#features" class="btn btn-secondary">See How Simple It Is</a>
                 </div>
             </section>
@@ -625,7 +684,7 @@
                     <div class="safety-item">
                         <span class="safety-icon">🔐</span>
                         <h3>You Control Your Keys</h3>
-                        <p>Unlike other bots that hold your crypto, you keep full control. We can't run away with your money!</p>
+                        <p>Unlike other bots that hold your crypto, you keep full control. Our smart contracts ensure we can't run away with your money!</p>
                     </div>
                     <div class="safety-item">
                         <span class="safety-icon">🏦</span>
@@ -677,23 +736,20 @@
 
             <!-- Community Section -->
             <section class="community" id="community">
-                <h2>Join Thousands of Happy Users!</h2>
-                <div class="stats-grid">
-                    <div class="stat-item">
-                        <div class="stat-number">50K+</div>
-                        <div class="stat-label">Discord Users</div>
+                <h2>Join the Community!</h2>
+                
+                <div class="community-links">
+                    <div class="community-card">
+                        <span class="community-icon">💬</span>
+                        <h3>Discord Support</h3>
+                        <p>Get help, share tips, and connect with other users</p>
+                        <a href="https://discord.gg/66gNdYCYZA" class="btn btn-primary">Join Discord</a>
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-number">$2M+</div>
-                        <div class="stat-label">Tips Sent</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number">1K+</div>
-                        <div class="stat-label">Discord Servers</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number">99.9%</div>
-                        <div class="stat-label">Uptime</div>
+                    <div class="community-card">
+                        <span class="community-icon">🤖</span>
+                        <h3>Add the Bot</h3>
+                        <p>Start tipping crypto in your Discord server today</p>
+                        <a href="https://discord.com/oauth2/authorize?client_id=1373784722718720090" class="btn btn-primary">Add Bot</a>
                     </div>
                 </div>
                 
@@ -717,9 +773,13 @@
 
     <footer>
         <div class="container">
-            <p>&copy; 2025 JustTheTip Bot. Making Discord tipping easy and safe!</p>
+            <p>&copy; 2025 JustTheTip Bot - Part of the TiltCheck Ecosystem</p>
+            <p><a href="#" class="degen-link">Made for degens by degens ❤️</a></p>
             <p><strong>Remember:</strong> Always test with small amounts first. Your crypto, your choice!</p>
-            <a href="https://github.com/jmenichole/Justthetip" class="github-link">🔗 View Code on GitHub</a>
+            <div class="footer-links">
+                <a href="https://github.com/jmenichole/Justthetip" class="footer-link">🔗 View Code on GitHub</a>
+                <a href="https://discord.gg/66gNdYCYZA" class="footer-link">💬 Join Discord</a>
+            </div>
         </div>
     </footer>
 
