@@ -243,7 +243,7 @@ document.addEventListener('DOMContentLoaded', function() {
 ===============================
 Made for degenerates, by degenerates.
 
-GitHub: https://github.com/Mischief-Manager-inc/justthetip
+GitHub: https://github.com/Mischief-Manager-inc/justthetipbot
 Community: https://discord.gg/66gNdYCYZA
 
 Self-custodial, multi-chain tipping at its finest!

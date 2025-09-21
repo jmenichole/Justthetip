@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JustTheTip - Multi-Chain Discord Tip Bot</title>
-    <meta name="description" content="Self-custodial multi-chain Discord tip bot. Instantly tip SOL, USDC, LTC, BTC & BCH to community members. You control your keys, we handle the convenience.">
+    <title>JustTheTip - Smart Contract SDK for Discord Bots</title>
+    <meta name="description" content="Developer-focused SDK for building non-custodial Discord bots on Solana. Enable tipping, airdrops, and token management through smart contracts without handling private keys.">
     <link rel="stylesheet" href="assets/style.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -21,7 +21,7 @@
                 <a href="#features" class="nav-link">Features</a>
                 <a href="#commands" class="nav-link">Commands</a>
                 <a href="#setup" class="nav-link">Setup</a>
-                <a href="https://github.com/Mischief-Manager-inc/justthetip" class="nav-link" target="_blank">
+                <a href="https://github.com/Mischief-Manager-inc/justthetipbot" class="nav-link" target="_blank">
                     <i class="fab fa-github"></i> GitHub
                 </a>
             </div>
@@ -33,28 +33,28 @@
         <div class="hero-content">
             <h1 class="hero-title">
                 <span class="text-cyan">Just</span><span class="text-purple">TheTip</span>
-                <span class="gradient-text">Discord Bot</span>
+                <span class="gradient-text">Smart Contract SDK</span>
             </h1>
             
             <!-- Logo Section -->
             <div class="logo-container">
-                <img src="assets/logo.png" alt="JustTheTip Logo - Iceberg" class="hero-logo" onerror="this.style.display='none'">
+                <img src="assets/logo.svg" alt="JustTheTip Logo - Iceberg" class="hero-logo">
             </div>
             
             <p class="hero-description">
-                Your Wallet, Your Discord, <strong>Supercharged.</strong>
+                Developer SDK for <strong>Solana Smart Contracts</strong>
                 <br>
-                <span class="gradient-text">Non-custodial crypto tipping made simple.</span>
+                <span class="gradient-text">Build non-custodial Discord bots without handling private keys.</span>
             </p>
             <p class="hero-subtitle">
-                Justthetip is a non-custodial helper bot for your external wallets. 
-                Tip and airdrop crypto directly in Discord, securely.
+                A TypeScript SDK for creating Discord bots with smart contract architecture. 
+                Users control their wallets, you provide the functionality.
             </p>
             <div class="hero-buttons">
                 <a href="https://discord.com/api/oauth2/authorize?client_id=1373784722718720090&permissions=2147483648&scope=bot%20applications.commands" 
                    class="btn btn-primary" target="_blank" id="add-bot-btn">
                     <i class="fab fa-discord"></i>
-                    ADD BOT TO SERVER
+                    TRY DEMO BOT
                 </a>
             </div>
         </div>
@@ -68,17 +68,17 @@
                     <i class="fas fa-dollar-sign"></i>
                     <span>USDC</span>
                 </div>
-                <div class="crypto-card ltc">
-                    <i class="fab fa-litecoin"></i>
-                    <span>LTC</span>
+                <div class="crypto-card sol-program">
+                    <i class="fas fa-code"></i>
+                    <span>SDK</span>
                 </div>
-                <div class="crypto-card btc">
-                    <i class="fab fa-bitcoin"></i>
-                    <span>BTC</span>
+                <div class="crypto-card smart-contract">
+                    <i class="fas fa-microchip"></i>
+                    <span>SC</span>
                 </div>
-                <div class="crypto-card bch">
-                    <i class="fas fa-coins"></i>
-                    <span>BCH</span>
+                <div class="crypto-card typescript">
+                    <i class="fab fa-js-square"></i>
+                    <span>TS</span>
                 </div>
             </div>
         </div>
@@ -96,49 +96,49 @@
     <!-- Features Section -->
     <section id="features" class="features">
         <div class="container">
-            <h2 class="section-title">Why Choose JustTheTip?</h2>
+            <h2 class="section-title">Why Choose JustTheTip SDK?</h2>
             <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-microchip"></i>
+                    </div>
+                    <h3>Smart Contract Architecture</h3>
+                    <p>All transactions through Solana programs. Zero custody risk, users control their own keys.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fab fa-js-square"></i>
+                    </div>
+                    <h3>TypeScript SDK</h3>
+                    <p>Fully typed SDK with comprehensive documentation for building Discord bots.</p>
+                </div>
                 <div class="feature-card">
                     <div class="feature-icon">
                         <i class="fas fa-shield-alt"></i>
                     </div>
-                    <h3>Self-Custodial</h3>
-                    <p>You control your private keys. No custodial risk, no KYC, no withdrawal limits.</p>
+                    <h3>Non-Custodial</h3>
+                    <p>Bot never handles private keys. Users sign transactions in their own wallets.</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">
                         <i class="fas fa-link"></i>
                     </div>
-                    <h3>Multi-Chain Support</h3>
-                    <p>Supports SOL, USDC (Solana), LTC, BTC (testnet), and BCH all in one bot.</p>
+                    <h3>Program Derived Addresses</h3>
+                    <p>Advanced features using PDAs for Discord user management and escrow functionality.</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">
-                        <i class="fas fa-bolt"></i>
+                        <i class="fas fa-code"></i>
                     </div>
-                    <h3>Instant Tipping</h3>
-                    <p>Lightning-fast tips with simple slash commands. Just /tip @user amount coin.</p>
+                    <h3>Developer Focused</h3>
+                    <p>Build custom Discord bots with tipping, airdrops, and token management features.</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">
-                        <i class="fas fa-gift"></i>
+                        <i class="fab fa-solana"></i>
                     </div>
-                    <h3>Community Airdrops</h3>
-                    <p>Create airdrops for your community members to collect and engage.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-wallet"></i>
-                    </div>
-                    <h3>Easy Withdrawals</h3>
-                    <p>Withdraw to external wallets anytime with simple commands.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-chart-line"></i>
-                    </div>
-                    <h3>Balance Tracking</h3>
-                    <p>Check all your crypto balances across multiple chains in one place.</p>
+                    <h3>Solana Native</h3>
+                    <p>Built specifically for Solana ecosystem with SOL and SPL token support.</p>
                 </div>
             </div>
         </div>
@@ -147,23 +147,23 @@
     <!-- Pricing Section -->
     <section class="pricing">
         <div class="container">
-            <h2 class="section-title">Transparent Fees</h2>
+            <h2 class="section-title">SDK & Smart Contract Fees</h2>
             <div class="pricing-grid">
                 <div class="pricing-card">
                     <div class="pricing-header">
-                        <div class="pricing-icon">💰</div>
-                        <h3>Tipping</h3>
-                        <div class="pricing-fee">Network Fee</div>
+                        <div class="pricing-icon">⚡</div>
+                        <h3>Smart Contract Transactions</h3>
+                        <div class="pricing-fee">Solana Network Fee</div>
                     </div>
-                    <p>A small, dynamic network fee is applied to cover gas costs for on-chain transactions.</p>
+                    <p>Standard Solana network fees (~0.000005 SOL) for smart contract interactions. No additional SDK fees.</p>
                 </div>
                 <div class="pricing-card">
                     <div class="pricing-header">
-                        <div class="pricing-icon">🚀</div>
-                        <h3>Airdrops & Utility</h3>
-                        <div class="pricing-fee">0.5%</div>
+                        <div class="pricing-icon">🛠️</div>
+                        <h3>SDK Usage</h3>
+                        <div class="pricing-fee">Free & Open Source</div>
                     </div>
-                    <p>A flat 0.5% service fee is taken on the total value of mass distributions and other utility functions.</p>
+                    <p>The JustTheTip SDK is completely free to use. Build unlimited Discord bots with smart contract functionality.</p>
                 </div>
             </div>
         </div>
@@ -172,43 +172,43 @@
     <!-- Commands Section -->
     <section id="commands" class="commands">
         <div class="container">
-            <h2 class="section-title">Available Commands</h2>
+            <h2 class="section-title">Smart Contract Commands</h2>
             <div class="commands-grid">
                 <div class="command-card">
                     <div class="command-header">
-                        <code>/balance</code>
+                        <code>/register-wallet &lt;address&gt;</code>
                     </div>
-                    <p>Show your balances across all supported cryptocurrencies</p>
+                    <p>Register your Solana wallet address for smart contract interactions</p>
                 </div>
                 <div class="command-card">
                     <div class="command-header">
-                        <code>/tip @user amount coin</code>
+                        <code>/sc-tip @user &lt;amount&gt;</code>
                     </div>
-                    <p>Tip a user (e.g., /tip @bob 0.1 sol)</p>
+                    <p>Create a smart contract tip transaction for the user to sign</p>
                 </div>
                 <div class="command-card">
                     <div class="command-header">
-                        <code>/registerwallet coin address</code>
+                        <code>/sc-balance</code>
                     </div>
-                    <p>Register your external wallet address for a specific coin</p>
+                    <p>Check your on-chain wallet balance directly from Solana</p>
                 </div>
                 <div class="command-card">
                     <div class="command-header">
-                        <code>/withdraw address amount coin</code>
+                        <code>/generate-pda</code>
                     </div>
-                    <p>Withdraw funds to your external wallet</p>
+                    <p>Generate your Program Derived Address for advanced features</p>
                 </div>
                 <div class="command-card">
                     <div class="command-header">
-                        <code>/airdrop amount coin</code>
+                        <code>/sc-info</code>
                     </div>
-                    <p>Create an airdrop for community members to collect</p>
+                    <p>View smart contract bot information and program details</p>
                 </div>
                 <div class="command-card">
                     <div class="command-header">
                         <code>/help</code>
                     </div>
-                    <p>Display help information and command list</p>
+                    <p>Display help information and available smart contract commands</p>
                 </div>
             </div>
         </div>
@@ -217,31 +217,31 @@
     <!-- Setup Section -->
     <section id="setup" class="setup">
         <div class="container">
-            <h2 class="section-title">Quick Setup</h2>
+            <h2 class="section-title">Quick Start Guide</h2>
             <div class="setup-steps">
                 <div class="setup-step">
                     <div class="step-number">1</div>
                     <div class="step-content">
-                        <h3>Invite the Bot</h3>
-                        <p>Add JustTheTip to your Discord server with the required permissions</p>
-                        <a href="https://discord.com/api/oauth2/authorize?client_id=1373784722718720090&permissions=2147483648&scope=bot%20applications.commands" 
+                        <h3>Install SDK</h3>
+                        <p>Clone the repository and install dependencies for your Discord bot</p>
+                        <a href="https://github.com/Mischief-Manager-inc/justthetipbot" 
                            class="btn btn-outline" target="_blank">
-                            <i class="fab fa-discord"></i> Invite Bot
+                            <i class="fab fa-github"></i> Get SDK
                         </a>
                     </div>
                 </div>
                 <div class="setup-step">
                     <div class="step-number">2</div>
                     <div class="step-content">
-                        <h3>Check Your Balance</h3>
-                        <p>Use <code>/balance</code> to see your current wallet status</p>
+                        <h3>Try Demo Bot</h3>
+                        <p>Test the smart contract functionality with our demo implementation</p>
                     </div>
                 </div>
                 <div class="setup-step">
                     <div class="step-number">3</div>
                     <div class="step-content">
-                        <h3>Start Tipping!</h3>
-                        <p>Use <code>/tip @user amount coin</code> to send your first tip</p>
+                        <h3>Build Your Bot</h3>
+                        <p>Use the SDK to create custom Discord bots with smart contract features</p>
                     </div>
                 </div>
             </div>
@@ -251,27 +251,27 @@
     <!-- Use Cases Section -->
     <section class="use-cases">
         <div class="container">
-            <h2 class="section-title">Perfect For</h2>
+            <h2 class="section-title">Perfect For Developers</h2>
             <div class="use-cases-grid">
                 <div class="use-case-card">
+                    <i class="fab fa-discord"></i>
+                    <h3>Discord Bot Builders</h3>
+                    <p>Add smart contract tipping to any Discord community</p>
+                </div>
+                <div class="use-case-card">
                     <i class="fas fa-gamepad"></i>
-                    <h3>Gaming Guilds</h3>
-                    <p>Reward top players and contributors</p>
+                    <h3>Gaming Communities</h3>
+                    <p>Build bots for tournaments, rewards, and player incentives</p>
                 </div>
                 <div class="use-case-card">
-                    <i class="fas fa-palette"></i>
-                    <h3>NFT Communities</h3>
-                    <p>Share profits and reward holders</p>
+                    <i class="fas fa-coins"></i>
+                    <h3>DeFi Projects</h3>
+                    <p>Integrate community rewards and governance tokens</p>
                 </div>
                 <div class="use-case-card">
-                    <i class="fas fa-code"></i>
-                    <h3>Developer Communities</h3>
-                    <p>Bounties and contribution rewards</p>
-                </div>
-                <div class="use-case-card">
-                    <i class="fas fa-graduation-cap"></i>
-                    <h3>Educational Servers</h3>
-                    <p>Incentivize learning and participation</p>
+                    <i class="fab fa-js-square"></i>
+                    <h3>TypeScript Developers</h3>
+                    <p>Fully typed SDK with comprehensive documentation</p>
                 </div>
             </div>
         </div>
@@ -312,8 +312,8 @@
                 <div class="footer-brand">
                     <span class="logo">🤏💸</span>
                     <span class="brand-name">JustTheTip</span>
-                    <p>Made for degenerates, by degenerates ❤️</p>
-                    <p class="ecosystem-text">PART OF THE <span class="tiltcheck">TILTCHECK.IT</span> ECOSYSTEM</p>
+                    <p>Made for degens by degens <a href="https://github.com/jmenichole" target="_blank" class="portfolio-link">❤️</a></p>
+                    <p class="ecosystem-text">PART OF THE <a href="https://tiltcheck.it" target="_blank" class="tiltcheck">TILTCHECK.IT</a> ECOSYSTEM</p>
                 </div>
                 <div class="footer-links">
                     <a href="https://discord.gg/66gNdYCYZA" target="_blank">
@@ -330,7 +330,10 @@
             <div class="footer-bottom">
                 <p>&copy; 2025 JustTheTip. All rights reserved.</p>
                 <p><strong>Disclaimer:</strong> This is a non-custodial helper tool. Users are responsible for their own wallet security and transactions.</p>
-                <button onclick="openAdminModal()" class="admin-link">Admin</button>
+                <div class="footer-extra-links">
+                    <a href="https://collectclock.com" target="_blank" class="collect-clock-link">Collect Clock</a>
+                    <button onclick="openAdminModal()" class="admin-link">Admin</button>
+                </div>
             </div>
         </div>
     </footer>

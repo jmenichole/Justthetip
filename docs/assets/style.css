@@ -597,6 +597,53 @@ body {
     }
 }
 
+/* New footer link styles */
+.portfolio-link {
+    color: #ff1493;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.portfolio-link:hover {
+    color: #ff69b4;
+    transform: scale(1.2);
+}
+
+.tiltcheck {
+    color: var(--cyan-color);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.tiltcheck:hover {
+    color: var(--primary-color);
+}
+
+.footer-extra-links {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1rem;
+}
+
+.collect-clock-link {
+    color: var(--text-light);
+    text-decoration: none;
+    font-size: 0.875rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.25rem;
+    transition: all 0.3s ease;
+}
+
+.collect-clock-link:hover {
+    color: var(--cyan-color);
+    border-color: var(--cyan-color);
+    background: rgba(6, 182, 212, 0.1);
+}
+
 html {
     scroll-behavior: smooth;
 }
