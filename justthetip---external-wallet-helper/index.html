@@ -4,25 +4,30 @@
     <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Justthetip - External Wallet Helper for Discord</title>
+    <title>JustTheTip - Solana Smart Contract SDK for Discord</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
     <script>
       tailwind.config = {
         theme: {
           extend: {
             fontFamily: {
               sans: ['Inter', 'sans-serif'],
+              mono: ['JetBrains Mono', 'monospace'],
             },
             colors: {
-              'brand-dark': '#0A092B',
-              'brand-card': '#101032',
+              'brand-dark': '#0F0F0F',
+              'brand-card': '#1A1A1A',
+              'brand-border': '#262626',
+              'accent-primary': '#14F195',
+              'accent-secondary': '#9945FF',
+              'accent-tertiary': '#DC1FFF',
             },
             backgroundImage: {
-              'glow-gradient-purple': 'radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.2), transparent 70%)',
-              'glow-gradient-cyan': 'radial-gradient(circle at 50% 50%, rgba(34, 211, 238, 0.2), transparent 70%)',
+              'glow-gradient-green': 'radial-gradient(circle at 50% 50%, rgba(20, 241, 149, 0.15), transparent 70%)',
+              'glow-gradient-purple': 'radial-gradient(circle at 50% 50%, rgba(153, 69, 255, 0.15), transparent 70%)',
             },
             animation: {
               'marquee': 'marquee 60s linear infinite',

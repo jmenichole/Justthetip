@@ -1,8 +1,213 @@
-# JustTheTip 🤏💸
+# JustTheTip Smart Contract SDK ⚡
 
-> A self-custodial Discord crypto tipping bot — built for degenerates, by degenerates. Supports multiple cryptocurrencies with real blockchain transactions. Fast, flexible, and just the tip. So smooth you'll hardly feel it.
+> A developer-focused SDK for building non-custodial Discord bots on Solana. Enable tipping, airdrops, and token management through smart contracts without handling private keys.
 
-**⚠️ LEGAL DISCLAIMER: This bot is non-custodial and provided "as is" without warranties. Users are responsible for their own wallets and compliance with local laws. By using this bot, you agree to the [Terms of Service](TERMS.md) and [Privacy Policy](PRIVACY.md).**
+**🔥 NEW: Complete rewrite with smart contract architecture - no more custodial risks!**
+
+---
+
+## 🚀 Smart Contract Architecture
+
+### Traditional vs Smart Contract Approach
+
+| Traditional Bot (Custodial) | JustTheTip SDK (Non-custodial) |
+|----------------------------|--------------------------------|
+| Bot holds private keys     | Users control their own keys   |
+| Database balance tracking  | On-chain balance queries       |
+| Bot executes transfers     | Users sign transactions        |
+| Custody risk              | Zero custody risk              |
+
+### Core Benefits
+
+- **🔒 Non-custodial**: Users maintain full control of their funds
+- **⚡ Smart Contracts**: All transactions through Solana programs  
+- **🔗 PDAs**: Program Derived Addresses for advanced features
+- **🛠️ TypeScript SDK**: Fully typed with comprehensive documentation
+- **⚙️ Zero Private Keys**: Bot never handles sensitive information
+
+---
+
+## 📦 Quick Start
+
+### 1. Install Dependencies
+```bash
+npm install
+mkdir -p logs
+```
+
+### 2. Run Smart Contract SDK Example
+```bash
+npm run demo:sdk
+```
+
+### 3. Start Smart Contract Discord Bot
+```bash
+npm run start:smart-contract
+```
+
+---
+
+## 🏗️ Implementation Options
+
+### Option 1: Smart Contract Bot (Recommended)
+```bash
+node bot_smart_contract.js
+```
+- ✅ Non-custodial 
+- ✅ Smart contract powered
+- ✅ Zero private key handling
+- ✅ Program Derived Addresses
+
+### Option 2: Traditional Bot (Legacy)
+```bash
+node bot.js
+```
+- ⚠️ Custodial (holds funds)
+- ⚠️ Private key management required
+- ⚠️ Security risks
+
+---
+
+## 🔧 Smart Contract Commands
+
+### User Commands
+- `/register-wallet <address>` - Register Solana wallet for smart contracts
+- `/sc-tip @user <amount>` - Create smart contract tip transaction
+- `/sc-balance` - Check on-chain wallet balance
+- `/generate-pda` - Generate your Program Derived Address
+- `/sc-info` - View smart contract bot information
+
+### Key Features
+- **Wallet Registration**: Users register their Solana wallet addresses
+- **Smart Contract Tips**: Generate unsigned transactions for users to sign
+- **On-chain Balances**: Query live balances directly from Solana
+- **PDA Generation**: Create Program Derived Addresses for advanced features
+
+---
+
+## 🛠️ Developer SDK
+
+### Core SDK Usage
+```javascript
+import { JustTheTipSDK } from './contracts/sdk.js';
+
+// Initialize SDK
+const sdk = new JustTheTipSDK('https://api.mainnet-beta.solana.com');
+
+// Create tip instruction
+const tipInstruction = sdk.createTipInstruction(
+  senderWallet,
+  recipientWallet, 
+  0.1 // 0.1 SOL
+);
+
+// Generate PDA for Discord user
+const userPDA = await sdk.generateUserPDA('discord_user_id');
+```
+
+### Discord Bot Integration
+```javascript
+import { JustTheTipSmartBot } from './bot_smart_contract.js';
+
+const bot = new JustTheTipSmartBot();
+await bot.initialize();
+```
+
+---
+
+## 📚 Documentation
+
+### SDK Documentation
+- [Smart Contract SDK](./contracts/README.md) - Complete SDK documentation
+- [Example Usage](./contracts/example.js) - Working code examples
+- [Bot Implementation](./bot_smart_contract.js) - Full Discord bot example
+
+### Web Interface
+- Professional developer-focused theme
+- Smart contract architecture explanations  
+- Solana-focused branding and messaging
+- TypeScript SDK documentation
+
+---
+
+## 🔄 Migration Guide
+
+### From Custodial to Smart Contract
+
+1. **Users Register Wallets**
+   ```bash
+   /register-wallet YOUR_SOLANA_ADDRESS
+   ```
+
+2. **Replace Custodial Commands**
+   - `!tip` → `/sc-tip`
+   - `!balance` → `/sc-balance`  
+   - Database balances → On-chain queries
+
+3. **Smart Contract Architecture**
+   - No more private key management
+   - Users sign transactions in their wallets
+   - Bot generates transaction instructions only
+
+---
+
+## 🌟 Advanced Features
+
+### Program Derived Addresses
+```javascript
+// Generate unique PDA for each Discord user
+const userPDA = await sdk.generateUserPDA(discordUserId);
+```
+
+### Custom Smart Contract Instructions
+```javascript
+// Build custom instructions for advanced features
+const customInstruction = sdk.createCustomInstruction(params);
+```
+
+### Multi-Recipient Airdrops  
+```javascript
+// Create airdrop to multiple recipients
+const recipients = [
+  { pubkey: wallet1, amount: 0.1 },
+  { pubkey: wallet2, amount: 0.1 }
+];
+const instructions = sdk.createAirdropInstructions(sender, recipients);
+```
+
+---
+
+## 🔒 Security
+
+### Smart Contract Benefits
+- **No Private Key Storage**: Bot never handles private keys
+- **User-Controlled**: All transactions signed by users
+- **Transparent**: All transactions on Solana blockchain
+- **Auditable**: Smart contract code is verifiable
+
+### Network Fees
+- **Transaction Cost**: ~0.000005 SOL per transaction
+- **No Service Fees**: SDK usage is completely free
+- **User Pays**: Transaction fees paid by transaction signer
+
+---
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/smart-contracts`)
+3. Test smart contract implementation
+4. Submit pull request
+
+---
+
+## 📄 License
+
+MIT License - see [LICENSE](LICENSE) for details.
+
+---
+
+**Built with ❤️ for the Solana developer community**
 
 ---
 

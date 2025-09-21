@@ -7,12 +7,14 @@
   "homepage": "https://mischief-manager-inc.github.io/justthetipbot",
   "scripts": {
     "start": "node bot.js",
+    "start:smart-contract": "node bot_smart_contract.js",
     "test": "jest",
     "lint": "eslint .",
     "audit": "npm audit",
     "prepare": "husky install",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "deploy": "gh-pages -d build",
+    "demo:sdk": "node contracts/example.js"
   },
   "author": "",
   "license": "ISC",
