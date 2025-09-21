@@ -1,10 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
-    "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
-    "./**/*.{js,ts,jsx,tsx}",
-    "./components/**/*.{js,ts,jsx,tsx}",
     "./justthetip---external-wallet-helper/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
@@ -15,6 +12,10 @@ export default {
       colors: {
         'brand-dark': '#0A092B',
         'brand-card': '#101032',
+        'brand-border': '#1a1a2e',
+        'accent-primary': '#22d3ee',
+        'accent-secondary': '#a855f7',
+        'accent-tertiary': '#f59e0b',
       },
       backgroundImage: {
         'glow-gradient-purple': 'radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.2), transparent 70%)',
