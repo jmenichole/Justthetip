@@ -320,8 +320,8 @@ All commands use dropdown menus for currency selection (SOL, USDC, LTC)
 
 ```bash
 # Clone repository
-git clone https://github.com/Mischief-Manager-inc/justthetip.git
-cd justthetip
+git clone https://github.com/Mischief-Manager-inc/justthetipbot.git
+cd justthetipbot
 
 # Install dependencies
 npm install
@@ -355,7 +355,7 @@ SOLANA_RPC_URL=your_helius_rpc_endpoint
 - **[🛠️ Deployment Guide](DEPLOYMENT_GUIDE.md)** - Complete setup instructions
 - **[⚖️ Terms of Service](TERMS.md)** - Legal terms and user agreements
 - **[🔒 Privacy Policy](PRIVACY.md)** - Data handling and privacy information
-- **[📊 Full Documentation Site](https://mischief-manager-inc.github.io/justthetip/)** - Complete documentation
+- **[📊 Full Documentation Site](https://mischief-manager-inc.github.io/justthetipbot/)** - Complete documentation
 
 ---
 
@@ -376,8 +376,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Support & Community
 
 - **Discord:** [Join our community server](https://discord.gg/your-server)
-- **Issues:** [GitHub Issues](https://github.com/Mischief-Manager-inc/justthetip/issues)
-- **Documentation:** [Complete docs site](https://mischief-manager-inc.github.io/justthetip/)
+- **Issues:** [GitHub Issues](https://github.com/Mischief-Manager-inc/justthetipbot/issues)
+- **Documentation:** [Complete docs site](https://mischief-manager-inc.github.io/justthetipbot/)
 
 Built with ❤️ by degenerate developers, for degenerate Discord communities.
 
