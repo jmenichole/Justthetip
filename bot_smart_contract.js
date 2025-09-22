@@ -140,7 +140,7 @@ client.on(Events.InteractionCreate, async interaction => {
       const embed = new EmbedBuilder()
         .setTitle('✅ Wallet Registered')
         .setDescription(`Your Solana wallet has been registered for smart contract operations.\n\n**Address:** \`${address}\``)
-        .setColor(0x1abc9c);
+        .setColor(0x8b5cf6);
         
       await interaction.reply({ embeds: [embed], ephemeral: true });
       
@@ -194,7 +194,7 @@ client.on(Events.InteractionCreate, async interaction => {
           `2. Sign it in your Solana wallet (Phantom, Solflare, etc.)\n` +
           `3. Submit the signed transaction to the network`
         )
-        .setColor(0x9b59b6)
+        .setColor(0x3b82f6)
         .setFooter({ text: 'This is a non-custodial transaction. You control your keys!' });
         
       const transactionData = transaction.serialize({ requireAllSignatures: false });
@@ -226,7 +226,7 @@ client.on(Events.InteractionCreate, async interaction => {
           `**Balance:** ${balance.toFixed(6)} SOL\n\n` +
           `*This is your actual on-chain balance, queried directly from the Solana blockchain.*`
         )
-        .setColor(0x3498db);
+        .setColor(0x1e3a8a);
         
       const refreshButton = new ActionRowBuilder()
         .addComponents(
@@ -260,7 +260,7 @@ client.on(Events.InteractionCreate, async interaction => {
           `**Bump:** ${pda.bump}\n\n` +
           `*This is your unique Program Derived Address for advanced smart contract features.*`
         )
-        .setColor(0xe74c3c);
+        .setColor(0x2d1b69);
         
       await interaction.reply({ embeds: [embed], ephemeral: true });
       
@@ -280,7 +280,7 @@ client.on(Events.InteractionCreate, async interaction => {
           `• \`/generate-pda\` - Generate your PDA\n` +
           `• \`/sc-info\` - Show this information`
         )
-        .setColor(0xf1c40f);
+        .setColor(0x8b5cf6);
         
       await interaction.reply({ embeds: [embed], ephemeral: true });
     }
@@ -319,7 +319,7 @@ client.on(Events.InteractionCreate, async interaction => {
         `**Balance:** ${balance.toFixed(6)} SOL\n\n` +
         `*Balance updated from Solana blockchain*`
       )
-      .setColor(0x3498db)
+      .setColor(0x1e3a8a)
       .setFooter({ text: 'Last updated: ' + new Date().toLocaleString() });
       
     await interaction.update({ embeds: [embed] });
