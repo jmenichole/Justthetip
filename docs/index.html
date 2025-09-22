@@ -641,6 +641,39 @@
             opacity: 0.8;
         }
         
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 1rem 0;
+            flex-wrap: wrap;
+        }
+        
+        .footer-link {
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-link:hover {
+            color: #8b5cf6;
+        }
+        
+        .degen-love {
+            display: inline-block;
+            margin-top: 1rem;
+            color: #f1c40f;
+            text-decoration: none;
+            font-weight: 500;
+            transition: transform 0.2s ease;
+        }
+        
+        .degen-love:hover {
+            transform: scale(1.05);
+            color: #f39c12;
+        }
+        
         @media (max-width: 768px) {
             .hero h1 {
                 font-size: 2.5rem;
@@ -901,7 +934,15 @@
         <div class="container">
             <p>&copy; 2025 JustTheTip Bot. Making Discord tipping safe and easy with Solana smart contracts!</p>
             <p><strong>Remember:</strong> Always test with small amounts first. Your crypto, your choice!</p>
+            
+            <div class="footer-links">
+                <a href="terms.html" class="footer-link">Terms of Service</a>
+                <a href="privacy.html" class="footer-link">Privacy Policy</a>
+            </div>
+            
             <a href="https://github.com/jmenichole/Justthetip" class="github-link">🔗 View Source Code on GitHub</a>
+            
+            <a href="https://github.com/jmenichole" class="degen-love">made for degens by degens ❤️</a>
         </div>
     </footer>
 
