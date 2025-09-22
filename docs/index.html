@@ -555,6 +555,70 @@
             font-weight: 600;
         }
         
+        /* Launch Info Section */
+        .launch-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+        
+        .launch-card {
+            background: rgba(30, 58, 138, 0.6);
+            padding: 2rem;
+            border-radius: 15px;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .launch-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(59, 130, 246, 0.2);
+        }
+        
+        .launch-icon {
+            font-size: 3rem;
+            display: block;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .launch-card h3 {
+            color: #8b5cf6;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+        
+        .launch-card p {
+            color: #e2e8f0;
+            line-height: 1.6;
+        }
+        
+        .early-access {
+            background: rgba(139, 92, 246, 0.2);
+            padding: 3rem;
+            border-radius: 20px;
+            border: 2px solid rgba(139, 92, 246, 0.4);
+            text-align: center;
+            margin-top: 3rem;
+        }
+        
+        .early-access h3 {
+            color: #8b5cf6;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .early-access p {
+            color: #e2e8f0;
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+        }
+        
         footer {
             background: rgba(15, 23, 42, 0.9);
             backdrop-filter: blur(20px);
@@ -797,38 +861,36 @@
 
             <!-- Community Section -->
             <section class="community" id="community">
-                <h2>Join the Community!</h2>
-                <div class="stats-grid">
-                    <div class="stat-item">
-                        <div class="stat-number">5K+</div>
-                        <div class="stat-label">Discord Users</div>
+                <h2>Coming Soon to Discord!</h2>
+                <div class="launch-info">
+                    <div class="launch-card">
+                        <span class="launch-icon">🚀</span>
+                        <h3>Ready to Launch</h3>
+                        <p>JustTheTip is currently in final development and will be launching soon for Discord communities.</p>
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-number">$500K+</div>
-                        <div class="stat-label">Tips Sent</div>
+                    <div class="launch-card">
+                        <span class="launch-icon">🔒</span>
+                        <h3>Security First</h3>
+                        <p>Built with Solana smart contracts from day one - no custodial risks, ever.</p>
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-number">100+</div>
-                        <div class="stat-label">Discord Servers</div>
+                    <div class="launch-card">
+                        <span class="launch-icon">⚡</span>
+                        <h3>Fast & Cheap</h3>
+                        <p>Powered by Solana's lightning-fast blockchain for instant, low-cost transactions.</p>
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-number">99.9%</div>
-                        <div class="stat-label">Uptime</div>
+                    <div class="launch-card">
+                        <span class="launch-icon">🎁</span>
+                        <h3>Community Features</h3>
+                        <p>Tipping, airdrops, and balance tracking designed for Discord communities.</p>
                     </div>
                 </div>
                 
-                <div class="testimonials">
-                    <div class="testimonial">
-                        <div class="quote">"Finally, a bot that doesn't hold my crypto! Smart contracts make it so much safer."</div>
-                        <div class="author">- CryptoPro2024</div>
-                    </div>
-                    <div class="testimonial">
-                        <div class="quote">"Love tipping my gaming buddies after good matches. Solana makes it super fast!"</div>
-                        <div class="author">- GameMaster99</div>
-                    </div>
-                    <div class="testimonial">
-                        <div class="quote">"The airdrops feature is perfect for our community events. Everyone loves it!"</div>
-                        <div class="author">- DiscordMod</div>
+                <div class="early-access">
+                    <h3>Get Early Access</h3>
+                    <p>Be among the first to try JustTheTip when we launch!</p>
+                    <div class="cta-buttons">
+                        <a href="#" class="btn btn-primary">Join Waitlist</a>
+                        <a href="https://github.com/jmenichole/Justthetip" class="btn btn-secondary">View Source Code</a>
                     </div>
                 </div>
             </section>
