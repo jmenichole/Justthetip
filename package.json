@@ -2,7 +2,7 @@
   "name": "justthetip",
   "version": "1.0.0",
   "type": "module",
-  "description": "A secure multi-coin Discord tip bot",
+  "description": "Professional Solana Smart Contract SDK for enterprise Discord bot development",
   "main": "bot.js",
   "homepage": "https://jmenichole.github.io/Justthetip",
   "scripts": {
