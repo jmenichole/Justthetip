@@ -1,4 +1,11 @@
-# JustTheTip Smart Contract SDK ⚡
+# JustTheTip - Discord Crypto Tipping Bot 💰
+
+## 🌟 **[➤ Visit Our User-Friendly Website](https://jmenichole.github.io/Justthetip/)** ⭐ 
+> **The easiest way to tip crypto in Discord! Safe, secure, and user-friendly.**
+
+---
+
+## For Developers: Smart Contract SDK ⚡
 
 > A developer-focused SDK for building non-custodial Discord bots on Solana. Enable tipping, airdrops, and token management through smart contracts without handling private keys.
 
@@ -117,15 +124,18 @@ await bot.initialize();
 
 ## 📚 Documentation
 
-### SDK Documentation
+### 🌐 **[User-Friendly Landing Page](https://jmenichole.github.io/Justthetip/)** 
+> **Perfect for end-users** - Beautiful, easy-to-understand guide with no technical jargon
+
+### SDK Documentation (For Developers)
 - [Smart Contract SDK](./contracts/README.md) - Complete SDK documentation
 - [Example Usage](./contracts/example.js) - Working code examples
 - [Bot Implementation](./bot_smart_contract.js) - Full Discord bot example
 
-### Web Interface
-- Professional developer-focused theme
-- Smart contract architecture explanations  
-- Solana-focused branding and messaging
+### Technical Implementation
+- Professional developer-focused architecture
+- Smart contract implementation details  
+- Solana-focused development guide
 - TypeScript SDK documentation
 
 ---
@@ -351,11 +361,11 @@ SOLANA_RPC_URL=your_helius_rpc_endpoint
 
 ## Documentation
 
+- **[🌐 User-Friendly Website](https://jmenichole.github.io/Justthetip/)** - Beautiful landing page for end users
 - **[🚀 Recent Updates](RECENT_UPDATES.md)** - Latest features and changes
-- **[🛠️ Deployment Guide](DEPLOYMENT_GUIDE.md)** - Complete setup instructions
+- **[🛠️ Deployment Guide](MAINNET_DEPLOYMENT_GUIDE.md)** - Complete setup instructions
 - **[⚖️ Terms of Service](terms.md)** - Legal terms and user agreements
 - **[🔒 Privacy Policy](privacy.md)** - Data handling and privacy information
-- **[📊 Full Documentation Site](https://jmenichole.github.io/Justthetip/)** - Complete documentation
 
 ---
 
@@ -375,8 +385,8 @@ This project is licensed under the JustTheTip Custom License (based on MIT with 
 
 ## Support & Community
 
+- **[🌐 User Guide & Info](https://jmenichole.github.io/Justthetip/)** - Complete user-friendly documentation
 - **Issues:** [GitHub Issues](https://github.com/jmenichole/Justthetip/issues)
-- **Documentation:** [Complete docs site](https://jmenichole.github.io/Justthetip/)
 
 Built with ❤️ by degenerate developers, for degenerate Discord communities.
 
