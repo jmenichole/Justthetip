@@ -1,7 +1,8 @@
 {
-  "SOL": "",
-  "USDC": "",
-  "LTC": "",
-  "BTC": "",
-  "BCH": ""
+  "SOL": "H8m2gN2GEPSbk4u6PoWa8JYkEZRJWH45DyWjbAm76uCX",
+  "USDC": "H8m2gN2GEPSbk4u6PoWa8JYkEZRJWH45DyWjbAm76uCX",
+  "ETH": "0x1DA15CdFc26EaF591785b540f972c42877058da0",
+  "XRP": "r4XKCn5SSFyMFBNR8L3nRW84k86rEbbabk",
+  "TRX": "THWvbdeep8usa1asaK8QqjJNMEVrSCETah",
+  "LTC": "LP7AApgqKnJhPQgpBKFiHzPJSNXP7ygMDQ"
 }
