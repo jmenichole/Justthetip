@@ -1,0 +1,23 @@
+[package]
+name = "justthetip-program"
+version = "0.1.0"
+edition = "2021"
+description = "JustTheTip Solana smart contract for non-custodial tipping"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "justthetip_program"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+
+[dependencies]
+solana-program = "1.18"
+spl-token = { version = "4.0", features = ["no-entrypoint"] }
+borsh = "0.10"
+hex = "0.4"
+spl-associated-token-account = { version = "2.3", features = ["no-entrypoint"] }

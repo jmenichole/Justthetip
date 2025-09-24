@@ -8,7 +8,7 @@ import * as db from './db/database.cjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-config({ path: join(__dirname, '.env.devnet') });
+config({ path: join(__dirname, '.env.testnet') });
 
 /**
  * JustTheTip Smart Contract Discord Bot

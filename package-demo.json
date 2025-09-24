@@ -1,0 +1,17 @@
+{
+  "name": "justthetip-demo",
+  "version": "1.0.0",
+  "description": "A Discord cryptocurrency tip bot",
+  "main": "bot-demo.js",
+  "scripts": {
+    "start": "node bot-demo.js",
+    "dev": "node bot-demo.js",
+    "test": "echo \"No tests specified\""
+  },
+  "dependencies": {
+    "discord.js": "^14.14.1",
+    "dotenv": "^16.0.0"
+  },
+  "author": "Your Name",
+  "license": "MIT"
+}

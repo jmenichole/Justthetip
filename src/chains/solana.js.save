@@ -1,0 +1,37 @@
+const solanaWeb3 = require('@solana/web3.js');
+require('dotenv').config();
+
+const secret = Uint8Array.from(JSON.parse(process.env.SOL_PRIVATE_KEY));
+const keypair = solanaWeb3.Keypair.fromSecretKey(secret);
+const connection = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl("mainnet-beta"));
+
+async function getSolBalance() {
+  const balance = await connection.getBalance(keypair.publicKey);
+  return balance / solanaWeb3.LAMPORTS_PER_SOL;
+}
+
+async function sendSol(to, amount) {
+  const tx = await solanaWeb3.sendAndConfirmTransaction(
+    connection,
+    new solanaWeb3.Transaction().add(
+      solanaWeb3.SystemProgram.transfer({
+        fromPubkey: keypair.publicKey,
+        toPubkey: new solanaWeb3.PublicKey(to),
+        lamports: amount * solanaWeb3.LAMPORTS_PER_SOL
+      })
+    ),
+    [keypair]
+  );
+  return tx;
+}
+
+module.exports = { getSolBalance, sendSol };
+^Ge
+
+node bot.js
+
+^Ex
+git pull
+
+^ex
+

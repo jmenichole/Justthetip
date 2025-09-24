@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solana Wallet Adapter Demo</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/@solana/wallet-adapter-react-ui/styles.css" />
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
+        const {
+            ConnectionProvider,
+            WalletProvider,
+            useConnection,
+            useWallet
+        } = window['@solana/wallet-adapter-react'];
+        const {
+            WalletModalProvider,
+            WalletMultiButton
+        } = window['@solana/wallet-adapter-react-ui'];
+        const {
+            clusterApiUrl,
+            LAMPORTS_PER_SOL,
+            Transaction,
+            PublicKey,
+            SystemProgram
+        } = window['@solana/web3.js'];
+
+        // Balance Display Component
+        const BalanceDisplay = () => {
+            const [balance, setBalance] = useState(0);
+            const { connection } = useConnection();
+            const { publicKey } = useWallet();
+
+            useEffect(() => {
+                const updateBalance = async () => {
+                    if (!connection || !publicKey) {
+                        console.error('Wallet not connected or connection unavailable');
+                        return;
+                    }
+
+                    try {
+                        connection.onAccountChange(
+                            publicKey,
+                            (updatedAccountInfo) => {
+                                setBalance(updatedAccountInfo.lamports / LAMPORTS_PER_SOL);
+                            },
+                            'confirmed'
+                        );
+
+                        const accountInfo = await connection.getAccountInfo(publicKey);
+
+                        if (accountInfo) {
+                            setBalance(accountInfo.lamports / LAMPORTS_PER_SOL);
+                        } else {
+                            throw new Error('Account info not found');
+                        }
+                    } catch (error) {
+                        console.error('Failed to retrieve account info:', error);
+                    }
+                };
+
+                updateBalance();
+            }, [connection, publicKey]);
+
+            return React.createElement('div', { className: 'bg-green-50 p-4 rounded-lg mb-4' },
+                React.createElement('h3', { className: 'font-semibold mb-2' }, 'Account Balance'),
+                React.createElement('p', { className: 'text-lg' },
+                    publicKey ? `${balance.toFixed(4)} SOL` : 'Connect wallet to view balance'
+                ),
+                publicKey && React.createElement('p', { className: 'text-sm text-gray-600 mt-1' },
+                    `Address: ${publicKey.toString().slice(0, 8)}...${publicKey.toString().slice(-8)}`
+                )
+            );
+        };
+
+        // Transaction Sender Component
+        const TransactionSender = () => {
+            const { publicKey, sendTransaction } = useWallet();
+            const { connection } = useConnection();
+            const [recipient, setRecipient] = useState('');
+            const [amount, setAmount] = useState('');
+            const [isLoading, setIsLoading] = useState(false);
+
+            const sendSol = async (event) => {
+                event.preventDefault();
+
+                if (!publicKey) {
+                    alert('Wallet not connected');
+                    return;
+                }
+
+                if (!recipient || !amount) {
+                    alert('Please fill in all fields');
+                    return;
+                }
+
+                setIsLoading(true);
+
+                try {
+                    const recipientPubKey = new PublicKey(recipient);
+                    const lamports = parseFloat(amount) * LAMPORTS_PER_SOL;
+
+                    const transaction = new Transaction();
+                    const sendSolInstruction = SystemProgram.transfer({
+                        fromPubkey: publicKey,
+                        toPubkey: recipientPubKey,
+                        lamports: lamports,
+                    });
+
+                    transaction.add(sendSolInstruction);
+
+                    const signature = await sendTransaction(transaction, connection);
+                    console.log(`Transaction signature: ${signature}`);
+
+                    alert(`Transaction sent! Signature: ${signature}`);
+
+                    setRecipient('');
+                    setAmount('');
+
+                } catch (error) {
+                    console.error('Transaction failed', error);
+                    alert(`Transaction failed: ${error.message || 'Unknown error'}`);
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+
+            return React.createElement('div', { className: 'bg-blue-50 p-4 rounded-lg' },
+                React.createElement('h3', { className: 'font-semibold mb-2' }, 'Send SOL'),
+                React.createElement('form', { onSubmit: sendSol, className: 'space-y-3' },
+                    React.createElement('div', null,
+                        React.createElement('label', { className: 'block text-sm font-medium mb-1' }, 'Recipient Address'),
+                        React.createElement('input', {
+                            type: 'text',
+                            value: recipient,
+                            onChange: (e) => setRecipient(e.target.value),
+                            placeholder: 'Enter Solana address',
+                            className: 'w-full p-2 border rounded',
+                            disabled: !publicKey
+                        })
+                    ),
+                    React.createElement('div', null,
+                        React.createElement('label', { className: 'block text-sm font-medium mb-1' }, 'Amount (SOL)'),
+                        React.createElement('input', {
+                            type: 'number',
+                            step: '0.000001',
+                            value: amount,
+                            onChange: (e) => setAmount(e.target.value),
+                            placeholder: '0.1',
+                            className: 'w-full p-2 border rounded',
+                            disabled: !publicKey
+                        })
+                    ),
+                    React.createElement('button', {
+                        type: 'submit',
+                        disabled: !publicKey || isLoading,
+                        className: 'w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed'
+                    }, isLoading ? 'Sending...' : publicKey ? 'Send SOL' : 'Connect Wallet First')
+                )
+            );
+        };
+
+        // Main App Component
+        const App = () => {
+            const endpoint = useMemo(() => clusterApiUrl('devnet'), []);
+            const wallets = useMemo(() => [], []);
+
+            return React.createElement(ConnectionProvider, { endpoint },
+                React.createElement(WalletProvider, { wallets },
+                    React.createElement(WalletModalProvider, null,
+                        React.createElement('div', { className: 'min-h-screen bg-gray-100 p-8' },
+                            React.createElement('div', { className: 'max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-6' },
+                                React.createElement('h1', { className: 'text-3xl font-bold text-center mb-8' },
+                                    'Solana Wallet Adapter Demo'
+                                ),
+                                React.createElement('div', { className: 'text-center mb-8' },
+                                    React.createElement(WalletMultiButton)
+                                ),
+                                React.createElement('div', { className: 'grid md:grid-cols-2 gap-6 mb-6' },
+                                    React.createElement(BalanceDisplay),
+                                    React.createElement(TransactionSender)
+                                ),
+                                React.createElement('div', { className: 'text-sm text-gray-600' },
+                                    React.createElement('div', { className: 'bg-yellow-50 p-4 rounded-lg mb-4' },
+                                        React.createElement('h3', { className: 'font-semibold mb-2' }, 'How it works:'),
+                                        React.createElement('ol', { className: 'text-left space-y-1 list-decimal list-inside' },
+                                            React.createElement('li', null, 'Connect your Solana wallet using the button above'),
+                                            React.createElement('li', null, 'View your account balance in real-time'),
+                                            React.createElement('li', null, 'Send SOL to any Solana address'),
+                                            React.createElement('li', null, 'Transactions are signed in your wallet')
+                                        )
+                                    ),
+                                    React.createElement('div', { className: 'bg-purple-50 p-4 rounded-lg' },
+                                        React.createElement('h3', { className: 'font-semibold mb-2' }, 'Supported Wallets:'),
+                                        React.createElement('p', { className: 'mb-2' },
+                                            'All wallets that support the Wallet Standard work automatically:'
+                                        ),
+                                        React.createElement('ul', { className: 'text-left space-y-1' },
+                                            React.createElement('li', null, '• Phantom'),
+                                            React.createElement('li', null, '• Solflare'),
+                                            React.createElement('li', null, '• Backpack'),
+                                            React.createElement('li', null, '• Trust Wallet'),
+                                            React.createElement('li', null, '• And many more...')
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
+            );
+        };
+
+        // Render the app
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(React.createElement(App));
+    </script>
+
+    <!-- Load the wallet adapter scripts -->
+    <script src="https://unpkg.com/@solana/wallet-adapter-base@0.9.23/lib/index.iife.js"></script>
+    <script src="https://unpkg.com/@solana/wallet-adapter-react@0.15.35/lib/index.iife.js"></script>
+    <script src="https://unpkg.com/@solana/wallet-adapter-react-ui@0.9.35/lib/index.iife.js"></script>
+    <script src="https://unpkg.com/@solana/web3.js@1.87.6/lib/index.iife.js"></script>
+</body>
+</html>

@@ -1,0 +1,165 @@
+const { MongoClient, ObjectId } = require('mongodb');
+
+const uri = process.env.MONGO_URI || 'mongodb+srv://jchapman7:b6lJKtXh4aG7BaZj@justhetip.0z3jtr.mongodb.net/';
+let client;
+let db;
+
+// Initialize connection
+async function connectDB() {
+  try {
+    client = new MongoClient(uri);
+    await client.connect();
+    db = client.db('justthetip');
+    console.log('Connected successfully to MongoDB');
+    return db;
+  } catch (error) {
+    console.error('Failed to connect to MongoDB:', error);
+    throw error;
+  }
+}
+
+function getUsersCollection() {
+  return db.collection('users');
+}
+
+function getAirdropsCollection() {
+  return db.collection('airdrops');
+}
+
+function getHistoryCollection() {
+  return db.collection('history');
+}
+
+/**
+ * Retrieves all balances for a user as an object { COIN: amount, ... }
+ * @param {string} userId - The Discord user's ID.
+ * @returns {Promise<object>} Balances object (e.g., { SOL: 1.23, USDC: 0.5 })
+ */
+async function getBalances(userId) {
+  const users = getUsersCollection();
+  const user = await users.findOne({ userId });
+  return user && user.balances ? user.balances : {};
+}
+
+/**
+ * Atomically credits a user's balance for a given coin.
+ * @param {string} userId - The Discord user's ID.
+ * @param {number} amount - The amount to credit (can be negative to debit).
+ * @param {string} coin - The coin ticker (e.g., 'SOL', 'USDC').
+ * @returns {Promise<void>}
+ */
+async function creditBalance(userId, amount, coin) {
+  const users = getUsersCollection();
+  await users.updateOne(
+    { userId },
+    { $inc: { [`balances.${coin}`]: amount } },
+    { upsert: true }
+  );
+}
+
+/**
+ * Gets a user's balance for a specific coin.
+ * @param {string} userId - The Discord user's ID.
+ * @param {string} coin - The coin ticker (e.g., 'SOL', 'USDC').
+ * @returns {Promise<number>} The balance amount.
+ */
+async function getBalance(userId, coin) {
+  const balances = await getBalances(userId);
+  return balances[coin] || 0;
+}
+
+/**
+ * Atomically debits a user's balance for a given coin.
+ * @param {string} userId - The Discord user's ID.
+ * @param {number} amount - The amount to debit.
+ * @param {string} coin - The coin ticker (e.g., 'SOL', 'USDC').
+ * @returns {Promise<void>}
+ */
+async function debitBalance(userId, amount, coin) {
+  return creditBalance(userId, -amount, coin);
+}
+
+async function claimAirdrop(airdropId, userId, share) {
+  const airdrops = getAirdropsCollection();
+  // Atomically add user to claimedBy if not present and not ended
+  const result = await airdrops.findOneAndUpdate(
+    {
+      _id: new ObjectId(airdropId), // Fixed: Added 'new' keyword
+      ended: false,
+      [`claimedBy`]: { $ne: userId }
+    },
+    {
+      $addToSet: { claimedBy: userId },
+      $inc: { claimCount: 1 }
+    },
+    { returnDocument: 'after' }
+  );
+
+  if (!result.value) {
+    // Either airdrop ended, doesn't exist, or user already claimed
+    const existingAirdrop = await airdrops.findOne({ _id: new ObjectId(airdropId) });
+    if (!existingAirdrop) {
+      return { success: false, reason: 'Airdrop not found' };
+    }
+    if (existingAirdrop.ended) {
+      return { success: false, reason: 'Airdrop has ended' };
+    }
+    if (existingAirdrop.claimedBy && existingAirdrop.claimedBy.includes(userId)) {
+      return { success: false, alreadyClaimed: true };
+    }
+  }
+
+  // Check if max users reached after this claim
+  if (result.value && result.value.claimCount >= result.value.maxUsers) {
+    await airdrops.updateOne({ _id: new ObjectId(airdropId) }, { $set: { ended: true } }); // Fixed: Added 'new' keyword
+  }
+
+  return { success: true };
+}
+
+async function endAirdrop(airdropId) {
+  const airdrops = getAirdropsCollection();
+  await airdrops.updateOne({ _id: new ObjectId(airdropId) }, { $set: { ended: true } }); // Fixed: Added 'new' keyword
+}
+
+async function createAirdrop(airdropData) {
+  const airdrops = getAirdropsCollection();
+  const result = await airdrops.insertOne(airdropData);
+  return result.insertedId;
+}
+
+async function getAirdrop(airdropId) {
+  const airdrops = getAirdropsCollection();
+  return await airdrops.findOne({ _id: new ObjectId(airdropId) }); // Fixed: Added 'new' keyword
+}
+
+async function getLatestActiveAirdrop() {
+  const airdrops = getAirdropsCollection();
+  return await airdrops.findOne({ ended: false }, { sort: { created: -1 } });
+}
+
+async function addHistory(fromUserId, toUserId, amount, coin, type = 'tip') {
+  const history = getHistoryCollection();
+  await history.insertOne({
+    fromUserId,
+    toUserId,
+    amount,
+    coin,
+    type,
+    timestamp: new Date()
+  });
+}
+
+module.exports = {
+  connectDB,
+  getBalances,
+  creditBalance,
+  getBalance,
+  debitBalance,
+  addHistory,
+  createAirdrop,
+  claimAirdrop,
+  endAirdrop,
+  getAirdrop,
+  getLatestActiveAirdrop,
+};

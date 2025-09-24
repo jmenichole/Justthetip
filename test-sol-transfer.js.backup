@@ -1,0 +1,78 @@
+#!/usr/bin/env node
+
+/**
+ * JustTheTip SOL Transfer Test Script
+ * Tests sending SOL between devnet wallets
+ */
+
+require('dotenv').config();
+const { Connection, PublicKey, SystemProgram, Transaction, sendAndConfirmTransaction, Keypair } = require('@solana/web3.js');
+
+async function testSOLTransfer() {
+  console.log('🧪 JustTheTip SOL Transfer Test');
+  console.log('================================');
+
+  const connection = new Connection(process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com');
+
+  // Use fee wallet as sender (has test SOL)
+  const senderAddress = process.env.FEE_PAYMENT_SOL_ADDRESS;
+  if (!senderAddress) {
+    console.error('❌ FEE_PAYMENT_SOL_ADDRESS not set in .env');
+    return;
+  }
+
+  const senderPubkey = new PublicKey(senderAddress);
+
+  // Create a test recipient wallet
+  const recipientKeypair = Keypair.generate();
+  const recipientPubkey = recipientKeypair.publicKey;
+
+  console.log('📤 Sender Wallet:', senderAddress);
+  console.log('📥 Test Recipient:', recipientPubkey.toString());
+  console.log('💰 Amount: 0.01 SOL');
+
+  try {
+    // Check sender balance
+    const senderBalance = await connection.getBalance(senderPubkey);
+    console.log('📊 Sender Balance:', (senderBalance / 1000000000).toFixed(4), 'SOL');
+
+    if (senderBalance < 10000000) { // 0.01 SOL
+      console.log('❌ Insufficient balance for test transaction');
+      return;
+    }
+
+    // Create transfer transaction
+    const transferInstruction = SystemProgram.transfer({
+      fromPubkey: senderPubkey,
+      toPubkey: recipientPubkey,
+      lamports: 10000000 // 0.01 SOL
+    });
+
+    const transaction = new Transaction().add(transferInstruction);
+    const { blockhash } = await connection.getRecentBlockhash();
+    transaction.recentBlockhash = blockhash;
+    transaction.feePayer = senderPubkey;
+
+    console.log('✅ Transaction created successfully!');
+    console.log('');
+    console.log('🎯 To test with the Discord bot:');
+    console.log('1. Start bot: npm start');
+    console.log('2. Register sender: /register-wallet address:' + senderAddress);
+    console.log('3. Register recipient: /register-wallet address:' + recipientPubkey.toString());
+    console.log('4. Send tip: /sc-tip @recipient 0.01');
+    console.log('5. Copy the transaction data from Discord');
+    console.log('6. Sign and submit the transaction');
+
+    // Serialize transaction for display
+    const serialized = transaction.serialize({ requireAllSignatures: false });
+    const base64 = serialized.toString('base64');
+    console.log('');
+    console.log('📋 Transaction Data (Base64):');
+    console.log(base64);
+
+  } catch (error) {
+    console.error('❌ Error:', error.message);
+  }
+}
+
+testSOLTransfer();
