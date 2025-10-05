@@ -284,13 +284,17 @@ All commands use dropdown menus for currency selection (SOL, USDC, LTC)
 
 - **Backend:** Node.js + Express
 - **Discord:** Discord.js v14 with Slash Commands
-- **Database:** MongoDB with X.509 Authentication
+- **Database:** PostgreSQL with ACID transactions (migrated from MongoDB for real money compliance)
 - **Blockchain:** 
   - Solana Web3.js + SPL Token
   - Litecoin Core + BitcoinJS
   - Helius RPC for Solana optimization
 - **Deployment:** PM2 Process Manager
-- **Security:** Certificate-based authentication, encrypted connections
+- **Security:** 
+  - ACID-compliant transactions for financial operations
+  - Indexed queries for high performance
+  - Secrets management ready (AWS Secrets Manager / HashiCorp Vault compatible)
+  - Encrypted connections
 
 ---
 
@@ -341,11 +345,16 @@ npm start
 
 ```env
 BOT_TOKEN=your_discord_bot_token
+DATABASE_URL=postgresql://username:password@host:port/justthetip
+SOLANA_RPC_URL=your_helius_rpc_endpoint
+
+# ⚠️ SECURITY WARNING: For production, use AWS Secrets Manager or HashiCorp Vault
+# Development only (NOT FOR PRODUCTION with real money):
 SOL_PRIVATE_KEY=[64,byte,array,format]
 LTC_WALLET_KEY=your_litecoin_private_key
-MONGODB_URI=your_mongodb_connection_string
-SOLANA_RPC_URL=your_helius_rpc_endpoint
 ```
+
+**Security Note:** Private keys should NEVER be stored in environment variables for production deployments handling real money. Use secure secrets management services like AWS Secrets Manager, HashiCorp Vault, Azure Key Vault, or Google Cloud Secret Manager.
 
 ---
 

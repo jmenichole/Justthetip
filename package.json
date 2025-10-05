@@ -1,7 +1,6 @@
 {
   "name": "justthetip",
   "version": "1.0.0",
-  "type": "module",
   "description": "Professional Solana Smart Contract SDK for enterprise Discord bot development",
   "main": "bot.js",
   "homepage": "https://jmenichole.github.io/Justthetip",
@@ -38,6 +37,7 @@
     "helmet": "^7.1.0",
     "litecore-lib": "^0.13.22",
     "mongodb": "^6.19.0",
+    "pg": "^8.16.3",
     "pm2": "^6.0.10",
     "rate-limiter-flexible": "^4.0.0",
     "react": "^19.1.1",

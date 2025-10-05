@@ -1,5 +1,32 @@
 # Recent Updates 🚀
 
+## January 2025 - PostgreSQL Migration & Security Enhancement
+
+### 🏦 ACID-Compliant Database Migration
+- **Migrated from MongoDB to PostgreSQL** for real money operations
+- **ACID Transactions**: All financial operations now use atomic transactions
+- **Critical Indexes**: Optimized queries with indexes on user_id, currency, and transaction fields
+- **Audit Trail**: Complete transaction logging for compliance and debugging
+
+### 🔒 Enhanced Security Architecture
+- **Secrets Management Ready**: Added documentation for AWS Secrets Manager / HashiCorp Vault integration
+- **Private Key Security**: Clear warnings and best practices for production deployments
+- **Connection Pooling**: Efficient database connection management
+- **SSL/TLS Support**: Secure database connections for production environments
+
+### 📊 Database Schema Improvements
+- **Proper Decimal Handling**: NUMERIC(20, 8) for precise financial calculations
+- **Foreign Key Constraints**: Data integrity across all tables
+- **Auto-updating Timestamps**: Automatic updated_at tracking
+- **Wallet Registration Table**: Dedicated table for user wallet addresses
+
+### 📚 Documentation
+- **[PostgreSQL Migration Guide](POSTGRESQL_MIGRATION.md)**: Complete migration documentation
+- **Security Best Practices**: Production-ready secrets management patterns
+- **Schema Documentation**: Full database schema with index explanations
+
+---
+
 ## September 13, 2025 - Major UX Improvements
 
 ### 💵 Dollar-Based Airdrops
