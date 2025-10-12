@@ -1,4 +1,19 @@
-// Solana helper functions for JustTheTip bot
+/**
+ * JustTheTip - Solana Helper Module
+ * Solana blockchain helper functions for JustTheTip bot
+ * 
+ * Copyright (c) 2025 JustTheTip Bot
+ * 
+ * This file is part of JustTheTip.
+ * 
+ * Licensed under the JustTheTip Custom License (Based on MIT).
+ * See LICENSE file in the project root for full license information.
+ * 
+ * SPDX-License-Identifier: MIT
+ * 
+ * This software may not be sold commercially without permission.
+ */
+
 const { Connection, PublicKey } = require('@solana/web3.js');
 
 function createSolanaPayUrl(recipient, amount, label, message) {
