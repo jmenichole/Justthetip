@@ -1,5 +1,18 @@
-// JustTheTip Smart Contract Discord Bot
-// Non-custodial implementation using Solana smart contracts
+/**
+ * JustTheTip - Smart Contract Discord Bot
+ * Non-custodial implementation using Solana smart contracts
+ * 
+ * Copyright (c) 2025 JustTheTip Bot
+ * 
+ * This file is part of JustTheTip.
+ * 
+ * Licensed under the JustTheTip Custom License (Based on MIT).
+ * See LICENSE file in the project root for full license information.
+ * 
+ * SPDX-License-Identifier: MIT
+ * 
+ * This software may not be sold commercially without permission.
+ */
 
 const { Client, GatewayIntentBits, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Events, REST, Routes } = require('discord.js');
 require('dotenv-safe').config();
