@@ -1,5 +1,7 @@
 # 🤖 Discord Bot 24/7 Deployment to Railway
 
+> **📖 Configuration Reference:** See [RAILWAY_CONFIG_GUIDE.md](./RAILWAY_CONFIG_GUIDE.md) for detailed information about Railway configuration files and multi-service setup. Also check [railway-bot.README.md](./railway-bot.README.md) for bot-specific configuration details.
+
 ## 🎯 Quick Setup Steps
 
 ### 1. Login to Railway
@@ -79,8 +81,14 @@ In Railway project settings:
 
 ## 🔧 Configuration Files
 
-### `railway-bot.json` ✅ Created
-Tells Railway to:
+### `railway-bot.json` ✅ Reference Configuration
+This is a **reference file** for bot deployment. Railway will use the default `railway.json` (API server) unless you:
+- Override start command in Railway dashboard to `node bot.js`, OR
+- Deploy as a separate service with custom settings
+
+See [railway-bot.README.md](./railway-bot.README.md) for detailed usage instructions.
+
+Configuration includes:
 - Use `node bot.js` as start command
 - Auto-restart on failures
 - Use npm install for dependencies
