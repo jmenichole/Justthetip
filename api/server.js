@@ -6,7 +6,7 @@
 const express = require('express');
 const cors = require('cors');
 const { Connection, PublicKey, Keypair } = require('@solana/web3.js');
-const { Metaplex, keypairIdentity, bundlrStorage } = require('@metaplex-foundation/js');
+const { Metaplex, keypairIdentity, irysStorage } = require('@metaplex-foundation/js');
 const nacl = require('tweetnacl');
 const bs58 = require('bs58').default; // Fix: Use .default export
 const { MongoClient } = require('mongodb');
@@ -89,7 +89,7 @@ async function initializeSolana() {
         
         metaplex = Metaplex.make(connection)
             .use(keypairIdentity(mintAuthority))
-            .use(bundlrStorage());
+            .use(irysStorage());
         
         console.log('✅ Solana connection initialized');
         console.log('📍 Mint Authority:', mintAuthority.publicKey.toString());
