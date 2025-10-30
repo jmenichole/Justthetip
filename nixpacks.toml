@@ -1,3 +1,7 @@
+# Nixpacks Configuration for Railway Deployment
+# This configures the build process for the API Server
+# For Discord Bot deployment, override start command in Railway dashboard
+
 [phases.install]
 cmds = ["npm install"]
 
