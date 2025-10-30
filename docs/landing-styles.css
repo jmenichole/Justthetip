@@ -642,6 +642,20 @@ body {
     font-size: 0.75rem;
 }
 
+.footer-degen-link {
+    margin-top: 1rem;
+}
+
+.footer-degen-link a {
+    color: #a78bfa;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.footer-degen-link a:hover {
+    color: #c4b5fd;
+}
+
 /* Modal */
 .modal {
     display: none;
