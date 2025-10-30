@@ -5,12 +5,12 @@
   "main": "bot.js",
   "homepage": "https://jmenichole.github.io/Justthetip",
   "scripts": {
-    "start": "node bot.js",
+    "start": "node api/server.js",
+    "start:bot": "node bot.js",
     "start:smart-contract": "node bot_smart_contract.js",
     "test": "jest",
     "lint": "eslint .",
     "audit": "npm audit",
-    "prepare": "husky install",
     "demo:sdk": "node contracts/example.js"
   },
   "author": "",
