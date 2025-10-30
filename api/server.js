@@ -70,14 +70,22 @@ async function initializeDatabase() {
 async function initializeSolana() {
     try {
         connection = new Connection(CONFIG.SOLANA_RPC_URL, 'confirmed');
+        console.log('✅ Solana RPC connected:', CONFIG.SOLANA_RPC_URL);
         
         if (!CONFIG.MINT_AUTHORITY_KEYPAIR) {
             console.warn('⚠️  No mint authority keypair - NFT minting disabled');
+            console.warn('📋 MINT_AUTHORITY_KEYPAIR environment variable is not set');
             return;
         }
 
+        console.log('🔑 Mint authority keypair found, length:', CONFIG.MINT_AUTHORITY_KEYPAIR.length);
+        console.log('🔑 First 20 chars:', CONFIG.MINT_AUTHORITY_KEYPAIR.substring(0, 20));
+        
         const secretKey = bs58.decode(CONFIG.MINT_AUTHORITY_KEYPAIR);
+        console.log('✅ bs58 decode successful');
+        
         const mintAuthority = Keypair.fromSecretKey(secretKey);
+        console.log('✅ Keypair created from secret');
         
         metaplex = Metaplex.make(connection)
             .use(keypairIdentity(mintAuthority))
@@ -85,8 +93,10 @@ async function initializeSolana() {
         
         console.log('✅ Solana connection initialized');
         console.log('📍 Mint Authority:', mintAuthority.publicKey.toString());
+        console.log('💎 NFT Minting: ENABLED');
     } catch (error) {
         console.error('❌ Solana initialization failed:', error.message);
+        console.error('❌ Full error:', error);
     }
 }
 
