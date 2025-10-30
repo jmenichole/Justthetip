@@ -175,7 +175,12 @@ app.get('/api/health', (req, res) => {
         timestamp: new Date().toISOString(),
         database: db ? 'connected' : 'disconnected',
         solana: connection ? 'connected' : 'disconnected',
-        nftMinting: metaplex ? 'enabled' : 'disabled'
+        nftMinting: metaplex ? 'enabled' : 'disabled',
+        // Debug fields (sanitized)
+        hasMintKey: Boolean(CONFIG.MINT_AUTHORITY_KEYPAIR),
+        mintKeyLength: CONFIG.MINT_AUTHORITY_KEYPAIR ? CONFIG.MINT_AUTHORITY_KEYPAIR.length : 0,
+        metaplexInitialized: Boolean(metaplex),
+        version: '2025-10-30T09:28Z'
     });
 });
 
