@@ -5,6 +5,8 @@
 **Estimated Time:** 20-30 minutes  
 **Cost:** Free tier available (500 hours/month)
 
+> **📖 Configuration Reference:** See [RAILWAY_CONFIG_GUIDE.md](./RAILWAY_CONFIG_GUIDE.md) for detailed information about Railway configuration files and multi-service setup.
+
 ---
 
 ## Why Railway?
