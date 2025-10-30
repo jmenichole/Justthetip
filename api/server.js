@@ -179,6 +179,32 @@ app.get('/api/health', (req, res) => {
     });
 });
 
+// Diagnostics (sanitized) - no secrets exposed
+app.get('/api/diag', (req, res) => {
+    try {
+        const key = CONFIG.MINT_AUTHORITY_KEYPAIR || '';
+        const preview = key ? `${key.substring(0, 8)}...${key.substring(key.length - 6)}` : null;
+        let rpcHost = null;
+        try {
+            const url = new URL(CONFIG.SOLANA_RPC_URL);
+            rpcHost = url.hostname;
+        } catch (_) {
+            rpcHost = CONFIG.SOLANA_RPC_URL;
+        }
+
+        res.json({
+            status: 'ok',
+            solanaRpcHost: rpcHost,
+            hasMintKey: Boolean(key),
+            mintKeyLength: key ? key.length : 0,
+            mintKeyPreview: preview,
+            metaplexInitialized: Boolean(metaplex)
+        });
+    } catch (error) {
+        res.status(500).json({ status: 'error', message: error.message });
+    }
+});
+
 // Discord OAuth token exchange
 app.post('/api/discord/token', async (req, res) => {
     try {
