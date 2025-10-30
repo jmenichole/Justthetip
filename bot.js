@@ -14,7 +14,7 @@
  */
 
 const { Client, GatewayIntentBits, Partials, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Events, REST, Routes, InteractionType } = require('discord.js');
-require('dotenv-safe').config();
+require('dotenv-safe').config({ allowEmptyValues: true });
 const db = require('./db/database');
 const { createSolanaPayUrl } = require('./chains/solanaHelper');
 const logger = require('./src/utils/logger');
