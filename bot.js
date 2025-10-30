@@ -56,10 +56,9 @@ const commands = [
     options: [
       { name: 'user', type: 6, description: 'User to tip', required: true },
       { name: 'amount', type: 10, description: 'Amount to tip', required: true },
-      { name: 'currency', type: 3, description: 'Currency (SOL, USDC, LTC)', required: true, choices: [
+      { name: 'currency', type: 3, description: 'Currency (SOL, USDC)', required: true, choices: [
           { name: 'SOL', value: 'SOL' },
-          { name: 'USDC', value: 'USDC' },
-          { name: 'LTC', value: 'LTC' }
+          { name: 'USDC', value: 'USDC' }
         ]
       }
     ]
@@ -69,10 +68,9 @@ const commands = [
     description: 'Create airdrop with USD amounts (e.g. $5.00 worth of SOL)',
     options: [
       { name: 'amount', type: 10, description: 'Amount to airdrop', required: true },
-      { name: 'currency', type: 3, description: 'Currency (SOL, USDC, LTC)', required: true, choices: [
+      { name: 'currency', type: 3, description: 'Currency (SOL, USDC)', required: true, choices: [
           { name: 'SOL', value: 'SOL' },
-          { name: 'USDC', value: 'USDC' },
-          { name: 'LTC', value: 'LTC' }
+          { name: 'USDC', value: 'USDC' }
         ]
       }
     ]
@@ -83,10 +81,9 @@ const commands = [
     options: [
       { name: 'address', type: 3, description: 'External wallet address', required: true },
       { name: 'amount', type: 10, description: 'Amount to withdraw', required: true },
-      { name: 'currency', type: 3, description: 'Currency (SOL, USDC, LTC)', required: true, choices: [
+      { name: 'currency', type: 3, description: 'Currency (SOL, USDC)', required: true, choices: [
           { name: 'SOL', value: 'SOL' },
-          { name: 'USDC', value: 'USDC' },
-          { name: 'LTC', value: 'LTC' }
+          { name: 'USDC', value: 'USDC' }
         ]
       }
     ]
@@ -99,11 +96,10 @@ const commands = [
     name: 'registerwallet',
     description: 'Register your wallet addresses',
     options: [
-      { name: 'currency', type: 3, description: 'Currency (SOL, USDC, LTC)', required: true, choices: [
-          { name: 'SOL', value: 'SOL' },
-          { name: 'USDC', value: 'USDC' },
-          { name: 'LTC', value: 'LTC' }
-        ]
+      { name: 'currency', type: 3, description: 'Currency (SOL, USDC)', required: true, choices: [
+        { name: 'SOL', value: 'SOL' },
+        { name: 'USDC', value: 'USDC' }
+      ]
       },
       { name: 'address', type: 3, description: 'Your wallet address', required: true }
     ]
@@ -113,10 +109,9 @@ const commands = [
     description: 'Donate to support bot development',
     options: [
       { name: 'amount', type: 10, description: 'Amount to burn', required: true },
-      { name: 'currency', type: 3, description: 'Currency (SOL, USDC, LTC)', required: true, choices: [
+      { name: 'currency', type: 3, description: 'Currency (SOL, USDC)', required: true, choices: [
           { name: 'SOL', value: 'SOL' },
-          { name: 'USDC', value: 'USDC' },
-          { name: 'LTC', value: 'LTC' }
+          { name: 'USDC', value: 'USDC' }
         ]
       }
     ]
@@ -182,8 +177,7 @@ const HELP_MESSAGE = `**JustTheTip Bot Commands:**
 
 **Supported Cryptocurrencies:**
 ☀️ **SOL** (Solana) - Active
-💚 **USDC** (USD Coin on Solana) - Active  
-🚀 **LTC** (Litecoin) - Active
+💚 **USDC** (USD Coin on Solana) - Active
 
 **Remember:** This bot handles real cryptocurrency. Always test with small amounts first!`;
 
@@ -194,15 +188,14 @@ client.on(Events.InteractionCreate, async interaction => {
   try {
     if (commandName === 'balance') {
       const userId = interaction.user.id;
-      const balances = { SOL: 0, USDC: 0, LTC: 0 }; // Mock data - replace with actual db call
+      const balances = { SOL: 0, USDC: 0 }; // Mock data - replace with actual db call
       
       const embed = new EmbedBuilder()
         .setTitle('💎 Your Portfolio Balance')
         .setColor(0x3498db)
         .setDescription('**Total Portfolio Value:** $0.00\n\n' +
           '☀️ **SOL:** 0.000000 (~$0.00)\n' +
-          '💚 **USDC:** 0.000000 (~$0.00)\n' +
-          '🚀 **LTC:** 0.000000 (~$0.00)')
+          '💚 **USDC:** 0.000000 (~$0.00)')
         .setFooter({ text: 'Click refresh to update with current prices' });
         
       const refreshButton = new ActionRowBuilder()
@@ -308,8 +301,7 @@ client.on(Events.InteractionCreate, async interaction => {
       .setColor(0x3498db)
       .setDescription('**Total Portfolio Value:** $0.00\n\n' +
         '☀️ **SOL:** 0.000000 (~$0.00)\n' +
-        '💚 **USDC:** 0.000000 (~$0.00)\n' +
-        '🚀 **LTC:** 0.000000 (~$0.00)')
+        '💚 **USDC:** 0.000000 (~$0.00)')
       .setFooter({ text: 'Balance updated with current prices' });
       
     await interaction.update({ embeds: [embed] });
