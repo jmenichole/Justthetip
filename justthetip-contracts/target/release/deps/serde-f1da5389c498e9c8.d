@@ -1,0 +1,14 @@
+/Users/fullsail/justthetip/justthetip-contracts/target/release/deps/libserde-f1da5389c498e9c8.rmeta: /Users/fullsail/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-1.0.226/src/lib.rs /Users/fullsail/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-1.0.226/src/integer128.rs /Users/fullsail/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-1.0.226/src/private/mod.rs /Users/fullsail/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-1.0.226/src/private/de.rs /Users/fullsail/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-1.0.226/src/private/ser.rs /Users/fullsail/justthetip/justthetip-contracts/target/release/build/serde-c3240e59bd23192c/out/private.rs
+
+/Users/fullsail/justthetip/justthetip-contracts/target/release/deps/libserde-f1da5389c498e9c8.rlib: /Users/fullsail/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-1.0.226/src/lib.rs /Users/fullsail/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-1.0.226/src/integer128.rs /Users/fullsail/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-1.0.226/src/private/mod.rs /Users/fullsail/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-1.0.226/src/private/de.rs /Users/fullsail/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-1.0.226/src/private/ser.rs /Users/fullsail/justthetip/justthetip-contracts/target/release/build/serde-c3240e59bd23192c/out/private.rs
+
+/Users/fullsail/justthetip/justthetip-contracts/target/release/deps/serde-f1da5389c498e9c8.d: /Users/fullsail/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-1.0.226/src/lib.rs /Users/fullsail/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-1.0.226/src/integer128.rs /Users/fullsail/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-1.0.226/src/private/mod.rs /Users/fullsail/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-1.0.226/src/private/de.rs /Users/fullsail/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-1.0.226/src/private/ser.rs /Users/fullsail/justthetip/justthetip-contracts/target/release/build/serde-c3240e59bd23192c/out/private.rs
+
+/Users/fullsail/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-1.0.226/src/lib.rs:
+/Users/fullsail/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-1.0.226/src/integer128.rs:
+/Users/fullsail/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-1.0.226/src/private/mod.rs:
+/Users/fullsail/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-1.0.226/src/private/de.rs:
+/Users/fullsail/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-1.0.226/src/private/ser.rs:
+/Users/fullsail/justthetip/justthetip-contracts/target/release/build/serde-c3240e59bd23192c/out/private.rs:
+
+# env-dep:OUT_DIR=/Users/fullsail/justthetip/justthetip-contracts/target/release/build/serde-c3240e59bd23192c/out

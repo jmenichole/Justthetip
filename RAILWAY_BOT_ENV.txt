@@ -17,7 +17,7 @@ GUILD_ID=1413961128522023024
 HELIUS_API_KEY=074efb1f-0838-4334-839b-2f5780b43eca
 SOLANA_RPC_URL=https://mainnet.helius-rpc.com/?api-key=074efb1f-0838-4334-839b-2f5780b43eca
 SOL_RPC_URL=https://mainnet.helius-rpc.com/?api-key=074efb1f-0838-4334-839b-2f5780b43eca
-JUSTTHETIP_PROGRAM_ID=YourProgramIdHere
+JUSTTHETIP_PROGRAM_ID=DPEJ3qgA54d88TnB7DeC72fmPd64BL7ZBaXe3Wcyb8dE
 
 # ==========================================
 # DATABASE (Required) ✅
@@ -28,12 +28,12 @@ MONGODB_URI=mongodb+srv://justthetip1:JWjwE7xgOmmc6k3O@justhetip.0z3jtr.mongodb.
 DATABASE_URL=postgresql://justthetip_user:password@localhost:5432/justthetip
 
 # ==========================================
-# ADMIN CONFIGURATION (Required) ⚠️
-# TODO: Replace with your Discord User ID
+# ADMIN CONFIGURATION (Required) ✅
+# Your Discord User ID: 1153034319271559328
 # ==========================================
 NODE_ENV=production
-SUPER_ADMIN_USER_IDS=YOUR_DISCORD_USER_ID_HERE
-ADMIN_USER_IDS=YOUR_DISCORD_USER_ID_HERE
+SUPER_ADMIN_USER_IDS=1153034319271559328
+ADMIN_USER_IDS=1153034319271559328
 SUPER_ADMIN_SECRET=ChangeThisSecurePassword123
 EMERGENCY_ADMIN_SECRET=ChangeThisEmergencyPassword456
 
