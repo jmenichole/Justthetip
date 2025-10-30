@@ -8,7 +8,7 @@ const cors = require('cors');
 const { Connection, PublicKey, Keypair } = require('@solana/web3.js');
 const { Metaplex, keypairIdentity, bundlrStorage } = require('@metaplex-foundation/js');
 const nacl = require('tweetnacl');
-const bs58 = require('bs58');
+const bs58 = require('bs58').default; // Fix: Use .default export
 const { MongoClient } = require('mongodb');
 require('dotenv').config();
 
