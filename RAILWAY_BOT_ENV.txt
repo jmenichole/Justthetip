@@ -1,0 +1,77 @@
+# ===================================
+# RAILWAY BOT SERVICE - ENVIRONMENT VARIABLES
+# Copy these to Railway Dashboard → Your Bot Service → Variables
+# ===================================
+
+# ==========================================
+# DISCORD CONFIGURATION (Required) ✅
+# Copy BOT_TOKEN from your local .env file
+# ==========================================
+BOT_TOKEN=YOUR_BOT_TOKEN_FROM_LOCAL_ENV
+CLIENT_ID=1419742988128616479
+GUILD_ID=1413961128522023024
+
+# ==========================================
+# SOLANA BLOCKCHAIN (Required) ✅
+# ==========================================
+HELIUS_API_KEY=074efb1f-0838-4334-839b-2f5780b43eca
+SOLANA_RPC_URL=https://mainnet.helius-rpc.com/?api-key=074efb1f-0838-4334-839b-2f5780b43eca
+SOL_RPC_URL=https://mainnet.helius-rpc.com/?api-key=074efb1f-0838-4334-839b-2f5780b43eca
+JUSTTHETIP_PROGRAM_ID=YourProgramIdHere
+
+# ==========================================
+# DATABASE (Required) ✅
+# ==========================================
+MONGODB_URI=mongodb+srv://justthetip1:JWjwE7xgOmmc6k3O@justhetip.0z3jtr.mongodb.net/?retryWrites=true&w=majority
+
+# PostgreSQL (if using - for legacy compatibility)
+DATABASE_URL=postgresql://justthetip_user:password@localhost:5432/justthetip
+
+# ==========================================
+# ADMIN CONFIGURATION (Required) ⚠️
+# TODO: Replace with your Discord User ID
+# ==========================================
+NODE_ENV=production
+SUPER_ADMIN_USER_IDS=YOUR_DISCORD_USER_ID_HERE
+ADMIN_USER_IDS=YOUR_DISCORD_USER_ID_HERE
+SUPER_ADMIN_SECRET=ChangeThisSecurePassword123
+EMERGENCY_ADMIN_SECRET=ChangeThisEmergencyPassword456
+
+# ==========================================
+# BLOCKCHAIN PRIVATE KEYS (Optional - Empty for now)
+# ⚠️ Only add if you need bot to send transactions
+# ==========================================
+SOL_PRIVATE_KEY=[]
+TRX_PRIVATE_KEY=
+ETH_PRIVATE_KEY=
+XRP_SEED=
+
+# ==========================================
+# RPC ENDPOINTS (Optional - Empty for unused chains)
+# ==========================================
+ETHEREUM_RPC_URL=
+TRON_API_KEY=
+XRP_SERVER=
+
+# ==========================================
+# LEGACY/OPTIONAL (From existing .env)
+# ==========================================
+LTC_WALLET_KEY=
+BTC_WIF=
+PAY_FORWARDING_ADDRESS=
+BLOCKCYPHER_TOKEN=
+APPLICATION_ID=
+CLIENT_SECRET=
+REDIRECT_URI=
+PUBLIC_KEY=
+INVITE_URL=
+FEE_PAYMENT_SOL_ADDRESS=
+
+# ==========================================
+# HOW TO GET YOUR DISCORD USER ID:
+# ==========================================
+# 1. Open Discord
+# 2. Settings → Advanced → Enable "Developer Mode"
+# 3. Right-click your username
+# 4. Click "Copy User ID"
+# 5. Replace YOUR_DISCORD_USER_ID_HERE above
