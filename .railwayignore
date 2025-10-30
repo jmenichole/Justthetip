@@ -1,0 +1,39 @@
+# Railway ignore file - exclude files from deployment
+
+# Development files
+node_modules/
+.git/
+.github/
+.vscode/
+
+# Test files
+*.test.js
+*.spec.js
+__tests__/
+test/
+
+# Documentation (not needed for backend)
+docs/
+*.md
+!README.md
+
+# Security (NEVER deploy these)
+.env
+.env.*
+security/*.json
+security/*.pem
+*.key
+*.pem
+
+# Bot files (separate deployment)
+bot.js
+bot_smart_contract.js
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
