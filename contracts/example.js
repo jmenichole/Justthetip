@@ -1,6 +1,6 @@
 /**
  * JustTheTip SDK Example
- * Demonstrates smart contract functionality
+ * Demonstrates smart contract functionality using the SDK
  * 
  * Copyright (c) 2025 JustTheTip Bot
  * 
@@ -14,142 +14,83 @@
  * This software may not be sold commercially without permission.
  */
 
-const { Connection, PublicKey, SystemProgram, Transaction, Keypair } = require('@solana/web3.js');
+const { JustTheTipSDK } = require('./sdk');
 
-class JustTheTipSDK {
-  constructor(rpcUrl = 'https://api.mainnet-beta.solana.com') {
-    this.connection = new Connection(rpcUrl, 'confirmed');
-    this.programId = new PublicKey('11111111111111111111111111111112'); // System program as example
-  }
-
-  // Create tip instruction
-  createTipInstruction(senderWallet, recipientWallet, amount) {
-    try {
-      const sender = new PublicKey(senderWallet);
-      const recipient = new PublicKey(recipientWallet);
-      const lamports = Math.floor(amount * 1e9);
-      
-      return SystemProgram.transfer({
-        fromPubkey: sender,
-        toPubkey: recipient,
-        lamports
-      });
-    } catch (error) {
-      console.error('Error creating tip instruction:', error);
-      throw error;
-    }
-  }
-
-  // Generate PDA for Discord user
-  async generateUserPDA(discordUserId) {
-    const seeds = [
-      Buffer.from('justthetip'),
-      Buffer.from(discordUserId)
-    ];
-    
-    try {
-      const [pda, bump] = PublicKey.findProgramAddressSync(seeds, this.programId);
-      return { address: pda, bump };
-    } catch (error) {
-      console.error('Error generating PDA:', error);
-      throw error;
-    }
-  }
-
-  // Get wallet balance
-  async getBalance(walletAddress) {
-    try {
-      const publicKey = new PublicKey(walletAddress);
-      const balance = await this.connection.getBalance(publicKey);
-      return balance / 1e9; // Convert lamports to SOL
-    } catch (error) {
-      console.error('Error getting balance:', error);
-      throw error;
-    }
-  }
-
-  // Create airdrop instructions for multiple recipients
-  createAirdropInstructions(sender, recipients) {
-    const instructions = [];
-    
-    try {
-      const senderPubkey = new PublicKey(sender);
-      
-      recipients.forEach(({ pubkey, amount }) => {
-        const recipientPubkey = new PublicKey(pubkey);
-        const lamports = Math.floor(amount * 1e9);
-        
-        const instruction = SystemProgram.transfer({
-          fromPubkey: senderPubkey,
-          toPubkey: recipientPubkey,
-          lamports
-        });
-        
-        instructions.push(instruction);
-      });
-      
-      return instructions;
-    } catch (error) {
-      console.error('Error creating airdrop instructions:', error);
-      throw error;
-    }
-  }
-
-  // Create custom instruction (placeholder for advanced features)
-  createCustomInstruction(params) {
-    // This would contain your custom program instructions
-    console.log('Custom instruction with params:', params);
-    return null; // Placeholder
-  }
-}
-
-// Example usage
+/**
+ * Example usage of JustTheTip SDK
+ * Demonstrates all major SDK features
+ */
 async function demo() {
   console.log('🚀 JustTheTip SDK Demo\n');
   
-  // Initialize SDK
-  const sdk = new JustTheTipSDK('https://api.mainnet-beta.solana.com');
+  // Initialize SDK with RPC URL
+  const sdk = new JustTheTipSDK(process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com');
   console.log('✅ SDK initialized');
   
-  // Example wallet addresses (replace with real ones)
+  // Example wallet addresses (replace with real ones for actual usage)
   const senderWallet = '11111111111111111111111111111112';
   const recipientWallet = '11111111111111111111111111111113';
   
   try {
-    // Create tip instruction
+    // 1. Validate addresses
+    console.log('\n🔍 Validating addresses...');
+    const isSenderValid = sdk.validateAddress(senderWallet);
+    const isRecipientValid = sdk.validateAddress(recipientWallet);
+    console.log(`Sender valid: ${isSenderValid}, Recipient valid: ${isRecipientValid}`);
+    
+    // 2. Create tip instruction
     console.log('\n📤 Creating tip instruction...');
-    const tipInstruction = sdk.createTipInstruction(
-      senderWallet,
-      recipientWallet, 
-      0.1 // 0.1 SOL
-    );
-    console.log('✅ Tip instruction created');
+    const tipTransaction = sdk.createTipInstruction(senderWallet, recipientWallet, 0.1);
+    if (tipTransaction) {
+      console.log('✅ Tip transaction created (unsigned)');
+      console.log('   Instructions:', tipTransaction.instructions.length);
+    }
     
-    // Generate PDA for Discord user
-    console.log('\n🔗 Generating PDA...');
-    const userPDA = await sdk.generateUserPDA('discord_user_123');
-    console.log('✅ PDA generated:', userPDA.address.toString());
+    // 3. Generate PDA for Discord user
+    console.log('\n🔗 Generating Program Derived Address...');
+    const userPDA = sdk.generateUserPDA('discord_user_123');
+    if (userPDA) {
+      console.log('✅ PDA generated:', userPDA.address);
+      console.log('   Bump:', userPDA.bump);
+    }
     
-    // Create multi-recipient airdrop
+    // 4. Create multi-recipient airdrop
     console.log('\n🎁 Creating airdrop instructions...');
     const recipients = [
       { pubkey: recipientWallet, amount: 0.05 },
       { pubkey: senderWallet, amount: 0.05 }
     ];
-    const airdropInstructions = sdk.createAirdropInstructions(senderWallet, recipients);
-    console.log('✅ Airdrop instructions created:', airdropInstructions.length);
+    const airdropTransaction = sdk.createAirdropInstructions(senderWallet, recipients);
+    if (airdropTransaction) {
+      console.log('✅ Airdrop transaction created');
+      console.log('   Recipients:', recipients.length);
+      console.log('   Instructions:', airdropTransaction.instructions.length);
+    }
     
-    console.log('\n🎉 Demo completed successfully!');
+    // 5. Get balance (commented out as it requires a valid address)
+    // console.log('\n💰 Getting wallet balance...');
+    // const balance = await sdk.getBalance(senderWallet);
+    // console.log('✅ Balance:', balance, 'SOL');
+    
+    // 6. Get recent blockhash
+    console.log('\n🔗 Getting recent blockhash...');
+    const blockhash = await sdk.getRecentBlockhash();
+    if (blockhash) {
+      console.log('✅ Recent blockhash:', blockhash.substring(0, 16) + '...');
+    }
+    
+    console.log('\n🎉 SDK Demo completed successfully!');
+    console.log('\n📚 For production use:');
+    console.log('   - Replace example addresses with real Solana addresses');
+    console.log('   - Users must sign transactions in their wallets');
+    console.log('   - All operations are non-custodial');
     
   } catch (error) {
     console.error('❌ Demo error:', error.message);
   }
 }
 
-// Export for use as module
-module.exports = { JustTheTipSDK };
-
 // Run demo if executed directly
 if (require.main === module) {
-  demo();
+  demo().catch(console.error);
 }

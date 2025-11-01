@@ -6,6 +6,17 @@ data/
 .DS_Store
 RAILWAY_ENV_VARS.txt
 
+# Build artifacts
+dist/
+build/
+coverage/
+*.tsbuildinfo
+
 # Backup config files
 *.backup
 railway.toml
+
+# Temporary files
+tmp/
+temp/
+*.tmp
