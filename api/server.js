@@ -10,6 +10,7 @@ const { Metaplex, keypairIdentity, irysStorage } = require('@metaplex-foundation
 const nacl = require('tweetnacl');
 const bs58 = require('bs58').default; // Fix: Use .default export
 const { MongoClient } = require('mongodb');
+const adminRoutes = require('./adminRoutes');
 require('dotenv').config();
 
 const app = express();
@@ -501,19 +502,27 @@ app.get('/api/tickets/:discordId', async (req, res) => {
     }
 });
 
+// ===== MOUNT ROUTES =====
+// Admin dashboard routes
+app.use('/api/admin', adminRoutes);
+
 // ===== INITIALIZATION =====
 async function startServer() {
     try {
         await initializeDatabase();
         await initializeSolana();
 
+        // Make db available to routes
+        app.locals.db = { pool: null }; // Will be set if database is available
+        
         app.listen(PORT, () => {
             console.log(`\n🚀 JustTheTip API Server Running`);
             console.log(`📍 Port: ${PORT}`);
             console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
             console.log(`💾 Database: ${db ? 'Connected' : 'Not configured'}`);
             console.log(`🔗 Solana: ${connection ? 'Connected' : 'Not configured'}`);
-            console.log(`🎨 NFT Minting: ${metaplex ? 'Enabled' : 'Disabled'}\n`);
+            console.log(`🎨 NFT Minting: ${metaplex ? 'Enabled' : 'Disabled'}`);
+            console.log(`📊 Admin API: /api/admin/* (requires authentication)\n`);
 
             // Configuration warnings
             if (!CONFIG.DISCORD_CLIENT_SECRET) {

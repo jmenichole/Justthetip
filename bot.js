@@ -19,6 +19,8 @@ const db = require('./db/database');
 const { createSolanaPayUrl } = require('./chains/solanaHelper');
 const logger = require('./src/utils/logger');
 const inputValidation = require('./src/validators/inputValidation');
+const { handleLeaderboardCommand } = require('./src/commands/leaderboardCommand');
+const { handleSwapCommand, handleSwapHelpButton } = require('./src/commands/swapCommand');
 const fs = require('fs');
 
 // Define the mint address for USDC on Solana mainnet-beta
@@ -119,6 +121,25 @@ const commands = [
   {
     name: 'help',
     description: 'Complete command reference',
+  },
+  {
+    name: 'leaderboard',
+    description: 'View top tippers and recipients',
+  },
+  {
+    name: 'swap',
+    description: 'Swap tokens using Jupiter aggregator',
+    options: [
+      { name: 'from', type: 3, description: 'Token to swap from', required: true, choices: [
+        { name: 'SOL', value: 'SOL' },
+        { name: 'USDC', value: 'USDC' }
+      ]},
+      { name: 'to', type: 3, description: 'Token to swap to', required: true, choices: [
+        { name: 'SOL', value: 'SOL' },
+        { name: 'USDC', value: 'USDC' }
+      ]},
+      { name: 'amount', type: 10, description: 'Amount to swap', required: true }
+    ]
   }
 ];
 
@@ -170,6 +191,8 @@ const HELP_MESSAGE = `**JustTheTip Bot Commands:**
 
 **Enhanced Features:**
 • \`/airdrop amount currency\` — Create airdrop with USD amounts (e.g. $5.00 worth of SOL)
+• \`/leaderboard\` — View top tippers and recipients 🏆
+• \`/swap from to amount\` — Convert tips between tokens via Jupiter 🔄
 • 🎁 **Collect Button** — Click buttons to collect from airdrops!
 • 🔄 **Balance Refresh** — Update your portfolio view with one click
 • \`/burn amount currency\` — Donate to support bot development
@@ -214,6 +237,15 @@ client.on(Events.InteractionCreate, async interaction => {
         .setColor(0x7289da)
         .setDescription(HELP_MESSAGE);
       await interaction.reply({ embeds: [embed], ephemeral: true });
+      
+    } else if (commandName === 'leaderboard') {
+      await handleLeaderboardCommand(interaction, db);
+      
+    } else if (commandName === 'swap') {
+      // Note: userWallets map would need to be implemented for full functionality
+      // For now, use a Map as a placeholder
+      const userWallets = new Map();
+      await handleSwapCommand(interaction, userWallets);
       
     } else if (commandName === 'airdrop') {
       const amount = interaction.options.getNumber('amount');
@@ -305,6 +337,9 @@ client.on(Events.InteractionCreate, async interaction => {
       .setFooter({ text: 'Balance updated with current prices' });
       
     await interaction.update({ embeds: [embed] });
+    
+  } else if (interaction.customId === 'swap_help') {
+    await handleSwapHelpButton(interaction);
   }
 });
 
