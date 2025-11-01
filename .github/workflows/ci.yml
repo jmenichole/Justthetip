@@ -1,0 +1,84 @@
+name: CI - Lint and Test
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+  push:
+    branches: [ main, develop ]
+
+permissions:
+  contents: read
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+    
+    strategy:
+      matrix:
+        node-version: [16.x, 18.x, 20.x]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run linter
+      run: npm run lint
+      continue-on-error: true
+    
+    - name: Run tests
+      run: npm test
+      env:
+        NODE_ENV: test
+        SOLANA_RPC_URL: https://api.devnet.solana.com
+    
+    - name: Check for security vulnerabilities
+      run: npm audit --production
+      continue-on-error: true
+
+  devnet-integration:
+    runs-on: ubuntu-latest
+    needs: lint-and-test
+    
+    permissions:
+      contents: read
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 18.x
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run SDK example on Devnet
+      run: |
+        # Create a minimal test that doesn't require private keys
+        echo "Testing SDK initialization..."
+        node -e "
+        const { JustTheTipSDK } = require('./contracts/sdk');
+        const sdk = new JustTheTipSDK('https://api.devnet.solana.com');
+        console.log('SDK initialized successfully');
+        const isValid = sdk.validateAddress('11111111111111111111111111111111');
+        console.log('Address validation works:', isValid);
+        process.exit(isValid ? 0 : 1);
+        "
+      env:
+        NODE_ENV: test
+        SOLANA_RPC_URL: https://api.devnet.solana.com

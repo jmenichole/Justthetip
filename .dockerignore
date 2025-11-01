@@ -1,0 +1,61 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Git
+.git/
+.gitignore
+.github/
+
+# Documentation (not needed in container)
+*.md
+!README.md
+docs/
+
+# Tests (not needed in production)
+tests/
+coverage/
+*.test.js
+*.spec.js
+
+# Build artifacts
+dist/
+build/
+*.tsbuildinfo
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+data/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.backup
+
+# Railway/Deployment specific
+railway.toml
+railway.json
+.railway/
+.railwayignore
+
+# Other
+mint-keypair.txt
