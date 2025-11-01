@@ -6,12 +6,13 @@
   "homepage": "https://jmenichole.github.io/Justthetip",
   "scripts": {
     "start": "node api/server.js",
-    "start:bot": "node bot.js",
-    "start:smart-contract": "node bot_smart_contract.js",
+    "start:bot": "npm run verify-env -- --legacy && node bot.js",
+    "start:smart-contract": "npm run verify-env -- --smart-contract && node bot_smart_contract.js",
     "test": "jest",
     "lint": "eslint .",
     "audit": "npm audit",
-    "demo:sdk": "node contracts/example.js"
+    "demo:sdk": "node contracts/example.js",
+    "verify-env": "node scripts/verify-env.js"
   },
   "author": "",
   "license": "Custom",
