@@ -17,6 +17,9 @@
 const { Client, GatewayIntentBits, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Events, REST, Routes } = require('discord.js');
 require('dotenv-safe').config();
 const { Connection, PublicKey, SystemProgram, Transaction } = require('@solana/web3.js');
+const { JustTheTipSDK } = require('./contracts/sdk');
+const { handleSwapCommand, handleSwapHelpButton } = require('./src/commands/swapCommand');
+const db = require('./db/database');
 
 const client = new Client({ 
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] 
@@ -50,6 +53,21 @@ const smartContractCommands = [
   {
     name: 'sc-info',
     description: 'View smart contract bot information'
+  },
+  {
+    name: 'swap',
+    description: 'Swap tokens using Jupiter aggregator',
+    options: [
+      { name: 'from', type: 3, description: 'Token to swap from', required: true, choices: [
+        { name: 'SOL', value: 'SOL' },
+        { name: 'USDC', value: 'USDC' }
+      ]},
+      { name: 'to', type: 3, description: 'Token to swap to', required: true, choices: [
+        { name: 'SOL', value: 'SOL' },
+        { name: 'USDC', value: 'USDC' }
+      ]},
+      { name: 'amount', type: 10, description: 'Amount to swap', required: true }
+    ]
   }
 ];
 
@@ -58,6 +76,9 @@ const userWallets = new Map();
 
 client.once('ready', async () => {
   console.log(`🟢 JustTheTip Smart Contract Bot logged in as ${client.user.tag}`);
+  
+  // Connect to database (optional)
+  await db.connectDB();
   
   // Register smart contract commands
   const rest = new REST({ version: '10' }).setToken(process.env.BOT_TOKEN);
@@ -72,61 +93,30 @@ client.once('ready', async () => {
   }
 });
 
-// Solana connection
+// Initialize SDK
+const sdk = new JustTheTipSDK(
+  process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com'
+);
+
+// Legacy Solana connection for backward compatibility
 const connection = new Connection(
   process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com',
   'confirmed'
 );
 
-// Generate Program Derived Address for a user
+// Generate Program Derived Address for a user (now uses SDK)
 function generateUserPDA(discordUserId) {
-  // In a real implementation, this would use your program ID
-  const programId = new PublicKey('11111111111111111111111111111112'); // System program as example
-  const seeds = [
-    Buffer.from('justthetip'),
-    Buffer.from(discordUserId)
-  ];
-  
-  try {
-    const [pda, bump] = PublicKey.findProgramAddressSync(seeds, programId);
-    return { address: pda.toString(), bump };
-  } catch (error) {
-    console.error('Error generating PDA:', error);
-    return null;
-  }
+  return sdk.generateUserPDA(discordUserId);
 }
 
-// Get Solana balance
+// Get Solana balance (now uses SDK)
 async function getSolanaBalance(address) {
-  try {
-    const publicKey = new PublicKey(address);
-    const balance = await connection.getBalance(publicKey);
-    return balance / 1e9; // Convert lamports to SOL
-  } catch (error) {
-    console.error('Error getting balance:', error);
-    return 0;
-  }
+  return await sdk.getBalance(address);
 }
 
-// Create tip instruction (unsigned transaction)
+// Create tip instruction (now uses SDK)
 function createTipInstruction(senderAddress, recipientAddress, amount) {
-  try {
-    const sender = new PublicKey(senderAddress);
-    const recipient = new PublicKey(recipientAddress);
-    const lamports = Math.floor(amount * 1e9);
-    
-    const instruction = SystemProgram.transfer({
-      fromPubkey: sender,
-      toPubkey: recipient,
-      lamports
-    });
-    
-    const transaction = new Transaction().add(instruction);
-    return transaction;
-  } catch (error) {
-    console.error('Error creating tip instruction:', error);
-    return null;
-  }
+  return sdk.createTipInstruction(senderAddress, recipientAddress, amount);
 }
 
 client.on(Events.InteractionCreate, async interaction => {
@@ -285,25 +275,38 @@ client.on(Events.InteractionCreate, async interaction => {
           `**⚡ Smart Contracts:** All transactions through Solana programs\n` +
           `**🔗 PDAs:** Program Derived Addresses for advanced features\n` +
           `**🛠️ TypeScript SDK:** Fully typed with comprehensive documentation\n` +
-          `**⚙️ Zero Private Keys:** Bot never handles sensitive information\n\n` +
+          `**⚙️ Zero Private Keys:** Bot never handles sensitive information\n` +
+          `**🔄 Jupiter Swaps:** Cross-token tipping via Jupiter Aggregator\n\n` +
           `**Commands:**\n` +
           `• \`/register-wallet\` - Register your Solana wallet\n` +
           `• \`/sc-tip\` - Create smart contract tip\n` +
           `• \`/sc-balance\` - Check on-chain balance\n` +
           `• \`/generate-pda\` - Generate your PDA\n` +
+          `• \`/swap\` - Convert tokens via Jupiter\n` +
           `• \`/sc-info\` - Show this information`
         )
         .setColor(0x8b5cf6);
         
       await interaction.reply({ embeds: [embed], ephemeral: true });
+      
+    } else if (commandName === 'swap') {
+      await handleSwapCommand(interaction, userWallets);
     }
     
   } catch (error) {
     console.error('Command error:', error);
-    await interaction.reply({ 
-      content: '❌ An error occurred while processing your command.', 
-      ephemeral: true 
-    });
+    
+    if (interaction.deferred || interaction.replied) {
+      await interaction.followUp({ 
+        content: '❌ An error occurred while processing your command.', 
+        ephemeral: true 
+      }).catch(() => {});
+    } else {
+      await interaction.reply({ 
+        content: '❌ An error occurred while processing your command.', 
+        ephemeral: true 
+      }).catch(() => {});
+    }
   }
 });
 
@@ -336,6 +339,9 @@ client.on(Events.InteractionCreate, async interaction => {
       .setFooter({ text: 'Last updated: ' + new Date().toLocaleString() });
       
     await interaction.update({ embeds: [embed] });
+    
+  } else if (interaction.customId === 'swap_help') {
+    await handleSwapHelpButton(interaction);
   }
 });
 
