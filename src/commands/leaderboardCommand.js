@@ -156,7 +156,8 @@ function createLeaderboardEmbed(client, topTippers, topRecipients) {
   let tippersText = '';
   topTippers.forEach((tipper, index) => {
     const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
-    tippersText += `${medal} <@${tipper.user_id}> - **${tipper.total_tipped.toFixed(2)}** SOL (${tipper.tip_count} tips)\n`;
+    // Note: Displaying as SOL for now. For multi-currency, aggregate by USD value
+    tippersText += `${medal} <@${tipper.user_id}> - **${tipper.total_tipped.toFixed(2)}** (${tipper.tip_count} tips)\n`;
   });
 
   if (tippersText) {
@@ -171,7 +172,8 @@ function createLeaderboardEmbed(client, topTippers, topRecipients) {
   let recipientsText = '';
   topRecipients.forEach((recipient, index) => {
     const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
-    recipientsText += `${medal} <@${recipient.user_id}> - **${recipient.total_received.toFixed(2)}** SOL (${recipient.tip_count} tips)\n`;
+    // Note: Displaying amount generically. For multi-currency, aggregate by USD value
+    recipientsText += `${medal} <@${recipient.user_id}> - **${recipient.total_received.toFixed(2)}** (${recipient.tip_count} tips)\n`;
   });
 
   if (recipientsText) {

@@ -102,8 +102,11 @@ class JustTheTipSDK {
   /**
    * Generate Program Derived Address for a Discord user
    * 
+   * Note: The default program ID is the system program for demonstration purposes.
+   * In production, you should provide your actual deployed program ID.
+   * 
    * @param {string} discordUserId - Discord user ID
-   * @param {string} programId - Optional custom program ID (defaults to system program)
+   * @param {string} programId - Custom program ID (defaults to system program for demo)
    * @returns {Object|null} Object with {address: string, bump: number} or null on error
    */
   generateUserPDA(discordUserId, programId = '11111111111111111111111111111112') {

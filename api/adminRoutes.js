@@ -256,10 +256,10 @@ router.get('/daily-stats', requireAdmin, async (req, res) => {
       FROM transactions
       WHERE transaction_type = 'tip' 
         AND status = 'completed'
-        AND created_at >= CURRENT_DATE - INTERVAL '${days} days'
+        AND created_at >= CURRENT_DATE - INTERVAL '1 day' * $1
       GROUP BY DATE(created_at)
       ORDER BY date DESC
-    `);
+    `, [days]);
 
     res.json({
       stats: result.rows.map(row => ({

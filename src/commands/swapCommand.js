@@ -67,7 +67,8 @@ async function handleSwapCommand(interaction, userWallets) {
     }
 
     // Calculate input amount in smallest unit
-    const decimals = fromToken === 'SOL' ? 9 : 6; // SOL uses 9 decimals, most SPL tokens use 6
+    // Note: This is a simplified approach. For production, fetch actual decimals from token mint
+    const decimals = fromToken === 'SOL' ? 9 : 6; // SOL: 9 decimals, USDC: 6 decimals
     const inputAmount = Math.floor(amount * Math.pow(10, decimals));
 
     const quote = await jupiter.getQuote(fromMint, toMint, inputAmount, 50);
@@ -79,7 +80,8 @@ async function handleSwapCommand(interaction, userWallets) {
     }
 
     // Calculate output amount
-    const outputDecimals = toToken === 'SOL' ? 9 : 6;
+    // Note: This is a simplified approach. For production, fetch actual decimals from token mint
+    const outputDecimals = toToken === 'SOL' ? 9 : 6; // SOL: 9 decimals, USDC: 6 decimals
     const outputAmount = (parseInt(quote.outAmount) / Math.pow(10, outputDecimals)).toFixed(6);
 
     // Create embed with swap details

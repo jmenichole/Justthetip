@@ -16,7 +16,7 @@
 
 const { Client, GatewayIntentBits, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Events, REST, Routes } = require('discord.js');
 require('dotenv-safe').config();
-const { Connection, PublicKey, SystemProgram, Transaction } = require('@solana/web3.js');
+const { PublicKey } = require('@solana/web3.js');
 const { JustTheTipSDK } = require('./contracts/sdk');
 const { handleSwapCommand, handleSwapHelpButton } = require('./src/commands/swapCommand');
 const db = require('./db/database');
@@ -96,12 +96,6 @@ client.once('ready', async () => {
 // Initialize SDK
 const sdk = new JustTheTipSDK(
   process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com'
-);
-
-// Legacy Solana connection for backward compatibility
-const connection = new Connection(
-  process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com',
-  'confirmed'
 );
 
 // Generate Program Derived Address for a user (now uses SDK)
@@ -300,12 +294,12 @@ client.on(Events.InteractionCreate, async interaction => {
       await interaction.followUp({ 
         content: '❌ An error occurred while processing your command.', 
         ephemeral: true 
-      }).catch(() => {});
+      }).catch(err => console.error('Failed to send error response:', err));
     } else {
       await interaction.reply({ 
         content: '❌ An error occurred while processing your command.', 
         ephemeral: true 
-      }).catch(() => {});
+      }).catch(err => console.error('Failed to send error response:', err));
     }
   }
 });
