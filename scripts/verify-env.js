@@ -146,13 +146,15 @@ function checkSecurity() {
  */
 function getBotMode() {
   const args = process.argv.slice(2);
-  if (args.includes('--smart-contract') || process.env.npm_lifecycle_event === 'start:smart-contract') {
-    return 'smartContract';
-  } else if (args.includes('--legacy') || process.env.npm_lifecycle_event === 'start:bot') {
+  const npmScript = process.env.npm_lifecycle_event;
+  
+  if (args.includes('--smart-contract') || npmScript === 'start:smart-contract') {
+    return 'smart-contract';
+  } else if (args.includes('--legacy') || npmScript === 'start:bot') {
     return 'legacy';
   }
   // Default to smart contract mode
-  return 'smartContract';
+  return 'smart-contract';
 }
 
 /**
@@ -174,7 +176,8 @@ function verifyEnvironment() {
   }
   
   const botMode = getBotMode();
-  log(`Bot Mode: ${botMode === 'smartContract' ? 'Smart Contract (Non-custodial)' : 'Legacy (Custodial)'}`, 'blue');
+  const modeDisplayName = botMode === 'smart-contract' ? 'Smart Contract (Non-custodial)' : 'Legacy (Custodial)';
+  log(`Bot Mode: ${modeDisplayName}`, 'blue');
   log(`Environment: ${process.env.NODE_ENV || 'development'}`, 'blue');
   log('');
   
@@ -192,8 +195,9 @@ function verifyEnvironment() {
   }
   
   // Check mode-specific variables
-  log(`\n${botMode === 'smartContract' ? 'Smart Contract' : 'Legacy'} Mode Variables:`, 'yellow');
-  const modeVars = requiredVars[botMode];
+  const modeVarsKey = botMode === 'smart-contract' ? 'smartContract' : 'legacy';
+  log(`\n${modeDisplayName} Mode Variables:`, 'yellow');
+  const modeVars = requiredVars[modeVarsKey];
   for (const varConfig of modeVars) {
     const result = validateVar(varConfig);
     results[result.status].push(result.name);

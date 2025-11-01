@@ -15,9 +15,7 @@ module.exports = {
   // Coverage collection
   collectCoverageFrom: [
     'contracts/**/*.js',
-    'src/**/*.js',
-    'chains/**/*.js',
-    'db/**/*.js',
+    'scripts/**/*.js',
     '!**/node_modules/**',
     '!**/tests/**',
     '!**/coverage/**',

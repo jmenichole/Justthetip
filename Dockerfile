@@ -32,9 +32,11 @@ ENV NODE_ENV=production
 # Expose ports (if using API)
 EXPOSE 3000
 
-# Health check (optional - adjust URL as needed)
+# Health check
+# Note: For production, implement a proper health endpoint in your application
+# and replace this with: CMD curl -f http://localhost:3000/health || exit 1
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-  CMD node -e "console.log('Health check passed')" || exit 1
+  CMD node -e "process.exit(0)" || exit 1
 
 # Default command - start the smart contract bot
 # Override with docker run command if needed
