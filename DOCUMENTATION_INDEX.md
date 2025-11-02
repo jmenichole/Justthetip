@@ -62,6 +62,16 @@ If you want to **fix issues and deploy**, read these in order:
 | **DEPLOYMENT_SUMMARY.md** | 8 KB | Architecture & platform comparison | When choosing deployment platform |
 | **setup-railway.sh** | 5 KB | Automated setup script (executable) | Run before deploying to generate configs |
 
+### GitHub Pages Documentation Site
+| Page | Purpose | URL |
+|------|---------|-----|
+| **index.html** | Main landing page | https://jmenichole.github.io/Justthetip/ |
+| **support.html** | Support ticket submission | https://jmenichole.github.io/Justthetip/support.html |
+| **investor.html** | Investor information | https://jmenichole.github.io/Justthetip/investor.html |
+| **terms.html** | Terms of service | https://jmenichole.github.io/Justthetip/terms.html |
+| **privacy.html** | Privacy policy | https://jmenichole.github.io/Justthetip/privacy.html |
+| **landing.html** | Alternative landing page | https://jmenichole.github.io/Justthetip/landing.html |
+
 ### Implementation Documentation
 | Document | Size | Purpose | When to Use |
 |----------|------|---------|-------------|
