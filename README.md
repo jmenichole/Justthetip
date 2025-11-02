@@ -301,8 +301,8 @@ All commands use dropdown menus for currency selection (SOL, USDC, LTC)
 ## Legal Compliance
 
 ### 📋 Required Documents
-- [Terms of Service](TERMS.md) - User agreements and disclaimers
-- [Privacy Policy](PRIVACY.md) - Data collection and usage
+- [Terms of Service](terms.md) - User agreements and disclaimers
+- [Privacy Policy](privacy.md) - Data collection and usage
 - [Custom License](LICENSE) - Software licensing (MIT-based, commercial sale restricted)
 
 ### ⚠️ Important Disclaimers
@@ -361,7 +361,7 @@ LTC_WALLET_KEY=your_litecoin_private_key
 ## Documentation
 
 - **[🚀 Recent Updates](RECENT_UPDATES.md)** - Latest features and changes
-- **[🛠️ Deployment Guide](DEPLOYMENT_GUIDE.md)** - Complete setup instructions
+- **[🛠️ Deployment Guide](DEPLOYMENT_SUMMARY.md)** - Complete setup instructions
 - **[⚖️ Terms of Service](terms.md)** - Legal terms and user agreements
 - **[🔒 Privacy Policy](privacy.md)** - Data handling and privacy information
 - **[📊 Full Documentation Site](https://jmenichole.github.io/Justthetip/)** - Complete documentation
