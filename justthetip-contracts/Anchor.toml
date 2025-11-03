@@ -8,9 +8,12 @@ skip-lint = false
 justthetip = "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS"
 
 [programs.devnet]
+# Update this with your devnet program ID after deployment
 justthetip = "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS"
 
 [programs.mainnet]
+# Update this with your mainnet program ID after deployment
+# IMPORTANT: Use a different program ID than devnet for safety
 justthetip = "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS"
 
 [registry]

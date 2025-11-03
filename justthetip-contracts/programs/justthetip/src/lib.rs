@@ -1,6 +1,9 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{self, Token, TokenAccount, Transfer};
 
+// IMPORTANT: Update this program ID after deployment
+// This is a placeholder - run `anchor keys list` after building to get your actual program ID
+// For production, use different program IDs for devnet and mainnet
 declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
 
 #[program]
@@ -37,12 +40,18 @@ pub mod justthetip {
         
         // Update sender stats
         let sender_account = &mut ctx.accounts.sender_account;
-        sender_account.total_sent = sender_account.total_sent.checked_add(amount).unwrap();
-        sender_account.tip_count = sender_account.tip_count.checked_add(1).unwrap();
+        sender_account.total_sent = sender_account.total_sent
+            .checked_add(amount)
+            .ok_or(ErrorCode::ArithmeticOverflow)?;
+        sender_account.tip_count = sender_account.tip_count
+            .checked_add(1)
+            .ok_or(ErrorCode::ArithmeticOverflow)?;
         
         // Update recipient stats
         let recipient_account = &mut ctx.accounts.recipient_account;
-        recipient_account.total_received = recipient_account.total_received.checked_add(amount).unwrap();
+        recipient_account.total_received = recipient_account.total_received
+            .checked_add(amount)
+            .ok_or(ErrorCode::ArithmeticOverflow)?;
         
         emit!(TipEvent {
             sender: ctx.accounts.sender.key(),
@@ -77,12 +86,18 @@ pub mod justthetip {
         
         // Update sender stats (in token units)
         let sender_account = &mut ctx.accounts.sender_account;
-        sender_account.total_sent = sender_account.total_sent.checked_add(amount).unwrap();
-        sender_account.tip_count = sender_account.tip_count.checked_add(1).unwrap();
+        sender_account.total_sent = sender_account.total_sent
+            .checked_add(amount)
+            .ok_or(ErrorCode::ArithmeticOverflow)?;
+        sender_account.tip_count = sender_account.tip_count
+            .checked_add(1)
+            .ok_or(ErrorCode::ArithmeticOverflow)?;
         
         // Update recipient stats
         let recipient_account = &mut ctx.accounts.recipient_account;
-        recipient_account.total_received = recipient_account.total_received.checked_add(amount).unwrap();
+        recipient_account.total_received = recipient_account.total_received
+            .checked_add(amount)
+            .ok_or(ErrorCode::ArithmeticOverflow)?;
         
         emit!(TipEvent {
             sender: ctx.accounts.sender.key(),
@@ -153,7 +168,9 @@ pub mod justthetip {
         );
         anchor_lang::system_program::transfer(cpi_context, amount)?;
         
-        airdrop.claimed_count = airdrop.claimed_count.checked_add(1).unwrap();
+        airdrop.claimed_count = airdrop.claimed_count
+            .checked_add(1)
+            .ok_or(ErrorCode::ArithmeticOverflow)?;
         
         // Deactivate if fully claimed
         if airdrop.claimed_count >= airdrop.recipients_count {
@@ -378,4 +395,6 @@ pub enum ErrorCode {
     AirdropFullyClaimed,
     #[msg("Unauthorized: only the creator can perform this action")]
     Unauthorized,
+    #[msg("Arithmetic overflow occurred")]
+    ArithmeticOverflow,
 }

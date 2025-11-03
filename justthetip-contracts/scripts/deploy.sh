@@ -55,7 +55,9 @@ echo "💰 Checking wallet balance..."
 BALANCE=$(solana balance 2>/dev/null | awk '{print $1}')
 echo "   Balance: $BALANCE SOL"
 
-if (( $(echo "$BALANCE < 0.5" | bc -l) )); then
+# Check if balance is too low (using awk instead of bc for portability)
+LOW_BALANCE=$(echo "$BALANCE" | awk '{if ($1 < 0.5) print "yes"; else print "no"}')
+if [ "$LOW_BALANCE" = "yes" ]; then
     echo "⚠️  Warning: Low balance. Deployment requires ~0.5-1 SOL"
     if [ "$CLUSTER" = "devnet" ]; then
         echo "   Getting devnet SOL..."
