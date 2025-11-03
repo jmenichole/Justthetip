@@ -76,9 +76,16 @@ echo "✅ Build complete"
 echo ""
 
 # Get program ID
-PROGRAM_ID=$(anchor keys list | grep justthetip | awk '{print $2}')
-echo "📝 Program ID: $PROGRAM_ID"
-echo ""
+PROGRAM_ID=$(anchor keys list 2>/dev/null | grep justthetip | awk '{print $2}')
+if [ -z "$PROGRAM_ID" ]; then
+    echo "⚠️  Warning: Could not determine program ID from anchor keys list"
+    echo "   This may be normal for first-time builds"
+    echo "   The program ID will be determined during deployment"
+    echo ""
+else
+    echo "📝 Program ID: $PROGRAM_ID"
+    echo ""
+fi
 
 # Confirm deployment
 if [ "$CLUSTER" = "mainnet" ]; then
@@ -98,22 +105,37 @@ echo "🚀 Deploying to $CLUSTER..."
 anchor deploy --provider.cluster $CLUSTER
 echo ""
 
+# Get the final program ID after deployment
+DEPLOYED_PROGRAM_ID=$(anchor keys list 2>/dev/null | grep justthetip | awk '{print $2}')
+
 # Verify deployment
 echo "✅ Deployment complete!"
 echo ""
-echo "📋 Next Steps:"
-echo "   1. Update Anchor.toml with program ID: $PROGRAM_ID"
-echo "   2. Copy IDL to contracts: cp target/idl/justthetip.json ../contracts/"
-echo "   3. Update bot configuration with new program ID"
-echo "   4. Test the deployment with: anchor test --skip-local-validator"
-echo ""
 
-if [ "$CLUSTER" = "mainnet" ]; then
-    echo "🔍 Verify on Solana Explorer:"
-    echo "   https://explorer.solana.com/address/$PROGRAM_ID"
+if [ -n "$DEPLOYED_PROGRAM_ID" ]; then
+    echo "📝 Deployed Program ID: $DEPLOYED_PROGRAM_ID"
+    echo ""
+    echo "📋 Next Steps:"
+    echo "   1. Update Anchor.toml with program ID: $DEPLOYED_PROGRAM_ID"
+    echo "   2. Copy IDL to contracts: cp target/idl/justthetip.json ../contracts/"
+    echo "   3. Update bot configuration with new program ID"
+    echo "   4. Test the deployment with: anchor test --skip-local-validator"
+    echo ""
+
+    if [ "$CLUSTER" = "mainnet" ]; then
+        echo "🔍 Verify on Solana Explorer:"
+        echo "   https://explorer.solana.com/address/$DEPLOYED_PROGRAM_ID"
+    else
+        echo "🔍 Verify on Solana Explorer:"
+        echo "   https://explorer.solana.com/address/$DEPLOYED_PROGRAM_ID?cluster=devnet"
+    fi
 else
-    echo "🔍 Verify on Solana Explorer:"
-    echo "   https://explorer.solana.com/address/$PROGRAM_ID?cluster=devnet"
+    echo "📋 Next Steps:"
+    echo "   1. Get your program ID: anchor keys list"
+    echo "   2. Update Anchor.toml with the program ID"
+    echo "   3. Copy IDL to contracts: cp target/idl/justthetip.json ../contracts/"
+    echo "   4. Update bot configuration with new program ID"
+    echo "   5. Test the deployment with: anchor test --skip-local-validator"
 fi
 echo ""
 
