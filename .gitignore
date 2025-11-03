@@ -20,3 +20,16 @@ railway.toml
 tmp/
 temp/
 *.tmp
+
+# Solana/Anchor artifacts
+justthetip-contracts/target/
+justthetip-contracts/.anchor/
+justthetip-contracts/node_modules/
+justthetip-contracts/test-ledger/
+.anchor/
+
+# Keep deployed program artifacts
+!justthetip-contracts/target/deploy/*.so
+!justthetip-contracts/target/deploy/*-keypair.json
+!justthetip-contracts/target/idl/
+!justthetip-contracts/target/types/

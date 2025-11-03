@@ -12,24 +12,29 @@ JustTheTip is a non-custodial Solana-based Discord tipping bot that enables user
    - `bot.js` - Custodial implementation (legacy, for testing)
    - `bot_smart_contract.js` - Non-custodial smart contract implementation (recommended)
 
-2. **SDK Layer** - Solana blockchain interactions
+2. **Smart Contract Layer** - On-chain Solana programs
+   - `justthetip-contracts/programs/justthetip/` - Anchor-based Solana program
+   - `justthetip-contracts/tests/` - Program integration tests
+   - See `QUICKSTART_SOLANA.md` and `SOLANA_PROGRAM_GUIDE.md` for details
+
+3. **SDK Layer** - Solana blockchain interactions
    - `contracts/sdk.js` - Reusable SDK for smart contract operations
    - `contracts/example.js` - SDK usage examples
 
-3. **Integration Layer** - External services
+4. **Integration Layer** - External services
    - `src/utils/jupiterSwap.js` - Jupiter Aggregator for token swaps
    - `chains/solanaHelper.js` - Solana helper utilities
 
-4. **Command Layer** - Bot command handlers
+5. **Command Layer** - Bot command handlers
    - `src/commands/leaderboardCommand.js` - Leaderboard functionality
    - `src/commands/swapCommand.js` - Token swap commands
    - `src/commands/airdropCommand.js` - Airdrop functionality
 
-5. **API Layer** - RESTful endpoints
+6. **API Layer** - RESTful endpoints
    - `api/server.js` - Main API server
    - `api/adminRoutes.js` - Admin dashboard endpoints
 
-6. **Database Layer** - Data persistence
+7. **Database Layer** - Data persistence
    - `db/database.js` - PostgreSQL database operations
    - `db/schema.sql` - Database schema
 
@@ -37,10 +42,19 @@ JustTheTip is a non-custodial Solana-based Discord tipping bot that enables user
 
 ### Prerequisites
 
+#### Bot Development
 - Node.js v18 or higher
 - PostgreSQL database (optional for testing)
 - Discord Bot Token
 - Solana RPC endpoint (Helius recommended)
+
+#### Smart Contract Development (Optional)
+For developing the Solana smart contracts, you'll also need:
+- Rust 1.70+ (install from https://rustup.rs/)
+- Solana CLI 1.17+ (install from https://docs.solana.com/cli/install-solana-cli-tools)
+- Anchor CLI 0.29+ (install from https://www.anchor-lang.com/docs/installation)
+
+See `QUICKSTART_SOLANA.md` for quick setup or `SOLANA_PROGRAM_GUIDE.md` for complete details.
 
 ### Installation
 
@@ -73,6 +87,26 @@ npm start
 
 # Run SDK demo
 npm run demo:sdk
+```
+
+### Building Smart Contracts (Optional)
+
+If you want to develop or modify the Solana smart contracts:
+
+```bash
+# Build the Solana program
+npm run build:contracts
+
+# Run smart contract tests
+npm run test:contracts
+
+# Deploy to devnet
+npm run deploy:devnet
+
+# For more details, see:
+# - QUICKSTART_SOLANA.md (quick setup)
+# - SOLANA_PROGRAM_GUIDE.md (comprehensive guide)
+# - justthetip-contracts/README.md (program documentation)
 ```
 
 ## Key Features Implemented
@@ -412,9 +446,36 @@ Optional:
 6. Push to branch (`git push origin feature/amazing-feature`)
 7. Open a Pull Request
 
-## Resources
+## Documentation Index
+
+### Getting Started
+- **[README.md](README.md)** - Project overview and features
+- **[QUICKSTART_SOLANA.md](QUICKSTART_SOLANA.md)** - Quick start for Solana development (5 minutes)
+- **[DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md)** - This file - comprehensive developer guide
+
+### Smart Contract Development
+- **[SOLANA_PROGRAM_GUIDE.md](SOLANA_PROGRAM_GUIDE.md)** - Complete Solana program development guide
+- **[justthetip-contracts/README.md](justthetip-contracts/README.md)** - Program architecture and API reference
+- **[justthetip-contracts/DEVELOPMENT_CHECKLIST.md](justthetip-contracts/DEVELOPMENT_CHECKLIST.md)** - Development workflow checklist
+
+### SDK & Integration
+- **[contracts/README.md](contracts/README.md)** - SDK documentation and usage examples
+- **[contracts/sdk.js](contracts/sdk.js)** - SDK source code
+- **[contracts/example.js](contracts/example.js)** - Working SDK examples
+
+### Deployment & Operations
+- **[DEPLOYMENT_SUMMARY.md](DEPLOYMENT_SUMMARY.md)** - Bot deployment guide
+- **[BOT_247_DEPLOYMENT_GUIDE.md](BOT_247_DEPLOYMENT_GUIDE.md)** - 24/7 bot deployment
+- **[RAILWAY_DEPLOYMENT_GUIDE.md](RAILWAY_DEPLOYMENT_GUIDE.md)** - Railway platform deployment
+
+### Additional Resources
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Contribution guidelines
+- **[CRYPTO_SUPPORT_GUIDE.md](CRYPTO_SUPPORT_GUIDE.md)** - Cryptocurrency support information
+
+## External Resources
 
 - [Solana Documentation](https://docs.solana.com/)
+- [Anchor Framework](https://www.anchor-lang.com/)
 - [Discord.js Guide](https://discordjs.guide/)
 - [Jupiter Aggregator](https://docs.jup.ag/)
 - [SPL Token Program](https://spl.solana.com/token)

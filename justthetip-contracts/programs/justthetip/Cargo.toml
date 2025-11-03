@@ -1,0 +1,25 @@
+[package]
+name = "justthetip"
+version = "0.1.0"
+description = "JustTheTip Non-Custodial Tipping Smart Contract"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "justthetip"
+
+[features]
+default = []
+cpi = ["no-entrypoint"]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+idl-build = ["anchor-lang/idl-build"]
+
+[dependencies]
+anchor-lang = "0.29.0"
+anchor-spl = "0.29.0"
+
+[dev-dependencies]
+solana-program-test = "1.17"
+solana-sdk = "1.17"

@@ -12,7 +12,11 @@
     "lint": "eslint .",
     "audit": "npm audit",
     "demo:sdk": "node contracts/example.js",
-    "verify-env": "node scripts/verify-env.js"
+    "verify-env": "node scripts/verify-env.js",
+    "build:contracts": "cd justthetip-contracts && anchor build",
+    "test:contracts": "cd justthetip-contracts && anchor test",
+    "deploy:devnet": "cd justthetip-contracts && anchor deploy --provider.cluster devnet",
+    "deploy:mainnet": "cd justthetip-contracts && anchor deploy --provider.cluster mainnet"
   },
   "author": "",
   "license": "Custom",
