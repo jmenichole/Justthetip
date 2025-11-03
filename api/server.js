@@ -5,12 +5,13 @@
 
 const express = require('express');
 const cors = require('cors');
-const { Connection, PublicKey, Keypair } = require('@solana/web3.js');
-const { Metaplex, keypairIdentity, irysStorage } = require('@metaplex-foundation/js');
+const { PublicKey } = require('@solana/web3.js');
 const nacl = require('tweetnacl');
 const bs58 = require('bs58').default; // Fix: Use .default export
 const { MongoClient } = require('mongodb');
 const adminRoutes = require('./adminRoutes');
+const solanaDevTools = require('../src/utils/solanaDevTools');
+const coinbaseClient = require('../src/utils/coinbaseClient');
 require('dotenv').config();
 
 const app = express();
@@ -18,14 +19,18 @@ const PORT = process.env.PORT || 3000;
 
 // ===== CONFIGURATION =====
 const CONFIG = {
+    SOLANA_CLUSTER: process.env.SOLANA_CLUSTER || 'mainnet-beta',
     SOLANA_RPC_URL: process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com',
+    SOLANA_DEVNET_RPC_URL: process.env.SOLANA_DEVNET_RPC_URL,
     MONGODB_URI: process.env.MONGODB_URI,
     DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID || '1419742988128616479',
     DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET, // Required
     DISCORD_REDIRECT_URI: process.env.DISCORD_REDIRECT_URI || 'https://jmenichole.github.io/Justthetip/landing.html',
     MINT_AUTHORITY_KEYPAIR: process.env.MINT_AUTHORITY_KEYPAIR, // Base58 private key
     VERIFIED_COLLECTION_ADDRESS: process.env.VERIFIED_COLLECTION_ADDRESS,
-    NFT_STORAGE_API_KEY: process.env.NFT_STORAGE_API_KEY
+    NFT_STORAGE_API_KEY: process.env.NFT_STORAGE_API_KEY,
+    COINBASE_COMMERCE_API_KEY: process.env.COINBASE_COMMERCE_API_KEY,
+    COINBASE_COMMERCE_WEBHOOK_SECRET: process.env.COINBASE_COMMERCE_WEBHOOK_SECRET
 };
 
 // ===== MIDDLEWARE =====
@@ -37,7 +42,11 @@ app.use(cors({
     ],
     credentials: true
 }));
-app.use(express.json());
+app.use(express.json({
+    verify: (req, res, buf) => {
+        req.rawBody = buf;
+    }
+}));
 
 // ===== DATABASE =====
 let db;
@@ -70,31 +79,35 @@ async function initializeDatabase() {
 
 async function initializeSolana() {
     try {
-        connection = new Connection(CONFIG.SOLANA_RPC_URL, 'confirmed');
-        console.log('✅ Solana RPC connected:', CONFIG.SOLANA_RPC_URL);
-        
+        const { connection: primaryConnection, metaplex: primaryMetaplex, mintAuthority } = solanaDevTools.initialize({
+            cluster: CONFIG.SOLANA_CLUSTER,
+            rpcUrl: CONFIG.SOLANA_RPC_URL,
+            mintAuthoritySecret: CONFIG.MINT_AUTHORITY_KEYPAIR,
+            nftStorageApiKey: CONFIG.NFT_STORAGE_API_KEY
+        });
+
+        connection = primaryConnection;
+        metaplex = primaryMetaplex;
+
+        console.log('✅ Solana RPC connected:', connection.rpcEndpoint);
+
         if (!CONFIG.MINT_AUTHORITY_KEYPAIR) {
             console.warn('⚠️  No mint authority keypair - NFT minting disabled');
             console.warn('📋 MINT_AUTHORITY_KEYPAIR environment variable is not set');
-            return;
+        } else if (mintAuthority) {
+            console.log('📍 Mint Authority:', mintAuthority.publicKey.toString());
+            console.log('💎 NFT Minting: ENABLED');
         }
 
-        console.log('🔑 Mint authority keypair found, length:', CONFIG.MINT_AUTHORITY_KEYPAIR.length);
-        console.log('🔑 First 20 chars:', CONFIG.MINT_AUTHORITY_KEYPAIR.substring(0, 20));
-        
-        const secretKey = bs58.decode(CONFIG.MINT_AUTHORITY_KEYPAIR);
-        console.log('✅ bs58 decode successful');
-        
-        const mintAuthority = Keypair.fromSecretKey(secretKey);
-        console.log('✅ Keypair created from secret');
-        
-        metaplex = Metaplex.make(connection)
-            .use(keypairIdentity(mintAuthority))
-            .use(irysStorage());
-        
-        console.log('✅ Solana connection initialized');
-        console.log('📍 Mint Authority:', mintAuthority.publicKey.toString());
-        console.log('💎 NFT Minting: ENABLED');
+        if (CONFIG.SOLANA_DEVNET_RPC_URL) {
+            solanaDevTools.initialize({
+                cluster: 'devnet',
+                rpcUrl: CONFIG.SOLANA_DEVNET_RPC_URL,
+                mintAuthoritySecret: CONFIG.MINT_AUTHORITY_KEYPAIR,
+                nftStorageApiKey: CONFIG.NFT_STORAGE_API_KEY
+            });
+            console.log('🧪 Solana devnet tools initialized');
+        }
     } catch (error) {
         console.error('❌ Solana initialization failed:', error.message);
         console.error('❌ Full error:', error);
@@ -171,12 +184,23 @@ async function createNFTMetadata(discordId, discordUsername, walletAddress, term
 
 // Health check
 app.get('/api/health', (req, res) => {
+    const devStatus = solanaDevTools.getStatus();
     res.json({
         status: 'ok',
         timestamp: new Date().toISOString(),
         database: db ? 'connected' : 'disconnected',
         solana: connection ? 'connected' : 'disconnected',
         nftMinting: metaplex ? 'enabled' : 'disabled',
+        solanaCluster: CONFIG.SOLANA_CLUSTER,
+        coinbasePayments: {
+            apiKeyConfigured: Boolean(CONFIG.COINBASE_COMMERCE_API_KEY),
+            webhookConfigured: Boolean(CONFIG.COINBASE_COMMERCE_WEBHOOK_SECRET)
+        },
+        devTools: {
+            defaultCluster: devStatus.defaultCluster,
+            connections: devStatus.connections.length,
+            mintAuthorities: devStatus.mintAuthorities.map((item) => item.publicKey)
+        },
         // Debug fields (sanitized)
         hasMintKey: Boolean(CONFIG.MINT_AUTHORITY_KEYPAIR),
         mintKeyLength: CONFIG.MINT_AUTHORITY_KEYPAIR ? CONFIG.MINT_AUTHORITY_KEYPAIR.length : 0,
@@ -204,10 +228,109 @@ app.get('/api/diag', (req, res) => {
             hasMintKey: Boolean(key),
             mintKeyLength: key ? key.length : 0,
             mintKeyPreview: preview,
-            metaplexInitialized: Boolean(metaplex)
+            metaplexInitialized: Boolean(metaplex),
+            coinbaseConfigured: Boolean(CONFIG.COINBASE_COMMERCE_API_KEY),
+            coinbaseWebhookConfigured: Boolean(CONFIG.COINBASE_COMMERCE_WEBHOOK_SECRET)
         });
     } catch (error) {
         res.status(500).json({ status: 'error', message: error.message });
+    }
+});
+
+// Solana dev tools status
+app.get('/api/solana/devtools/status', (req, res) => {
+    const status = solanaDevTools.getStatus();
+    res.json({ success: true, status });
+});
+
+// Fetch program accounts for diagnostics
+app.get('/api/solana/devtools/program/:programId/accounts', async (req, res) => {
+    try {
+        const { programId } = req.params;
+        const { cluster, commitment } = req.query;
+
+        if (!programId) {
+            return res.status(400).json({ success: false, error: 'Program ID required' });
+        }
+
+        const rpcUrl = cluster === 'devnet' && CONFIG.SOLANA_DEVNET_RPC_URL
+            ? CONFIG.SOLANA_DEVNET_RPC_URL
+            : undefined;
+
+        const config = {};
+        if (commitment) {
+            config.commitment = commitment;
+        }
+
+        const accounts = await solanaDevTools.getProgramAccounts(programId, {
+            cluster: cluster || undefined,
+            rpcUrl,
+            config: Object.keys(config).length > 0 ? config : undefined
+        });
+
+        res.json({ success: true, count: accounts.length, accounts });
+    } catch (error) {
+        res.status(400).json({ success: false, error: error.message });
+    }
+});
+
+// Request devnet/testnet airdrop
+app.post('/api/solana/devtools/airdrop', async (req, res) => {
+    try {
+        const { walletAddress, amountLamports, amountSol, cluster } = req.body;
+
+        if (!walletAddress) {
+            return res.status(400).json({ success: false, error: 'walletAddress is required' });
+        }
+
+        let lamports = Number(amountLamports);
+        if (!lamports && amountSol) {
+            lamports = Math.round(Number(amountSol) * 1_000_000_000);
+        }
+
+        if (!lamports || Number.isNaN(lamports) || lamports <= 0) {
+            return res.status(400).json({ success: false, error: 'Positive lamport amount required' });
+        }
+
+        const targetCluster = cluster || 'devnet';
+        const rpcUrl = targetCluster === 'devnet' && CONFIG.SOLANA_DEVNET_RPC_URL
+            ? CONFIG.SOLANA_DEVNET_RPC_URL
+            : undefined;
+
+        const result = await solanaDevTools.requestAirdrop(walletAddress, lamports, {
+            cluster: targetCluster,
+            rpcUrl
+        });
+
+        res.json({ success: true, signature: result.signature, cluster: targetCluster });
+    } catch (error) {
+        res.status(400).json({ success: false, error: error.message });
+    }
+});
+
+// Fetch NFT metadata for diagnostics
+app.get('/api/solana/devtools/nft/:mintAddress', async (req, res) => {
+    try {
+        const { mintAddress } = req.params;
+        const { cluster } = req.query;
+
+        if (!mintAddress) {
+            return res.status(400).json({ success: false, error: 'mintAddress is required' });
+        }
+
+        const rpcUrl = cluster === 'devnet' && CONFIG.SOLANA_DEVNET_RPC_URL
+            ? CONFIG.SOLANA_DEVNET_RPC_URL
+            : undefined;
+
+        const metadata = await solanaDevTools.getNftMetadata(mintAddress, {
+            cluster: cluster || CONFIG.SOLANA_CLUSTER,
+            rpcUrl,
+            mintAuthoritySecret: CONFIG.MINT_AUTHORITY_KEYPAIR
+        });
+
+        res.json({ success: true, metadata });
+    } catch (error) {
+        res.status(400).json({ success: false, error: error.message });
     }
 });
 
@@ -400,6 +523,80 @@ app.post('/api/mintBadge', async (req, res) => {
             message: error.message,
             details: process.env.NODE_ENV === 'development' ? error.stack : undefined
         });
+    }
+});
+
+// Coinbase Commerce - create payment charge
+app.post('/api/payments/coinbase/charges', async (req, res) => {
+    try {
+        if (!CONFIG.COINBASE_COMMERCE_API_KEY) {
+            return res.status(503).json({ error: 'Coinbase Commerce API key not configured' });
+        }
+
+        const { name, description, amount, currency, metadata, redirectUrl, cancelUrl } = req.body;
+
+        if (!name || !amount || !currency) {
+            return res.status(400).json({ error: 'name, amount, and currency are required' });
+        }
+
+        const charge = await coinbaseClient.createCharge({
+            name,
+            description,
+            localPrice: { amount: amount.toString(), currency },
+            metadata,
+            redirectUrl,
+            cancelUrl
+        });
+
+        res.json({ success: true, charge });
+    } catch (error) {
+        console.error('Coinbase create charge error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Coinbase Commerce - fetch charge status
+app.get('/api/payments/coinbase/charges/:chargeId', async (req, res) => {
+    try {
+        if (!CONFIG.COINBASE_COMMERCE_API_KEY) {
+            return res.status(503).json({ error: 'Coinbase Commerce API key not configured' });
+        }
+
+        const { chargeId } = req.params;
+        if (!chargeId) {
+            return res.status(400).json({ error: 'chargeId is required' });
+        }
+
+        const charge = await coinbaseClient.getCharge(chargeId);
+        res.json({ success: true, charge });
+    } catch (error) {
+        console.error('Coinbase get charge error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Coinbase Commerce webhook handler
+app.post('/api/payments/coinbase/webhook', (req, res) => {
+    try {
+        if (!CONFIG.COINBASE_COMMERCE_WEBHOOK_SECRET) {
+            return res.status(503).json({ error: 'Coinbase Commerce webhook secret not configured' });
+        }
+
+        const signature = req.headers['x-cc-webhook-signature'];
+        const rawBody = req.rawBody || Buffer.from(JSON.stringify(req.body));
+        const verified = coinbaseClient.verifyWebhookSignature(rawBody, signature, CONFIG.COINBASE_COMMERCE_WEBHOOK_SECRET);
+
+        if (!verified) {
+            return res.status(400).json({ error: 'Invalid webhook signature' });
+        }
+
+        const event = req.body;
+        console.log('💳 Coinbase webhook received:', event.type, event.id);
+
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Coinbase webhook error:', error);
+        res.status(500).json({ error: error.message });
     }
 });
 
