@@ -5,7 +5,11 @@ This directory contains the GitHub Pages site for JustTheTip, deployed at https:
 ## 📄 Site Structure
 
 ### Main Pages
-- **index.html** - Primary landing page (default page served by GitHub Pages)
+- **landing.html** - Primary marketing and verification landing page
+  - Highlights non-custodial tipping, NFT verification, and Coinbase flows
+  - Includes "Add to Discord" entry points and quick-start walkthrough
+  - Uses external CSS/JS for modern styling
+- **index.html** - Legacy overview page (still deployed for backwards-compatible bookmarks)
   - Features Discord bot information
   - Smart contract benefits
   - How it works section
@@ -34,14 +38,9 @@ This directory contains the GitHub Pages site for JustTheTip, deployed at https:
   - Data handling policies
 
 ### Alternative Landing Pages
-- **landing.html** - Modern alternative landing page design
-  - Uses external CSS (landing-styles.css)
-  - More developer-focused
-  - SVG icons and modern design
-  
-- **landing_NEW.html** - Another variation of landing page
+- **landing_NEW.html** - Secondary variation of landing page
   - Different styling approach
-  - Can be used for A/B testing
+  - Useful for A/B testing or campaign-specific messaging
 
 ### Assets
 - **logo.png** - JustTheTip logo (947KB)
