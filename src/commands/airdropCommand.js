@@ -192,7 +192,8 @@ class AirdropCommand {
     try {
       const airdropId = interaction.customId.replace('claim_airdrop_', '');
       const userId = interaction.user.id;
-      const username = interaction.user.username;
+      // Username reserved for future logging/notifications
+      // const username = interaction.user.username;
 
       // Get airdrop data
       const airdrop = await this.db.getAirdrop(airdropId);
