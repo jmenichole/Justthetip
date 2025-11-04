@@ -119,7 +119,7 @@ async function main() {
       console.error('\n💡 Missing Access: Bot lacks permissions');
       console.error('   Solution: Reinvite bot with applications.commands scope');
     } else if (error.code === 'ERR_INVALID_ARG_TYPE') {
-      console.error('\n💡 Invalid Token: Check your BOT_TOKEN in .env');
+      console.error('\n💡 Invalid Token: Check your DISCORD_BOT_TOKEN in .env');
     }
     
     process.exit(1);
