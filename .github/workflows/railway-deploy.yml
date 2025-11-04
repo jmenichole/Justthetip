@@ -54,8 +54,8 @@ jobs:
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
         run: |
-          railway variables set BOT_TOKEN="${{ secrets.BOT_TOKEN }}" --service ${{ secrets.RAILWAY_BOT_SERVICE_ID }}
-          railway variables set CLIENT_ID="${{ secrets.CLIENT_ID }}" --service ${{ secrets.RAILWAY_BOT_SERVICE_ID }}
+          railway variables set DISCORD_BOT_TOKEN="${{ secrets.DISCORD_BOT_TOKEN }}" --service ${{ secrets.RAILWAY_BOT_SERVICE_ID }}
+          railway variables set DISCORD_CLIENT_ID="${{ secrets.DISCORD_CLIENT_ID }}" --service ${{ secrets.RAILWAY_BOT_SERVICE_ID }}
           railway variables set GUILD_ID="${{ secrets.GUILD_ID }}" --service ${{ secrets.RAILWAY_BOT_SERVICE_ID }}
           railway variables set HELIUS_API_KEY="${{ secrets.HELIUS_API_KEY }}" --service ${{ secrets.RAILWAY_BOT_SERVICE_ID }}
           railway variables set SOLANA_RPC_URL="${{ secrets.SOLANA_RPC_URL }}" --service ${{ secrets.RAILWAY_BOT_SERVICE_ID }}
@@ -105,7 +105,7 @@ jobs:
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
         run: |
-          railway variables set DISCORD_CLIENT_ID="${{ secrets.CLIENT_ID }}" --service ${{ secrets.RAILWAY_API_SERVICE_ID }}
+          railway variables set DISCORD_CLIENT_ID="${{ secrets.DISCORD_CLIENT_ID }}" --service ${{ secrets.RAILWAY_API_SERVICE_ID }}
           railway variables set DISCORD_CLIENT_SECRET="${{ secrets.DISCORD_CLIENT_SECRET }}" --service ${{ secrets.RAILWAY_API_SERVICE_ID }}
           railway variables set DISCORD_REDIRECT_URI="${{ secrets.DISCORD_REDIRECT_URI }}" --service ${{ secrets.RAILWAY_API_SERVICE_ID }}
           railway variables set SOLANA_RPC_URL="${{ secrets.SOLANA_RPC_URL }}" --service ${{ secrets.RAILWAY_API_SERVICE_ID }}

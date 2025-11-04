@@ -17,8 +17,8 @@ describe('Railway Secrets Verification', () => {
 
   test('should fail when critical secrets are missing', () => {
     // Clear critical secrets
-    delete process.env.BOT_TOKEN;
-    delete process.env.CLIENT_ID;
+    delete process.env.DISCORD_BOT_TOKEN;
+    delete process.env.DISCORD_CLIENT_ID;
 
     const { verifyRailwaySecrets } = require('../scripts/verify-railway-secrets');
     const result = verifyRailwaySecrets();
@@ -28,8 +28,8 @@ describe('Railway Secrets Verification', () => {
 
   test('should pass when critical secrets are present', () => {
     // Set critical secrets
-    process.env.BOT_TOKEN = 'test_token_with_more_than_fifty_characters_here_for_validation';
-    process.env.CLIENT_ID = '1234567890';
+    process.env.DISCORD_BOT_TOKEN = 'test_token_with_more_than_fifty_characters_here_for_validation';
+    process.env.DISCORD_CLIENT_ID = '1234567890';
 
     const { verifyRailwaySecrets } = require('../scripts/verify-railway-secrets');
     
@@ -44,9 +44,9 @@ describe('Railway Secrets Verification', () => {
     expect(result).toBe(true);
   });
 
-  test('should validate BOT_TOKEN length', () => {
-    process.env.BOT_TOKEN = 'short';
-    process.env.CLIENT_ID = '1234567890';
+  test('should validate DISCORD_BOT_TOKEN length', () => {
+    process.env.DISCORD_BOT_TOKEN = 'short';
+    process.env.DISCORD_CLIENT_ID = '1234567890';
 
     const { verifyRailwaySecrets } = require('../scripts/verify-railway-secrets');
     
@@ -60,9 +60,9 @@ describe('Railway Secrets Verification', () => {
     expect(result).toBe(false);
   });
 
-  test('should validate CLIENT_ID is numeric', () => {
-    process.env.BOT_TOKEN = 'test_token_with_more_than_fifty_characters_here_for_validation';
-    process.env.CLIENT_ID = 'not_numeric';
+  test('should validate DISCORD_CLIENT_ID is numeric', () => {
+    process.env.DISCORD_BOT_TOKEN = 'test_token_with_more_than_fifty_characters_here_for_validation';
+    process.env.DISCORD_CLIENT_ID = 'not_numeric';
 
     const { verifyRailwaySecrets } = require('../scripts/verify-railway-secrets');
     
@@ -77,8 +77,8 @@ describe('Railway Secrets Verification', () => {
   });
 
   test('should validate MONGODB_URI format', () => {
-    process.env.BOT_TOKEN = 'test_token_with_more_than_fifty_characters_here_for_validation';
-    process.env.CLIENT_ID = '1234567890';
+    process.env.DISCORD_BOT_TOKEN = 'test_token_with_more_than_fifty_characters_here_for_validation';
+    process.env.DISCORD_CLIENT_ID = '1234567890';
     process.env.MONGODB_URI = 'invalid_uri';
 
     const { verifyRailwaySecrets } = require('../scripts/verify-railway-secrets');
@@ -95,8 +95,8 @@ describe('Railway Secrets Verification', () => {
   });
 
   test('should validate SOLANA_RPC_URL format', () => {
-    process.env.BOT_TOKEN = 'test_token_with_more_than_fifty_characters_here_for_validation';
-    process.env.CLIENT_ID = '1234567890';
+    process.env.DISCORD_BOT_TOKEN = 'test_token_with_more_than_fifty_characters_here_for_validation';
+    process.env.DISCORD_CLIENT_ID = '1234567890';
     process.env.SOLANA_RPC_URL = 'not_https_url';
 
     const { verifyRailwaySecrets } = require('../scripts/verify-railway-secrets');

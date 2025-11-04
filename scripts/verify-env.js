@@ -23,8 +23,8 @@ const colors = {
 // Required environment variables for different bot modes
 const requiredVars = {
   common: [
-    { name: 'BOT_TOKEN', description: 'Discord bot token from Developer Portal' },
-    { name: 'CLIENT_ID', description: 'Discord application client ID' },
+    { name: 'DISCORD_BOT_TOKEN', description: 'Discord bot token from Developer Portal' },
+    { name: 'DISCORD_CLIENT_ID', description: 'Discord application client ID' },
     { name: 'NODE_ENV', description: 'Environment (development/production)', optional: true, default: 'development' },
   ],
   smartContract: [
