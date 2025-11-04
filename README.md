@@ -181,10 +181,23 @@ CI/CD pipelines should run linting, unit tests, and contract tests before deploy
 ---
 
 ## Deployment Notes
+
+### Discord Bot Deployment
+- **Quick Start**: See [RAILWAY_QUICK_REFERENCE.md](./RAILWAY_QUICK_REFERENCE.md) for fast Railway deployment
+- **Complete Guide**: [RAILWAY_DEPLOYMENT_INSTRUCTIONS.md](./RAILWAY_DEPLOYMENT_INSTRUCTIONS.md) has step-by-step instructions
+- **Troubleshooting**: [RAILWAY_BOT_CHECKLIST.md](./RAILWAY_BOT_CHECKLIST.md) includes verification checklist
+- **Fix Guide**: [FIX_SUMMARY.md](./FIX_SUMMARY.md) documents common issues and solutions
+
+### API Server Deployment
 - The API can be hosted on services like Railway or Heroku; see `RAILWAY_*.md` and `DEPLOY_BACKEND.md` for environment-specific steps.
 - Front-end assets are published via GitHub Pages (see `DOCUMENTATION_INDEX.md`).
+
+### Smart Contracts
 - Anchor deployments require cluster-specific keypairs and RPC URLs; consult `SOLANA_PROGRAM_GUIDE.md` and `MAINNET_DEPLOYMENT_GUIDE.md`.
+
+### Security
 - Production environments must secure secrets through managed secret stores and restrict webhook endpoints to HTTPS.
+- Use Railway environment variables for all secrets (BOT_TOKEN, CLIENT_ID, MONGODB_URI, etc.)
 
 ---
 
