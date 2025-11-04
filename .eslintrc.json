@@ -28,6 +28,21 @@
     "build/",
     "coverage/",
     "justthetip-contracts/",
-    "*.min.js"
+    "*.min.js",
+    "USER_PAID_MINTING_CODE.js"
+  ],
+  "overrides": [
+    {
+      "files": ["tests/**/*.js", "**/*.test.js", "**/*.spec.js"],
+      "env": {
+        "jest": true
+      }
+    },
+    {
+      "files": ["docs/**/*.js"],
+      "env": {
+        "browser": true
+      }
+    }
   ]
 }

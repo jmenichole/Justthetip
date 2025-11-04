@@ -13,27 +13,24 @@
  * This software may not be sold commercially without permission.
  */
 
-const { Client, GatewayIntentBits, Partials, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Events, REST, Routes, InteractionType } = require('discord.js');
+const { Client, GatewayIntentBits, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Events, REST, Routes } = require('discord.js');
 require('dotenv-safe').config({ allowEmptyValues: true });
 const db = require('./db/database');
-const { createSolanaPayUrl } = require('./chains/solanaHelper');
-const logger = require('./src/utils/logger');
-const inputValidation = require('./src/validators/inputValidation');
 const { handleLeaderboardCommand } = require('./src/commands/leaderboardCommand');
 const { handleSwapCommand, handleSwapHelpButton } = require('./src/commands/swapCommand');
 const fs = require('fs');
 
-// Define the mint address for USDC on Solana mainnet-beta
-const USDC_MINT_ADDRESS = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
-// Load fee wallet addresses
+// Load fee wallet addresses (reserved for future use)
 const feeWallets = require('./security/feeWallet.json');
 // Fee rate (0.5%)
 const FEE_RATE = 0.005;
 
+// Reserved for future fee calculation feature
 function calculateFee(amount) {
   return Math.max(Math.floor(amount * FEE_RATE * 1e8) / 1e8, 0); // 8 decimals
 }
 
+// Reserved for future fee wallet feature
 function getFeeWallet(coin) {
   return feeWallets[coin.toUpperCase()] || null;
 }
@@ -145,6 +142,7 @@ const commands = [
 
 const rest = new REST({ version: '10' }).setToken(process.env.BOT_TOKEN);
 
+// Reserved for future admin role checking feature
 function isAdmin(member) {
   return member.roles.cache.some(role => role.name.toLowerCase() === 'admin');
 }
@@ -165,7 +163,7 @@ function loadAirdrops() {
   }
 }
 
-let airdrops = loadAirdrops();
+const airdrops = loadAirdrops();
 
 const rateLimits = {};
 function isRateLimited(userId, command, max = 5, windowMs = 60000) {
@@ -210,8 +208,7 @@ client.on(Events.InteractionCreate, async interaction => {
   
   try {
     if (commandName === 'balance') {
-      const userId = interaction.user.id;
-      const balances = { SOL: 0, USDC: 0 }; // Mock data - replace with actual db call
+      // Mock data - replace with actual db call using interaction.user.id
       
       const embed = new EmbedBuilder()
         .setTitle('💎 Your Portfolio Balance')
@@ -308,7 +305,7 @@ client.on(Events.InteractionCreate, async interaction => {
     const userId = interaction.user.id;
     
     // Find unclaimed airdrop for collection
-    const availableAirdrops = Object.entries(airdrops).filter(([id, airdrop]) => !airdrop.claimed);
+    const availableAirdrops = Object.entries(airdrops).filter(([_id, airdrop]) => !airdrop.claimed);
     
     if (availableAirdrops.length === 0) {
       return interaction.reply({ content: 'No airdrops available to collect.', ephemeral: true });
