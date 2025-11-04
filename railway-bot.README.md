@@ -36,6 +36,30 @@ mv railway-bot.json railway.json
 
 ## Required Environment Variables
 
+### Option 1: Automated Deployment with GitHub Secrets (Recommended)
+
+Use GitHub Actions to automatically deploy and sync environment variables from repository secrets:
+
+1. Configure GitHub repository secrets (see [RAILWAY_GITHUB_SECRETS.md](./RAILWAY_GITHUB_SECRETS.md))
+2. Trigger deployment via GitHub Actions
+3. Environment variables automatically sync to Railway
+
+**Required GitHub Secrets:**
+- `RAILWAY_TOKEN` - Railway API token
+- `RAILWAY_PROJECT_ID` - Railway project ID  
+- `RAILWAY_BOT_SERVICE_ID` - Railway bot service ID
+- `BOT_TOKEN` - Discord bot token
+- `CLIENT_ID` - Discord client ID
+- `GUILD_ID` - Discord guild ID
+- `MONGODB_URI` - MongoDB connection string
+- `SOLANA_RPC_URL` - Solana RPC endpoint
+- `HELIUS_API_KEY` - Helius API key
+- Plus admin and security secrets
+
+**See [RAILWAY_GITHUB_SECRETS.md](./RAILWAY_GITHUB_SECRETS.md) for complete list and setup instructions.**
+
+### Option 2: Manual Configuration in Railway Dashboard
+
 See [BOT_RAILWAY_SETUP.md](./BOT_RAILWAY_SETUP.md) for complete list. Key variables:
 
 ```
@@ -60,5 +84,6 @@ NODE_ENV=production
 
 ## See Also
 
+- [RAILWAY_GITHUB_SECRETS.md](./RAILWAY_GITHUB_SECRETS.md) - **Automated deployment with GitHub Actions & secrets**
 - [RAILWAY_CONFIG_GUIDE.md](./RAILWAY_CONFIG_GUIDE.md) - Complete Railway configuration overview
 - [BOT_RAILWAY_SETUP.md](./BOT_RAILWAY_SETUP.md) - Step-by-step bot deployment guide

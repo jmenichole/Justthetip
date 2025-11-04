@@ -1,0 +1,122 @@
+name: Deploy to Railway
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+    inputs:
+      service:
+        description: 'Service to deploy (bot or api)'
+        required: true
+        default: 'bot'
+        type: choice
+        options:
+          - bot
+          - api
+
+env:
+  RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-bot:
+    name: Deploy Discord Bot to Railway
+    runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'push' && contains(github.event.head_commit.message, '[deploy-bot]')) ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.service == 'bot')
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy to Railway
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          railway link ${{ secrets.RAILWAY_PROJECT_ID }}
+          railway up --service ${{ secrets.RAILWAY_BOT_SERVICE_ID }}
+
+      - name: Set Environment Variables
+        if: success()
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          railway variables set BOT_TOKEN="${{ secrets.BOT_TOKEN }}" --service ${{ secrets.RAILWAY_BOT_SERVICE_ID }}
+          railway variables set CLIENT_ID="${{ secrets.CLIENT_ID }}" --service ${{ secrets.RAILWAY_BOT_SERVICE_ID }}
+          railway variables set GUILD_ID="${{ secrets.GUILD_ID }}" --service ${{ secrets.RAILWAY_BOT_SERVICE_ID }}
+          railway variables set HELIUS_API_KEY="${{ secrets.HELIUS_API_KEY }}" --service ${{ secrets.RAILWAY_BOT_SERVICE_ID }}
+          railway variables set SOLANA_RPC_URL="${{ secrets.SOLANA_RPC_URL }}" --service ${{ secrets.RAILWAY_BOT_SERVICE_ID }}
+          railway variables set SOL_RPC_URL="${{ secrets.SOL_RPC_URL }}" --service ${{ secrets.RAILWAY_BOT_SERVICE_ID }}
+          railway variables set MONGODB_URI="${{ secrets.MONGODB_URI }}" --service ${{ secrets.RAILWAY_BOT_SERVICE_ID }}
+          railway variables set DATABASE_URL="${{ secrets.DATABASE_URL }}" --service ${{ secrets.RAILWAY_BOT_SERVICE_ID }}
+          railway variables set NODE_ENV="production" --service ${{ secrets.RAILWAY_BOT_SERVICE_ID }}
+          railway variables set SUPER_ADMIN_USER_IDS="${{ secrets.SUPER_ADMIN_USER_IDS }}" --service ${{ secrets.RAILWAY_BOT_SERVICE_ID }}
+          railway variables set ADMIN_USER_IDS="${{ secrets.ADMIN_USER_IDS }}" --service ${{ secrets.RAILWAY_BOT_SERVICE_ID }}
+          railway variables set SUPER_ADMIN_SECRET="${{ secrets.SUPER_ADMIN_SECRET }}" --service ${{ secrets.RAILWAY_BOT_SERVICE_ID }}
+          railway variables set EMERGENCY_ADMIN_SECRET="${{ secrets.EMERGENCY_ADMIN_SECRET }}" --service ${{ secrets.RAILWAY_BOT_SERVICE_ID }}
+
+      - name: Verify Deployment
+        if: success()
+        run: |
+          echo "✅ Bot deployed successfully to Railway!"
+          echo "Check Railway dashboard for deployment status"
+
+  deploy-api:
+    name: Deploy API Server to Railway
+    runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'push' && contains(github.event.head_commit.message, '[deploy-api]')) ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.service == 'api')
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy to Railway
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          railway link ${{ secrets.RAILWAY_PROJECT_ID }}
+          railway up --service ${{ secrets.RAILWAY_API_SERVICE_ID }}
+
+      - name: Set Environment Variables
+        if: success()
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          railway variables set DISCORD_CLIENT_ID="${{ secrets.CLIENT_ID }}" --service ${{ secrets.RAILWAY_API_SERVICE_ID }}
+          railway variables set DISCORD_CLIENT_SECRET="${{ secrets.DISCORD_CLIENT_SECRET }}" --service ${{ secrets.RAILWAY_API_SERVICE_ID }}
+          railway variables set DISCORD_REDIRECT_URI="${{ secrets.DISCORD_REDIRECT_URI }}" --service ${{ secrets.RAILWAY_API_SERVICE_ID }}
+          railway variables set SOLANA_RPC_URL="${{ secrets.SOLANA_RPC_URL }}" --service ${{ secrets.RAILWAY_API_SERVICE_ID }}
+          railway variables set MINT_AUTHORITY_KEYPAIR="${{ secrets.MINT_AUTHORITY_KEYPAIR }}" --service ${{ secrets.RAILWAY_API_SERVICE_ID }}
+          railway variables set MONGODB_URI="${{ secrets.MONGODB_URI }}" --service ${{ secrets.RAILWAY_API_SERVICE_ID }}
+          railway variables set PORT="3000" --service ${{ secrets.RAILWAY_API_SERVICE_ID }}
+          railway variables set NODE_ENV="production" --service ${{ secrets.RAILWAY_API_SERVICE_ID }}
+          railway variables set CORS_ORIGIN="${{ secrets.CORS_ORIGIN }}" --service ${{ secrets.RAILWAY_API_SERVICE_ID }}
+
+      - name: Verify Deployment
+        if: success()
+        run: |
+          echo "✅ API deployed successfully to Railway!"
+          echo "Check Railway dashboard for deployment status"
