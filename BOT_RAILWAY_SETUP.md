@@ -21,8 +21,8 @@ Copy and paste these into Railway's environment variables section:
 
 #### **Required Discord Variables** ✅ (Copy from your local .env)
 ```
-BOT_TOKEN=your_bot_token_from_local_env
-CLIENT_ID=1419742988128616479
+DISCORD_BOT_TOKEN=your_bot_token_from_local_env
+DISCORD_CLIENT_ID=1419742988128616479
 GUILD_ID=1413961128522023024
 ```
 
@@ -143,7 +143,7 @@ Contains all bot dependencies:
 ### Bot Keeps Restarting
 **Check logs for:**
 - `ECONNREFUSED` - Database connection issues
-- `401 Unauthorized` - Invalid BOT_TOKEN
+- `401 Unauthorized` - Invalid DISCORD_BOT_TOKEN
 - `Missing Access` - Bot lacks Discord permissions
 
 ---
@@ -195,7 +195,7 @@ After deployment:
 3. **Security Best Practices:**
    - Use strong admin passwords
    - Limit ADMIN_USER_IDS to trusted users
-   - Never share BOT_TOKEN publicly
+   - Never share DISCORD_BOT_TOKEN publicly
    - Rotate secrets every 90 days
 
 4. **Testing in Development:**

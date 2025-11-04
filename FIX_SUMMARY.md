@@ -12,7 +12,7 @@ Railway was configured to start the API server (`api/server.js`) instead of the 
 Created a robust verification script that validates all environment variables before the bot starts:
 
 **File:** `scripts/verify-railway-secrets.js`
-- ✅ Validates presence of critical secrets (BOT_TOKEN, CLIENT_ID)
+- ✅ Validates presence of critical secrets (DISCORD_BOT_TOKEN, DISCORD_CLIENT_ID)
 - ✅ Validates format of important secrets (MONGODB_URI, SOLANA_RPC_URL)
 - ✅ Provides clear error messages with fix instructions
 - ✅ Exit code 1 if critical secrets missing (prevents bot startup)
@@ -66,8 +66,8 @@ Change to: npm run start:bot-railway
 **Step 2: Verify Environment Variables**
 Go to Variables tab and ensure these are set:
 ```bash
-BOT_TOKEN=your_discord_bot_token
-CLIENT_ID=your_discord_client_id
+DISCORD_BOT_TOKEN=your_discord_bot_token
+DISCORD_CLIENT_ID=your_discord_client_id
 MONGODB_URI=your_mongodb_connection_string
 SOLANA_RPC_URL=your_solana_rpc_endpoint
 ```
@@ -89,8 +89,8 @@ Railway Discord Bot - Secrets Verification
    Environment: production
 
 🔴 CRITICAL SECRETS (Bot won't start without these):
-  ✅ BOT_TOKEN: ***xxxx
-  ✅ CLIENT_ID: 1419742988128616479
+  ✅ DISCORD_BOT_TOKEN: ***xxxx
+  ✅ DISCORD_CLIENT_ID: 1419742988128616479
 
 🟡 IMPORTANT SECRETS (Recommended for full functionality):
   ✅ MONGODB_URI: ***xxxx
@@ -128,10 +128,10 @@ Successfully reloaded application (/) commands.
 **❌ Failure (Missing Secrets):**
 ```
 🔴 CRITICAL SECRETS (Bot won't start without these):
-  ❌ BOT_TOKEN: MISSING
-     BOT_TOKEN must be set with valid Discord token from Developer Portal
-  ❌ CLIENT_ID: MISSING
-     CLIENT_ID must be set with numeric Discord application ID
+  ❌ DISCORD_BOT_TOKEN: MISSING
+     DISCORD_BOT_TOKEN must be set with valid Discord token from Developer Portal
+  ❌ DISCORD_CLIENT_ID: MISSING
+     DISCORD_CLIENT_ID must be set with numeric Discord application ID
 
 ❌ CRITICAL SECRETS MISSING - Bot cannot start!
 
@@ -172,7 +172,7 @@ After deploying, verify these:
 
 **Fix:**
 1. Go to Railway Dashboard → Variables tab
-2. Add missing variables (BOT_TOKEN, CLIENT_ID)
+2. Add missing variables (DISCORD_BOT_TOKEN, DISCORD_CLIENT_ID)
 3. Get values from Discord Developer Portal
 4. Redeploy service
 

@@ -83,7 +83,7 @@ open https://render.com
 ### Before Deploying
 
 - [ ] Run `./setup-railway.sh` (generates keypair)
-- [ ] Get Discord CLIENT_SECRET from Developer Portal
+- [ ] Get Discord DISCORD_CLIENT_SECRET from Developer Portal
 - [ ] Have MongoDB URI ready (already in .env)
 - [ ] Fund mint wallet with 0.5-1 SOL
 
@@ -110,7 +110,7 @@ open https://render.com
 ```
 Step 1: Preparation (5 minutes)
 → Run ./setup-railway.sh
-→ Get Discord CLIENT_SECRET
+→ Get Discord DISCORD_CLIENT_SECRET
 
 Step 2: Railway Deployment (5 minutes)
 → Read QUICK_DEPLOY.md

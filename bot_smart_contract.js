@@ -81,7 +81,7 @@ client.once('ready', async () => {
   await db.connectDB();
   
   // Register smart contract commands
-  const rest = new REST({ version: '10' }).setToken(process.env.BOT_TOKEN);
+  const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_BOT_TOKEN);
   try {
     await rest.put(
       Routes.applicationCommands(client.user.id),
@@ -339,4 +339,4 @@ client.on(Events.InteractionCreate, async interaction => {
   }
 });
 
-client.login(process.env.BOT_TOKEN);
+client.login(process.env.DISCORD_BOT_TOKEN);

@@ -140,7 +140,7 @@ const commands = [
   }
 ];
 
-const rest = new REST({ version: '10' }).setToken(process.env.BOT_TOKEN);
+const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_BOT_TOKEN);
 
 // Reserved for future admin role checking feature
 function isAdmin(member) {
@@ -356,4 +356,4 @@ client.once('ready', async () => {
   }
 });
 
-client.login(process.env.BOT_TOKEN);
+client.login(process.env.DISCORD_BOT_TOKEN);

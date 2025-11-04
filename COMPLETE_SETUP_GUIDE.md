@@ -124,7 +124,7 @@ Your API will be at: `https://your-app.railway.app`
 1. Go to https://discord.com/developers/applications
 2. Click "New Application"
 3. Name it "JustTheTip"
-4. Save the **Application ID** (this is your CLIENT_ID)
+4. Save the **Application ID** (this is your DISCORD_CLIENT_ID)
 
 ### Step 2: Configure OAuth2
 1. Go to OAuth2 → General

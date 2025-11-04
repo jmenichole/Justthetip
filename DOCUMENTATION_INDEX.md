@@ -202,7 +202,7 @@ VERIFIED_COLLECTION_ADDRESS=...
 - [x] Run configuration validation
 - [x] Run mock test suite
 - [x] Generate fix guides
-- [ ] Add Discord CLIENT_SECRET to .env
+- [ ] Add Discord DISCORD_CLIENT_SECRET to .env
 - [ ] Generate mint authority keypair
 - [ ] Fund mint wallet with SOL
 - [ ] Add API_BASE_URL to .env
@@ -238,7 +238,7 @@ VERIFIED_COLLECTION_ADDRESS=...
 
 ## 🔍 Finding Specific Information
 
-### "How do I get Discord CLIENT_SECRET?"
+### "How do I get Discord DISCORD_CLIENT_SECRET?"
 **File:** `.env.validation-report.md`  
 **Section:** "2. Missing Variables - DISCORD_CLIENT_SECRET"  
 **Quick:** `QUICK_FIX_GUIDE.md` section 1

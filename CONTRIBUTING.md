@@ -61,8 +61,8 @@ Edit `.env` and add your configuration:
 
 ```env
 # Discord Configuration
-BOT_TOKEN=your_discord_bot_token_here
-CLIENT_ID=your_discord_client_id_here
+DISCORD_BOT_TOKEN=your_discord_bot_token_here
+DISCORD_CLIENT_ID=your_discord_client_id_here
 GUILD_ID=your_discord_guild_id_here
 
 # Solana Configuration (Use Devnet for Development)

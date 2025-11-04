@@ -26,7 +26,7 @@ Before starting, ensure you have:
 
 - [x] GitHub account with Justthetip repository
 - [x] Railway account (sign up at https://railway.app)
-- [x] Discord CLIENT_SECRET (from Developer Portal)
+- [x] Discord DISCORD_CLIENT_SECRET (from Developer Portal)
 - [x] Mint authority keypair generated (see Quick Setup below)
 - [x] MongoDB URI (already in your .env)
 - [x] 0.5-1 SOL in mint authority wallet

@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const dotenv = require('dotenv');
 
-const REQUIRED_ENV_VARS = ['BOT_TOKEN', 'CLIENT_ID'];
+const REQUIRED_ENV_VARS = ['DISCORD_BOT_TOKEN', 'DISCORD_CLIENT_ID'];
 
 function loadEnv() {
   const projectRoot = path.resolve(__dirname, '../../');

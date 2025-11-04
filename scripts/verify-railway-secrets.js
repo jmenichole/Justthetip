@@ -32,16 +32,16 @@ function logHeader(message) {
 // Critical secrets required for Discord bot to function
 const CRITICAL_SECRETS = [
   {
-    name: 'BOT_TOKEN',
+    name: 'DISCORD_BOT_TOKEN',
     description: 'Discord bot token for authentication',
     validate: (val) => val && val.length > 50,
-    errorMsg: 'BOT_TOKEN must be set with valid Discord token from Developer Portal',
+    errorMsg: 'DISCORD_BOT_TOKEN must be set with valid Discord token from Developer Portal',
   },
   {
-    name: 'CLIENT_ID',
+    name: 'DISCORD_CLIENT_ID',
     description: 'Discord application client ID',
     validate: (val) => val && /^\d+$/.test(val),
-    errorMsg: 'CLIENT_ID must be set with numeric Discord application ID',
+    errorMsg: 'DISCORD_CLIENT_ID must be set with numeric Discord application ID',
   },
 ];
 

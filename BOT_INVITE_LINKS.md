@@ -24,7 +24,7 @@ Use this for users logging in via your website:
 https://discord.com/oauth2/authorize?client_id=1419742988128616479&redirect_uri=https://overflowing-acceptance-production.up.railway.app/callback&response_type=code&scope=identify%20guilds
 ```
 
-This is what `CLIENT_SECRET` and `REDIRECT_URI` are used for.
+This is what `DISCORD_CLIENT_SECRET` and `REDIRECT_URI` are used for.
 
 ---
 

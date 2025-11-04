@@ -12,11 +12,11 @@ const { commands } = require('./IMPROVED_SLASH_COMMANDS');
 
 // Try different variable names
 const CLIENT_ID = process.env.DISCORD_CLIENT_ID || process.env.DISCORD_APP_ID || '1419742988128616479';
-const BOT_TOKEN = process.env.BOT_TOKEN;
+const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 const GUILD_ID = process.env.GUILD_ID || '1413961128522023024'; // Optional: for faster testing
 
-if (!BOT_TOKEN) {
-  console.error('❌ Missing BOT_TOKEN in .env file');
+if (!DISCORD_BOT_TOKEN) {
+  console.error('❌ Missing DISCORD_BOT_TOKEN in .env file');
   console.error('Current env keys:', Object.keys(process.env).filter(k => k.includes('DISCORD') || k.includes('BOT')));
   process.exit(1);
 }
@@ -24,7 +24,7 @@ if (!BOT_TOKEN) {
 console.log(`✓ Using Client ID: ${CLIENT_ID}`);
 console.log(`✓ Using Guild ID: ${GUILD_ID}`);
 
-const rest = new REST({ version: '10' }).setToken(BOT_TOKEN);
+const rest = new REST({ version: '10' }).setToken(DISCORD_BOT_TOKEN);
 
 async function main() {
   try {
@@ -119,7 +119,7 @@ async function main() {
       console.error('\n💡 Missing Access: Bot lacks permissions');
       console.error('   Solution: Reinvite bot with applications.commands scope');
     } else if (error.code === 'ERR_INVALID_ARG_TYPE') {
-      console.error('\n💡 Invalid Token: Check your BOT_TOKEN in .env');
+      console.error('\n💡 Invalid Token: Check your DISCORD_BOT_TOKEN in .env');
     }
     
     process.exit(1);

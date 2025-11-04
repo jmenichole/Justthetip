@@ -70,7 +70,7 @@ npm install
 cp .env.example .env
 
 # Edit .env with your credentials
-# BOT_TOKEN, DATABASE_URL, SOLANA_RPC_URL, etc.
+# DISCORD_BOT_TOKEN, DATABASE_URL, SOLANA_RPC_URL, etc.
 ```
 
 ### Running the Bot
@@ -417,8 +417,8 @@ try {
 ### Environment Variables
 
 Required:
-- `BOT_TOKEN` - Discord bot token
-- `CLIENT_ID` - Discord client ID
+- `DISCORD_BOT_TOKEN` - Discord bot token
+- `DISCORD_CLIENT_ID` - Discord client ID
 - `SOLANA_RPC_URL` - Solana RPC endpoint
 
 Optional:

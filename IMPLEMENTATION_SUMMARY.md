@@ -261,7 +261,7 @@ Total New Code: ~1,800 lines
 ## 🎯 Next Steps
 
 1. **Immediate:**
-   - [ ] Get Discord CLIENT_SECRET from Developer Portal
+   - [ ] Get Discord DISCORD_CLIENT_SECRET from Developer Portal
    - [ ] Create MongoDB Atlas cluster and get URI
    - [ ] Generate Solana mint authority keypair
    - [ ] Deploy backend to Railway/Render

@@ -88,7 +88,7 @@ client.once('ready', async () => {
   ];
   
   // Register with Discord
-  const rest = new REST({ version: '10' }).setToken(process.env.BOT_TOKEN);
+  const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_BOT_TOKEN);
   
   try {
     console.log('📝 Registering slash commands...');
@@ -313,7 +313,7 @@ process.on('SIGINT', async () => {
 // ===================================
 // START BOT
 // ===================================
-client.login(process.env.BOT_TOKEN);
+client.login(process.env.DISCORD_BOT_TOKEN);
 ```
 
 ---

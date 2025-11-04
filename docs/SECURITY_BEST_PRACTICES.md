@@ -256,7 +256,7 @@ function sanitizeInput(input) {
 
 ```javascript
 // ✅ Good: Use environment variables
-const BOT_TOKEN = process.env.BOT_TOKEN;
+const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 const HELIUS_API_KEY = process.env.HELIUS_API_KEY;
 
 // ❌ Bad: Hardcoded secrets
@@ -287,7 +287,7 @@ async function getSecret(secretName) {
 
 // Usage
 const secrets = await getSecret('justthetip/production');
-const botToken = secrets.BOT_TOKEN;
+const botToken = secrets.DISCORD_BOT_TOKEN;
 ```
 
 ### Logging Security

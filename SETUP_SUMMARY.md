@@ -28,9 +28,9 @@ Your current bot token appears to be invalid/expired.
 4. Click "Reset Token" button
 5. Copy the new token
 6. Update in three places:
-   - Local `.env` file: `BOT_TOKEN=new_token_here`
-   - Railway API service: Update `BOT_TOKEN` variable
-   - Railway bot service (when created): Add `BOT_TOKEN` variable
+   - Local `.env` file: `DISCORD_BOT_TOKEN=new_token_here`
+   - Railway API service: Update `DISCORD_BOT_TOKEN` variable
+   - Railway bot service (when created): Add `DISCORD_BOT_TOKEN` variable
 
 ###  B. Update Mint Authority Keypair in Railway
 Your API needs the base58 format, not JSON array.
@@ -50,7 +50,7 @@ Your API needs the base58 format, not JSON array.
 
 **Option 1: Automated (After token refresh)**
 ```bash
-# Update .env with new BOT_TOKEN first
+# Update .env with new DISCORD_BOT_TOKEN first
 node register-commands.js
 ```
 
@@ -75,7 +75,7 @@ node register-commands.js
 
 2. Add environment variables:
    ```
-   BOT_TOKEN=<your_new_token>
+   DISCORD_BOT_TOKEN=<your_new_token>
    DISCORD_CLIENT_ID=1419742988128616479
    DISCORD_APP_ID=1419742988128616479
    GUILD_ID=1413961128522023024
