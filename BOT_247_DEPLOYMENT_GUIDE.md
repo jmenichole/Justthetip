@@ -21,7 +21,7 @@
 
 2. **Add Environment Variables** (copy from RAILWAY_ENV_VARS.txt)
    ```
-   BOT_TOKEN=MTQxOTc0Mjk4ODEyODYxNjQ3OQ.GlpftB.ZR9kkF6-IsXTKco4A08YHHGEgsqZhjjrWVvuu8
+   DISCORD_BOT_TOKEN=MTQxOTc0Mjk4ODEyODYxNjQ3OQ.GlpftB.ZR9kkF6-IsXTKco4A08YHHGEgsqZhjjrWVvuu8
    DISCORD_CLIENT_ID=1419742988128616479
    GUILD_ID=1413961128522023024
    LOG_CHANNEL_ID=1414091527969439824
@@ -271,7 +271,7 @@ if (commandName === 'status') {
 
 ## 🔐 Final Security Notes
 
-1. **Never expose** private keys or BOT_TOKEN
+1. **Never expose** private keys or DISCORD_BOT_TOKEN
 2. **Always use** environment variables
 3. **Enable 2FA** on all accounts (Discord, Railway, GitHub, MongoDB)
 4. **Regular audits** of transaction logs

@@ -197,7 +197,7 @@ CI/CD pipelines should run linting, unit tests, and contract tests before deploy
 
 ### Security
 - Production environments must secure secrets through managed secret stores and restrict webhook endpoints to HTTPS.
-- Use Railway environment variables for all secrets (BOT_TOKEN, CLIENT_ID, MONGODB_URI, etc.)
+- Use Railway environment variables for all secrets (DISCORD_BOT_TOKEN, DISCORD_CLIENT_ID, MONGODB_URI, etc.)
 
 ---
 

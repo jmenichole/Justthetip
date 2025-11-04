@@ -22,8 +22,8 @@ Your Discord bot is not online because Railway is starting the API server (`api/
 
 3. **Verify Environment Variables** (Click "Variables" tab)
    ```
-   ✅ BOT_TOKEN=your_bot_token
-   ✅ CLIENT_ID=your_client_id
+   ✅ DISCORD_BOT_TOKEN=your_bot_token
+   ✅ DISCORD_CLIENT_ID=your_client_id
    ⚠️  MONGODB_URI=your_mongodb_uri (recommended)
    ⚠️  SOLANA_RPC_URL=your_solana_rpc (recommended)
    ```
@@ -54,8 +54,8 @@ Your Discord bot is not online because Railway is starting the API server (`api/
 
 | Variable | Description | Where to Get |
 |----------|-------------|--------------|
-| `BOT_TOKEN` | Discord bot authentication token | [Discord Developer Portal](https://discord.com/developers/applications) → Your App → Bot → Token |
-| `CLIENT_ID` | Discord application ID | Discord Developer Portal → Your App → OAuth2 → Client ID |
+| `DISCORD_BOT_TOKEN` | Discord bot authentication token | [Discord Developer Portal](https://discord.com/developers/applications) → Your App → Bot → Token |
+| `DISCORD_CLIENT_ID` | Discord application ID | Discord Developer Portal → Your App → OAuth2 → Client ID |
 
 ### Important (Should Have) 🟡
 
@@ -123,8 +123,8 @@ npm run start:bot-railway
 ════════════════════════════════════════════════════════════
 Railway Discord Bot - Secrets Verification
 ════════════════════════════════════════════════════════════
-✅ BOT_TOKEN: ***xxxx
-✅ CLIENT_ID: 1419742988128616479
+✅ DISCORD_BOT_TOKEN: ***xxxx
+✅ DISCORD_CLIENT_ID: 1419742988128616479
 ✅ All required secrets are present - Bot ready to start!
 ════════════════════════════════════════════════════════════
 Step 2: Health Checks
@@ -144,8 +144,8 @@ Successfully reloaded application (/) commands.
 
 ❌ **Failure:**
 ```
-❌ BOT_TOKEN: MISSING
-❌ CLIENT_ID: MISSING
+❌ DISCORD_BOT_TOKEN: MISSING
+❌ DISCORD_CLIENT_ID: MISSING
 ❌ CRITICAL SECRETS MISSING - Bot cannot start!
 
 To fix:
@@ -183,7 +183,7 @@ To fix:
 
 **Check 2: Verify Secrets**
 - Railway Dashboard → Variables
-- Ensure `BOT_TOKEN` and `CLIENT_ID` are set
+- Ensure `DISCORD_BOT_TOKEN` and `DISCORD_CLIENT_ID` are set
 - Check for typos
 
 **Check 3: Check Logs**
@@ -240,8 +240,8 @@ Use this checklist for every deployment:
 
 ### Deployment
 - [ ] Start command set to `npm run start:bot-railway`
-- [ ] `BOT_TOKEN` added to Railway variables
-- [ ] `CLIENT_ID` added to Railway variables
+- [ ] `DISCORD_BOT_TOKEN` added to Railway variables
+- [ ] `DISCORD_CLIENT_ID` added to Railway variables
 - [ ] `MONGODB_URI` added to Railway variables
 - [ ] `SOLANA_RPC_URL` added to Railway variables
 - [ ] Service deployed successfully

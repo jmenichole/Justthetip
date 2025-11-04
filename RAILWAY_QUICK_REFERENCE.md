@@ -15,14 +15,14 @@
 ## 🔑 Required Secrets (Minimum)
 
 ```bash
-BOT_TOKEN=your_discord_bot_token
-CLIENT_ID=your_discord_client_id
+DISCORD_BOT_TOKEN=your_discord_bot_token
+DISCORD_CLIENT_ID=your_discord_client_id
 ```
 
 **Get them here:**
 - https://discord.com/developers/applications
-- Your App → Bot → Token (BOT_TOKEN)
-- Your App → OAuth2 → Client ID (CLIENT_ID)
+- Your App → Bot → Token (DISCORD_BOT_TOKEN)
+- Your App → OAuth2 → Client ID (DISCORD_CLIENT_ID)
 
 ---
 
@@ -30,8 +30,8 @@ CLIENT_ID=your_discord_client_id
 
 **In Railway Logs:**
 ```
-✅ BOT_TOKEN: ***xxxx
-✅ CLIENT_ID: 1419742988128616479
+✅ DISCORD_BOT_TOKEN: ***xxxx
+✅ DISCORD_CLIENT_ID: 1419742988128616479
 ✅ All required secrets are present - Bot ready to start!
 ✅ Health checks passed
 🟢 Logged in as YourBotName#1234
@@ -49,8 +49,8 @@ Database connected.
 
 | Error | Fix |
 |-------|-----|
-| `BOT_TOKEN: MISSING` | Add BOT_TOKEN to Railway Variables |
-| `CLIENT_ID: MISSING` | Add CLIENT_ID to Railway Variables |
+| `DISCORD_BOT_TOKEN: MISSING` | Add DISCORD_BOT_TOKEN to Railway Variables |
+| `DISCORD_CLIENT_ID: MISSING` | Add DISCORD_CLIENT_ID to Railway Variables |
 | Bot offline in Discord | Check start command: `npm run start:bot-railway` |
 | Commands don't work | Run `node register-commands.js` locally |
 | Database failed | Check MONGODB_URI, add `0.0.0.0/0` to whitelist |
@@ -97,8 +97,8 @@ npm run start:bot
 Start Command: npm run start:bot-railway
 
 # In Railway Variables:
-BOT_TOKEN=your_token
-CLIENT_ID=your_id
+DISCORD_BOT_TOKEN=your_token
+DISCORD_CLIENT_ID=your_id
 MONGODB_URI=your_mongo_uri
 SOLANA_RPC_URL=your_rpc_url
 ```

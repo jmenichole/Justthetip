@@ -48,8 +48,8 @@ Use GitHub Actions to automatically deploy and sync environment variables from r
 - `RAILWAY_TOKEN` - Railway API token
 - `RAILWAY_PROJECT_ID` - Railway project ID  
 - `RAILWAY_BOT_SERVICE_ID` - Railway bot service ID
-- `BOT_TOKEN` - Discord bot token
-- `CLIENT_ID` - Discord client ID
+- `DISCORD_BOT_TOKEN` - Discord bot token
+- `DISCORD_CLIENT_ID` - Discord client ID
 - `GUILD_ID` - Discord guild ID
 - `MONGODB_URI` - MongoDB connection string
 - `SOLANA_RPC_URL` - Solana RPC endpoint
@@ -63,8 +63,8 @@ Use GitHub Actions to automatically deploy and sync environment variables from r
 See [BOT_RAILWAY_SETUP.md](./BOT_RAILWAY_SETUP.md) for complete list. Key variables:
 
 ```
-BOT_TOKEN=your_discord_bot_token
-CLIENT_ID=1419742988128616479
+DISCORD_BOT_TOKEN=your_discord_bot_token
+DISCORD_CLIENT_ID=1419742988128616479
 GUILD_ID=your_guild_id
 MONGODB_URI=your_mongodb_connection_string
 SOLANA_RPC_URL=your_solana_rpc_endpoint

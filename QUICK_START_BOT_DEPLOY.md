@@ -28,9 +28,9 @@
 Click **"Variables"** tab → Click **"RAW Editor"** → Paste this:
 
 ```bash
-# Copy your BOT_TOKEN from local .env first!
-BOT_TOKEN=paste_your_actual_bot_token_here
-CLIENT_ID=1419742988128616479
+# Copy your DISCORD_BOT_TOKEN from local .env first!
+DISCORD_BOT_TOKEN=paste_your_actual_bot_token_here
+DISCORD_CLIENT_ID=1419742988128616479
 GUILD_ID=1413961128522023024
 HELIUS_API_KEY=074efb1f-0838-4334-839b-2f5780b43eca
 SOLANA_RPC_URL=https://mainnet.helius-rpc.com/?api-key=074efb1f-0838-4334-839b-2f5780b43eca
@@ -52,7 +52,7 @@ DATABASE_URL=postgresql://localhost:5432/justthetip
 ```
 
 **IMPORTANT:** 
-- Replace `paste_your_actual_bot_token_here` with BOT_TOKEN from your local `.env`
+- Replace `paste_your_actual_bot_token_here` with DISCORD_BOT_TOKEN from your local `.env`
 - Replace `your_discord_user_id_from_step_1` with the User ID you copied
 
 ---
@@ -96,7 +96,7 @@ If commands work → **YOU'RE DONE!** 🎉
 ✅ **Fix:** Add all variables from Step 3
 
 ### "401 Unauthorized"
-❌ **Problem:** Wrong BOT_TOKEN
+❌ **Problem:** Wrong DISCORD_BOT_TOKEN
 ✅ **Fix:** Copy exact token from local `.env` file
 
 ### "Database connection failed"

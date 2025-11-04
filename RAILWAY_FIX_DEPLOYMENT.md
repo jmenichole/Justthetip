@@ -55,13 +55,13 @@ Create two separate Railway services:
 
 ### 🔴 CRITICAL (Must Have)
 ```bash
-BOT_TOKEN=your_discord_bot_token
-CLIENT_ID=your_discord_client_id
+DISCORD_BOT_TOKEN=your_discord_bot_token
+DISCORD_CLIENT_ID=your_discord_client_id
 ```
 
 **Where to get these:**
-- BOT_TOKEN: Discord Developer Portal → Your App → Bot → Token
-- CLIENT_ID: Discord Developer Portal → Your App → OAuth2 → Client ID
+- DISCORD_BOT_TOKEN: Discord Developer Portal → Your App → Bot → Token
+- DISCORD_CLIENT_ID: Discord Developer Portal → Your App → OAuth2 → Client ID
 
 ### 🟡 IMPORTANT (Should Have)
 ```bash
@@ -102,8 +102,8 @@ After deployment, look for these messages:
 ════════════════════════════════════════════════════════════
 Railway Discord Bot - Secrets Verification
 ════════════════════════════════════════════════════════════
-✅ BOT_TOKEN: ***xxxx
-✅ CLIENT_ID: 1419742988128616479
+✅ DISCORD_BOT_TOKEN: ***xxxx
+✅ DISCORD_CLIENT_ID: 1419742988128616479
 ✅ All required secrets are present - Bot ready to start!
 ✅ Health checks passed
 🟢 Logged in as YourBotName#1234
@@ -113,8 +113,8 @@ Successfully reloaded application (/) commands.
 
 **❌ ERROR INDICATORS:**
 ```
-❌ BOT_TOKEN: MISSING
-❌ CLIENT_ID: MISSING
+❌ DISCORD_BOT_TOKEN: MISSING
+❌ DISCORD_CLIENT_ID: MISSING
 ❌ CRITICAL SECRETS MISSING - Bot cannot start!
 ```
 
@@ -129,14 +129,14 @@ Successfully reloaded application (/) commands.
 ### Issue 1: "Bot won't start - Missing secrets"
 **Symptoms:**
 ```
-❌ BOT_TOKEN: MISSING
+❌ DISCORD_BOT_TOKEN: MISSING
 ❌ CRITICAL SECRETS MISSING - Bot cannot start!
 ```
 
 **Fix:**
 1. Go to Railway Dashboard → Variables
-2. Add `BOT_TOKEN` from Discord Developer Portal
-3. Add `CLIENT_ID` from Discord Developer Portal
+2. Add `DISCORD_BOT_TOKEN` from Discord Developer Portal
+3. Add `DISCORD_CLIENT_ID` from Discord Developer Portal
 4. Redeploy
 
 ### Issue 2: "Wrong service is starting"
@@ -210,7 +210,7 @@ npm install
 cp .env.example .env
 
 # 3. Add your secrets to .env
-# Edit .env and add BOT_TOKEN, CLIENT_ID, etc.
+# Edit .env and add DISCORD_BOT_TOKEN, DISCORD_CLIENT_ID, etc.
 
 # 4. Test verification script
 npm run verify-railway-secrets

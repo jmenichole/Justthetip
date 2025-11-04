@@ -6,8 +6,8 @@ Use this checklist to ensure your Discord bot is properly configured and deploye
 
 ### 1. Discord Application Setup
 - [ ] Created Discord application at https://discord.com/developers/applications
-- [ ] Obtained **BOT_TOKEN** from Bot tab
-- [ ] Obtained **CLIENT_ID** from OAuth2 tab (Application ID)
+- [ ] Obtained **DISCORD_BOT_TOKEN** from Bot tab
+- [ ] Obtained **DISCORD_CLIENT_ID** from OAuth2 tab (Application ID)
 - [ ] Bot has necessary permissions (Send Messages, Read Messages, Use Slash Commands)
 - [ ] Bot is invited to your Discord server
 
@@ -55,8 +55,8 @@ Go to Variables tab and add these secrets:
 
 #### 🔴 CRITICAL (Required)
 ```bash
-BOT_TOKEN=your_discord_bot_token_here
-CLIENT_ID=your_discord_client_id_here
+DISCORD_BOT_TOKEN=your_discord_bot_token_here
+DISCORD_CLIENT_ID=your_discord_client_id_here
 ```
 
 #### 🟡 IMPORTANT (Recommended)
@@ -115,12 +115,12 @@ Successfully reloaded application (/) commands.
 
 ### Bot Won't Start
 
-**Error: `BOT_TOKEN is not set`**
-- **Fix**: Add BOT_TOKEN to Railway environment variables
-- Go to Variables tab → Add Variable → Name: `BOT_TOKEN` → Value: (your token)
+**Error: `DISCORD_BOT_TOKEN is not set`**
+- **Fix**: Add DISCORD_BOT_TOKEN to Railway environment variables
+- Go to Variables tab → Add Variable → Name: `DISCORD_BOT_TOKEN` → Value: (your token)
 
-**Error: `CLIENT_ID is not set`**
-- **Fix**: Add CLIENT_ID to Railway environment variables
+**Error: `DISCORD_CLIENT_ID is not set`**
+- **Fix**: Add DISCORD_CLIENT_ID to Railway environment variables
 - Get from Discord Developer Portal → Your App → OAuth2 → Client ID
 
 **Error: `Cannot find module 'discord.js'`**
@@ -155,7 +155,7 @@ Successfully reloaded application (/) commands.
 ### Bot Keeps Restarting
 
 Check Railway logs for:
-- **401 Unauthorized**: Invalid BOT_TOKEN
+- **401 Unauthorized**: Invalid DISCORD_BOT_TOKEN
 - **Missing Access**: Bot lacks Discord permissions
 - **Memory exceeded**: Upgrade Railway plan
 - **Crash on startup**: Check error stack trace
@@ -195,7 +195,7 @@ Check Railway logs for:
 
 - [ ] Never commit secrets to GitHub
 - [ ] Use Railway environment variables for all secrets
-- [ ] Rotate BOT_TOKEN every 90 days
+- [ ] Rotate DISCORD_BOT_TOKEN every 90 days
 - [ ] Limit admin user IDs to trusted users
 - [ ] Monitor logs for suspicious activity
 - [ ] Keep dependencies updated (npm audit)

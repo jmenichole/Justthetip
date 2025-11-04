@@ -254,7 +254,7 @@ node .env.mock-test.js
 ### Immediate (Next 30 Minutes)
 1. ✅ Read `.env.validation-report.md` (you just did this)
 2. ✅ Run mock test (you just did this)
-3. ⏭️ **Add Discord CLIENT_SECRET to .env**
+3. ⏭️ **Add Discord DISCORD_CLIENT_SECRET to .env**
    - Go to Developer Portal
    - Copy secret
    - Add to .env
