@@ -10,7 +10,7 @@
    - Revenue projections
    - Implementation code examples
 
-2. **`USER_PAID_MINTING_CODE.js`** (4KB)
+2. **`docs/examples/USER_PAID_MINTING_CODE.js`** (4KB)
    - Ready-to-use backend code
    - Payment verification function
    - Updated `/api/mintBadge` endpoint
@@ -84,7 +84,7 @@ NFT_MINT_FEE_ENABLED=true
 ```
 
 ### Step 2: Update Backend
-Copy code from `USER_PAID_MINTING_CODE.js` into `api/server.js`:
+Copy code from `docs/examples/USER_PAID_MINTING_CODE.js` into `api/server.js`:
 - Add `verifyPayment()` function
 - Replace `/api/mintBadge` endpoint
 - Add `/api/checkPayment` endpoint
@@ -167,7 +167,7 @@ git push
 ### Implementation Guides:
 - **Quick Start**: `USER_PAID_MINTING_CHECKLIST.md`
 - **Complete Guide**: `USER_PAID_MINTING.md`
-- **Code Reference**: `USER_PAID_MINTING_CODE.js`
+- **Code Reference**: `docs/examples/USER_PAID_MINTING_CODE.js`
 
 ### Key Concepts:
 1. **Payment Verification**: Checks Solana blockchain for recent transfers
@@ -213,7 +213,7 @@ User pays 0.02 SOL → You get 0.01 SOL → Referrer gets 0.001 SOL
 
 ### Immediate (Today):
 1. ✅ Review `USER_PAID_MINTING_CHECKLIST.md`
-2. ✅ Copy code from `USER_PAID_MINTING_CODE.js`
+2. ✅ Copy code from `docs/examples/USER_PAID_MINTING_CODE.js`
 3. ✅ Add environment variables to Railway
 4. ✅ Test locally with 0.02 SOL payment
 
@@ -234,7 +234,7 @@ User pays 0.02 SOL → You get 0.01 SOL → Referrer gets 0.001 SOL
 ## 💬 Support
 
 ### Questions?
-- **Implementation**: See `USER_PAID_MINTING_CODE.js`
+- **Implementation**: See `docs/examples/USER_PAID_MINTING_CODE.js`
 - **Business Model**: See `USER_PAID_MINTING.md`
 - **Step-by-Step**: See `USER_PAID_MINTING_CHECKLIST.md`
 

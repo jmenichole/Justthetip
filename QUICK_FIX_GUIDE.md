@@ -90,7 +90,7 @@ async function handleDiscordCallback() {
 ## ✅ Test After Fixes
 
 ```bash
-node .env.mock-test.js
+node docs/testing/.env.mock-test.js
 ```
 
 **Expected:** 92/92 tests passed (100%)
@@ -126,9 +126,9 @@ git push origin main
 
 ## 📄 Documentation
 
-- **This File:** `.env.mock-test-results.md` (detailed action plan)
-- **Validation Report:** `.env.validation-report.md` (config guide)
-- **Mock Test:** `.env.mock-test.js` (run to validate)
+- **This File:** `docs/testing/.env.mock-test-results.md` (detailed action plan)
+- **Validation Report:** `docs/testing/.env.validation-report.md` (config guide)
+- **Mock Test:** `docs/testing/.env.mock-test.js` (run to validate)
 - **Setup Guide:** `COMPLETE_SETUP_GUIDE.md` (full instructions)
 
 ---

@@ -11,7 +11,7 @@
  * 5. NFT Minting
  * 6. Bot Verification
  * 
- * Run: node .env.mock-test.js
+ * Run: node docs/testing/.env.mock-test.js
  */
 
 const fs = require('fs');
@@ -862,12 +862,12 @@ function generateFinalReport() {
   
   if (testResults.failed > 0) {
     logInfo('1. Review failed tests above');
-    logInfo('2. Read .env.validation-report.md for missing variables');
+    logInfo('2. Read docs/testing/.env.validation-report.md for missing variables');
     logInfo('3. Fix issues and run mock test again');
     logInfo('4. Once all tests pass, proceed to deployment');
   } else {
     logSuccess('1. All tests passed! Ready for deployment');
-    logInfo('2. Complete .env configuration (see .env.validation-report.md)');
+    logInfo('2. Complete .env configuration (see docs/testing/.env.validation-report.md)');
     logInfo('3. Generate mint authority keypair');
     logInfo('4. Fund mint authority wallet with SOL');
     logInfo('5. Deploy backend to Railway/Render');
@@ -880,10 +880,10 @@ function generateFinalReport() {
   console.log('\n' + '='.repeat(60));
   log('  DOCUMENTATION', 'bright');
   console.log('='.repeat(60) + '\n');
-  logInfo('• Configuration Guide:  .env.validation-report.md');
+  logInfo('• Configuration Guide:  docs/testing/.env.validation-report.md');
   logInfo('• Setup Instructions:   COMPLETE_SETUP_GUIDE.md');
   logInfo('• Implementation Info:  IMPLEMENTATION_SUMMARY.md');
-  logInfo('• Mock Test Script:     .env.mock-test.js (this file)');
+  logInfo('• Mock Test Script:     docs/testing/.env.mock-test.js (this file)');
   
   console.log('\n');
 }
