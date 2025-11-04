@@ -141,7 +141,7 @@ If commands work → **YOU'RE DONE!** 🎉
 ## 📚 Related Docs
 
 - Full Setup Guide: `BOT_RAILWAY_SETUP.md`
-- Environment Variables: `RAILWAY_BOT_ENV.txt`
+- Environment Variables: `docs/RAILWAY_BOT_ENV.txt`
 - Railway Config: `railway-bot.json`
 - All Commands: See bot.js lines 47-125
 

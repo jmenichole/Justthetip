@@ -319,7 +319,7 @@ open docs/landing_NEW.html
 ### Before Production (30 min)
 
 9. Fund mint authority wallet with SOL
-10. Create NFT collection (see `.env.validation-report.md`)
+10. Create NFT collection (see `docs/testing/.env.validation-report.md`)
 11. Add `VERIFIED_COLLECTION_ADDRESS` to Railway
 12. Integrate verification checker into bot
 
@@ -358,7 +358,7 @@ open docs/landing_NEW.html
 
 ### Documentation
 - **DEPLOY_BACKEND.md** - Full deployment guide
-- **.env.validation-report.md** - Environment config
+- **docs/testing/.env.validation-report.md** - Environment config
 - **QUICK_FIX_GUIDE.md** - Quick fixes
 - **CONFIG_TEST_SUMMARY.md** - Test results
 
