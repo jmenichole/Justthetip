@@ -6,12 +6,11 @@
 const express = require('express');
 const cors = require('cors');
 const { PublicKey } = require('@solana/web3.js');
-const nacl = require('tweetnacl');
-const bs58 = require('bs58').default; // Fix: Use .default export
 const { MongoClient } = require('mongodb');
 const adminRoutes = require('./adminRoutes');
 const solanaDevTools = require('../src/utils/solanaDevTools');
 const coinbaseClient = require('../src/utils/coinbaseClient');
+const { verifySignature } = require('../src/utils/validation');
 require('dotenv').config();
 
 const app = express();
@@ -132,18 +131,7 @@ async function initializeSolana() {
 }
 
 // ===== HELPER FUNCTIONS =====
-function verifySignature(message, signature, publicKey) {
-    try {
-        const messageBytes = new TextEncoder().encode(message);
-        const signatureBytes = bs58.decode(signature);
-        const publicKeyBytes = new PublicKey(publicKey).toBytes();
-        
-        return nacl.sign.detached.verify(messageBytes, signatureBytes, publicKeyBytes);
-    } catch (error) {
-        console.error('Signature verification error:', error);
-        return false;
-    }
-}
+// Note: verifySignature is now imported from shared utils
 
 async function createNFTMetadata(discordId, discordUsername, walletAddress, termsVersion) {
     const metadata = {

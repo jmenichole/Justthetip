@@ -20,6 +20,15 @@ const { handleLeaderboardCommand } = require('./src/commands/leaderboardCommand'
 const { handleSwapCommand, handleSwapHelpButton } = require('./src/commands/swapCommand');
 const fs = require('fs');
 const crypto = require('crypto');
+const { isValidSolanaAddress, verifySignature } = require('./src/utils/validation');
+const rateLimiter = require('./src/utils/rateLimiter');
+const {
+  createBalanceEmbed,
+  createWalletRegisteredEmbed,
+  createTipSuccessEmbed,
+  createAirdropEmbed,
+  createAirdropCollectedEmbed,
+} = require('./src/utils/embedBuilders');
 
 // Load fee wallet addresses (reserved for future use)
 const feeWallets = require('./security/feeWallet.json');
@@ -44,15 +53,7 @@ const PRICE_CONFIG = {
   USDC: 1  // USDC is pegged to USD
 };
 
-// Validation helpers
-function isValidSolanaAddress(address) {
-  // Basic Solana address validation
-  if (!address || typeof address !== 'string') return false;
-  
-  // Solana addresses are base58 encoded and typically 32-44 characters
-  const base58Regex = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
-  return base58Regex.test(address);
-}
+// Note: isValidSolanaAddress is now imported from shared utils
 
 client.once('ready', async () => {
   console.log(`🟢 Logged in as ${client.user.tag}`);
@@ -186,18 +187,7 @@ function loadAirdrops() {
 
 const airdrops = loadAirdrops();
 
-const rateLimits = {};
-function isRateLimited(userId, command, max = 5, windowMs = 60000) {
-  const now = Date.now();
-  if (!rateLimits[userId]) rateLimits[userId] = {};
-  if (!rateLimits[userId][command] || now - rateLimits[userId][command].timestamp > windowMs) {
-    rateLimits[userId][command] = { count: 1, timestamp: now };
-    return false;
-  }
-  if (rateLimits[userId][command].count >= max) return true;
-  rateLimits[userId][command].count++;
-  return false;
-}
+// Note: Rate limiting is now handled by the shared rateLimiter module
 
 // Concise help message for default /help command
 const HELP_MESSAGE_BASIC = `## 💰 Basic Commands
@@ -356,21 +346,7 @@ client.on(Events.InteractionCreate, async interaction => {
         // Get actual balance from database
         const balances = await db.getBalances(interaction.user.id);
         
-        const solBalance = balances.SOL || 0;
-        const usdcBalance = balances.USDC || 0;
-        
-        // Calculate approximate USD values
-        const solUsdValue = solBalance * PRICE_CONFIG.SOL;
-        const usdcUsdValue = usdcBalance * PRICE_CONFIG.USDC;
-        const totalValue = solUsdValue + usdcUsdValue;
-        
-        const embed = new EmbedBuilder()
-          .setTitle('💎 Your Portfolio Balance')
-          .setColor(0x3498db)
-          .setDescription(`**Total Portfolio Value:** $${totalValue.toFixed(2)}\n\n` +
-            `☀️ **SOL:** ${solBalance.toFixed(6)} (~$${solUsdValue.toFixed(2)})\n` +
-            `💚 **USDC:** ${usdcBalance.toFixed(6)} (~$${usdcUsdValue.toFixed(2)})`)
-          .setFooter({ text: 'Click refresh to update with current prices' });
+        const embed = createBalanceEmbed(balances, PRICE_CONFIG);
           
         const refreshButton = new ActionRowBuilder()
           .addComponents(
@@ -423,17 +399,14 @@ client.on(Events.InteractionCreate, async interaction => {
       const amount = interaction.options.getNumber('amount');
       const currency = interaction.options.getString('currency');
       
-      if (isRateLimited(interaction.user.id, commandName)) {
+      if (rateLimiter.isRateLimited(interaction.user.id, commandName)) {
         return await interaction.reply({ 
           content: '⏳ Rate limit exceeded. Please wait before using this command again.', 
           ephemeral: true 
         });
       }
       
-      const embed = new EmbedBuilder()
-        .setTitle('🎁 Airdrop Created!')
-        .setDescription(`${interaction.user} is dropping **${amount} ${currency}**! Click to collect!`)
-        .setColor(0x00ff99);
+      const embed = createAirdropEmbed(interaction.user, amount, currency);
         
       const collectButton = new ActionRowBuilder()
         .addComponents(
@@ -459,7 +432,7 @@ client.on(Events.InteractionCreate, async interaction => {
       const amount = interaction.options.getNumber('amount');
       const currency = interaction.options.getString('currency');
       
-      if (isRateLimited(interaction.user.id, commandName)) {
+      if (rateLimiter.isRateLimited(interaction.user.id, commandName)) {
         return await interaction.reply({ 
           content: '⏳ Rate limit exceeded. Please wait before using this command again.', 
           ephemeral: true 
@@ -494,11 +467,7 @@ client.on(Events.InteractionCreate, async interaction => {
         // Process the tip through the database
         await db.processTip(interaction.user.id, recipient.id, amount, currency);
         
-        const embed = new EmbedBuilder()
-          .setTitle('💸 Tip Sent Successfully!')
-          .setDescription(`${interaction.user} tipped ${recipient} **${amount} ${currency}**! 🎉`)
-          .setColor(0x2ecc71)
-          .setFooter({ text: 'Thanks for spreading the love!' });
+        const embed = createTipSuccessEmbed(interaction.user, recipient, amount, currency);
           
         await interaction.reply({ embeds: [embed] });
         
@@ -554,7 +523,7 @@ client.on(Events.InteractionCreate, async interaction => {
       const amount = interaction.options.getNumber('amount');
       const currency = interaction.options.getString('currency');
       
-      if (isRateLimited(interaction.user.id, commandName)) {
+      if (rateLimiter.isRateLimited(interaction.user.id, commandName)) {
         return await interaction.reply({ 
           content: '⏳ Rate limit exceeded. Please wait before using this command again.', 
           ephemeral: true 
@@ -651,7 +620,7 @@ client.on(Events.InteractionCreate, async interaction => {
       const amount = interaction.options.getNumber('amount');
       const currency = interaction.options.getString('currency');
       
-      if (isRateLimited(interaction.user.id, commandName)) {
+      if (rateLimiter.isRateLimited(interaction.user.id, commandName)) {
         return await interaction.reply({ 
           content: '⏳ Rate limit exceeded. Please wait before using this command again.', 
           ephemeral: true 
@@ -718,10 +687,7 @@ client.on(Events.InteractionCreate, async interaction => {
     airdrops[airdropId].claimedBy = userId;
     saveAirdrops(airdrops);
     
-    const embed = new EmbedBuilder()
-      .setTitle('🎉 Airdrop Collected!')
-      .setDescription(`You collected **${airdrop.amount} ${airdrop.currency}**!`)
-      .setColor(0xf1c40f);
+    const embed = createAirdropCollectedEmbed(airdrop.amount, airdrop.currency);
       
     await interaction.reply({ embeds: [embed], ephemeral: true });
     
@@ -730,21 +696,7 @@ client.on(Events.InteractionCreate, async interaction => {
       // Refresh balance display with actual data
       const balances = await db.getBalances(interaction.user.id);
       
-      const solBalance = balances.SOL || 0;
-      const usdcBalance = balances.USDC || 0;
-      
-      // Calculate approximate USD values
-      const solUsdValue = solBalance * PRICE_CONFIG.SOL;
-      const usdcUsdValue = usdcBalance * PRICE_CONFIG.USDC;
-      const totalValue = solUsdValue + usdcUsdValue;
-      
-      const embed = new EmbedBuilder()
-        .setTitle('💎 Your Portfolio Balance')
-        .setColor(0x3498db)
-        .setDescription(`**Total Portfolio Value:** $${totalValue.toFixed(2)}\n\n` +
-          `☀️ **SOL:** ${solBalance.toFixed(6)} (~$${solUsdValue.toFixed(2)})\n` +
-          `💚 **USDC:** ${usdcBalance.toFixed(6)} (~$${usdcUsdValue.toFixed(2)})`)
-        .setFooter({ text: 'Balance updated with current prices' });
+      const embed = createBalanceEmbed(balances, PRICE_CONFIG, true);
         
       await interaction.update({ embeds: [embed] });
       
