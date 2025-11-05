@@ -144,7 +144,11 @@ function verifyEnvironment() {
   log('Common Variables:', 'yellow');
   for (const varConfig of requiredVars.common) {
     const result = validateVar(varConfig);
-    results[result.status].push(result.name);
+    // Map 'valid' status to 'ok' for results buckets
+    const status = result.status === 'valid' ? 'ok' : result.status;
+    if (results[status]) {
+      results[status].push(result.name);
+    }
   }
   
   // Check mode-specific variables
@@ -153,14 +157,22 @@ function verifyEnvironment() {
   const modeVars = requiredVars[modeVarsKey];
   for (const varConfig of modeVars) {
     const result = validateVar(varConfig);
-    results[result.status].push(result.name);
+    // Map 'valid' status to 'ok' for results buckets
+    const status = result.status === 'valid' ? 'ok' : result.status;
+    if (results[status]) {
+      results[status].push(result.name);
+    }
   }
   
   // Check optional variables
   log('\nOptional Variables:', 'yellow');
   for (const varConfig of requiredVars.optional) {
     const result = validateVar(varConfig);
-    results[result.status].push(result.name);
+    // Map 'valid' status to 'ok' for results buckets
+    const status = result.status === 'valid' ? 'ok' : result.status;
+    if (results[status]) {
+      results[status].push(result.name);
+    }
   }
   
   // Security check
