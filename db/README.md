@@ -2,36 +2,35 @@
 
 ## Overview
 
-This directory contains the database connection and schema for JustTheTip bot. The project uses **PostgreSQL** for ACID-compliant financial transactions.
+This directory contains the database connection and operations for JustTheTip bot. The project uses **SQLite** with better-sqlite3 for zero-config local storage.
 
 ## Files
 
-- **`database.js`** - Main database module with connection pooling and transaction handling
-- **`schema.sql`** - PostgreSQL schema with tables, indexes, and constraints
+- **`db.js`** - Core SQLite database module with helper functions
+- **`database.js`** - Compatibility wrapper maintaining the original API
+- **`justthetip.db`** - SQLite database file (auto-created, git-ignored)
 
 ## Quick Start
 
-### 1. Install PostgreSQL
+No setup required! The database is automatically created and initialized when the bot starts.
 
-See the [PostgreSQL Migration Guide](../POSTGRESQL_MIGRATION.md) for detailed installation instructions.
+```javascript
+const db = require('./db/database');
 
-### 2. Create Database
+// Connect (no-op for SQLite, exists for API compatibility)
+await db.connectDB();
 
-```bash
-createdb justthetip
-```
+// Get user balances
+const balances = await db.getBalances(userId);
 
-### 3. Initialize Schema
+// Process a tip
+await db.processTip(senderId, recipientId, amount, currency);
 
-```bash
-psql -d justthetip -f db/schema.sql
-```
+// Credit balance
+await db.creditBalance(userId, amount, currency);
 
-### 4. Configure Environment
-
-```env
-DATABASE_URL=postgresql://username:password@localhost:5432/justthetip
-NODE_ENV=development
+// Get transaction history
+const transactions = await db.getUserTransactions(userId, 10);
 ```
 
 ## Database Schema
@@ -39,43 +38,69 @@ NODE_ENV=development
 ### Tables
 
 - **users** - Discord user records
-- **balances** - User cryptocurrency balances (NUMERIC for precision)
-- **transactions** - Transaction audit trail
-- **wallet_registrations** - External wallet addresses
+  - `id` (TEXT PRIMARY KEY) - User Discord ID
+  - `wallet` (TEXT) - Optional wallet address
+  - `balance` (REAL) - User balance (default 0)
 
-### Critical Indexes
+- **tips** - Transaction history
+  - `id` (INTEGER PRIMARY KEY AUTOINCREMENT) - Transaction ID
+  - `sender` (TEXT) - Sender Discord ID
+  - `receiver` (TEXT) - Receiver Discord ID
+  - `amount` (REAL) - Transaction amount
+  - `currency` (TEXT) - Currency type (SOL, USDC, etc.)
+  - `created_at` (TEXT) - Timestamp (ISO format)
 
-All tables have indexes on frequently queried columns:
-- User lookups: `idx_users_user_id`
-- Balance queries: `idx_balances_user_id`, `idx_balances_currency`
-- Transaction history: `idx_transactions_sender`, `idx_transactions_recipient`, `idx_transactions_created_at`
+## Features
 
-## ACID Compliance
+### Direct Database Functions (db.js)
 
-All financial operations use PostgreSQL transactions:
+- `getUser(id)` - Get or create user with default balance 0
+- `updateBalance(id, amount)` - Update user balance (supports negative amounts)
+- `recordTip(sender, receiver, amount, currency)` - Log a tip transaction
+- `getUserTransactions(id, limit)` - Get recent transactions (sent or received)
 
-```javascript
-const client = await pool.connect();
-try {
-  await client.query('BEGIN');
-  // ... operations ...
-  await client.query('COMMIT');
-} catch (error) {
-  await client.query('ROLLBACK');
-  throw error;
-} finally {
-  client.release();
-}
-```
+### Wrapper Functions (database.js)
 
-## Demo Mode
+- `connectDB()` - Initialize database (compatibility no-op)
+- `getBalances(userId)` - Get user balances for all currencies
+- `processTip(senderId, recipientId, amount, currency)` - Process a tip with validation
+- `creditBalance(userId, amount, currency)` - Add funds to user account
+- `getUserTransactions(userId, limit)` - Get user transaction history
 
-If `DATABASE_URL` is not set, the module runs in demo mode with mock operations. This is useful for testing without a database.
+## DM Commands
+
+Users can interact with the bot via DMs using the `$` prefix:
+
+- `$history [number]` - View transaction history (default: 10, max: 50)
+- `$transactions` - Alias for $history
+- `$balance` - Check current balance
+- `$help` - Show available DM commands
+
+## Error Handling
+
+All database functions include try/catch error handling with safe defaults:
+- Failed operations return default values (empty arrays, zero balances)
+- Errors are logged to console for debugging
+- Critical operations (tips) throw errors to prevent data loss
+
+## WAL Mode
+
+The database uses Write-Ahead Logging (WAL) mode for better performance and concurrency.
+
+## Migration Notes
+
+This database was migrated from PostgreSQL to SQLite for:
+- Zero configuration setup
+- Local file-based storage
+- Simplified deployment
+- No external database dependencies
+
+Previous PostgreSQL schema can be found in `schema.sql` (kept for reference).
 
 ## Documentation
 
-- [PostgreSQL Migration Guide](../POSTGRESQL_MIGRATION.md) - Complete migration documentation
-- [README](../README.md) - Main project documentation
+- [Main README](../README.md) - Project documentation
+- [Database Tests](../tests/database.test.js) - Usage examples
 
 ## Support
 
