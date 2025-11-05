@@ -198,29 +198,100 @@ function isRateLimited(userId, command, max = 5, windowMs = 60000) {
   return false;
 }
 
-const HELP_MESSAGE = `**JustTheTip Bot Commands:**
+const HELP_MESSAGE = `# 🤖 JustTheTip Bot - Your Crypto Tipping Companion
 
-**Essential Commands:**
-• \`/tip @user amount currency\` — Send crypto to another user
-• \`/balance\` — Check your portfolio with crypto amounts AND USD values 💎
-• \`/withdraw address amount currency\` — Send crypto to external wallet
-• \`/registerwallet currency address\` — Register your wallet addresses
-• \`/deposit\` — Get instructions for adding funds
+⚠️ **IMPORTANT:** This bot handles real cryptocurrency. Always start with small test amounts!
 
-**Enhanced Features:**
-• \`/airdrop amount currency\` — Create airdrop with USD amounts (e.g. $5.00 worth of SOL)
-• \`/leaderboard\` — View top tippers and recipients 🏆
-• \`/swap from to amount\` — Convert tips between tokens via Jupiter 🔄
-• 🎁 **Collect Button** — Click buttons to collect from airdrops!
-• 🔄 **Balance Refresh** — Update your portfolio view with one click
-• \`/burn amount currency\` — Donate to support bot development
-• \`/help\` — Show this help message
+## 🚀 Quick Start Guide
 
-**Supported Cryptocurrencies:**
-☀️ **SOL** (Solana) - Active
-💚 **USDC** (USD Coin on Solana) - Active
+**New to JustTheTip?** Here's how to get started in 3 easy steps:
 
-**Remember:** This bot handles real cryptocurrency. Always test with small amounts first!`;
+1. **Check your balance**: Use \`/balance\` to see your current portfolio
+2. **Add funds**: Use \`/deposit\` to learn how to add crypto to your account
+3. **Send your first tip**: Try \`/tip @friend 0.01 SOL\` to send a small tip!
+
+---
+
+## 💰 Managing Your Funds
+
+**View Your Portfolio**
+• \`/balance\` — See your crypto balances with USD values 💎
+  _Example: Shows "0.5 SOL (~$10.00)" and total portfolio value_
+
+**Adding Funds**
+• \`/deposit\` — Get step-by-step instructions for depositing crypto
+  _Supports: SOL and USDC on Solana network_
+
+**Withdrawing Funds**
+• \`/withdraw <address> <amount> <currency>\` — Send crypto to your external wallet
+  _Example: \`/withdraw YourWalletAddress123... 0.1 SOL\`_
+  _⏱️ Processing time: 5-15 minutes_
+
+**Register External Wallet**
+• \`/registerwallet <currency> <address> <signature>\` — Link your external wallet with verification
+  _Required for deposits and withdrawals_
+
+---
+
+## 🎁 Sending & Receiving Tips
+
+**Send a Tip**
+• \`/tip <@user> <amount> <currency>\` — Send crypto to another Discord user
+  _Example: \`/tip @Alice 0.05 SOL\` sends 5 cents worth of SOL_
+  _Example: \`/tip @Bob 1 USDC\` sends $1 in USDC_
+
+**Create an Airdrop**
+• \`/airdrop <amount> <currency>\` — Drop crypto for others to collect
+  _Example: \`/airdrop 0.1 SOL\` creates a 🎁 button anyone can click to claim_
+  _Great for giveaways and community engagement!_
+
+**Collect from Airdrops**
+• 🎁 **Click the Collect button** on airdrop messages to claim your share
+
+---
+
+## 🔄 Advanced Features
+
+**Token Swapping**
+• \`/swap <from> <to> <amount>\` — Exchange between supported tokens
+  _Example: \`/swap SOL USDC 0.1\` converts 0.1 SOL to USDC_
+  _Powered by Jupiter aggregator for best rates_
+
+**View Leaderboard**
+• \`/leaderboard\` — See top tippers and most generous community members 🏆
+  _Track your ranking and celebrate top contributors_
+
+**Support Development**
+• \`/burn <amount> <currency>\` — Donate to help maintain the bot
+  _Example: \`/burn 0.01 SOL\` — Every contribution helps!_
+
+**Get Help**
+• \`/help\` — Display this helpful guide anytime
+
+---
+
+## 💱 Supported Cryptocurrencies
+
+☀️ **SOL** (Solana) — Fast, low-fee native token
+💚 **USDC** — Stablecoin pegged to US Dollar ($1.00)
+
+_Both run on the Solana blockchain for instant transactions_
+
+---
+
+## 💡 Pro Tips
+
+✅ **Start small** — Test with tiny amounts (0.01 SOL) before larger transactions
+✅ **Double-check addresses** — Always verify wallet addresses before withdrawing
+✅ **Use the refresh button** — Click 🔄 on your balance to update prices
+✅ **Save gas fees** — Tip within Discord to avoid blockchain transaction fees
+✅ **Stay secure** — Never share your wallet's private keys or seed phrases
+
+---
+
+**Need more help?** Use \`/help\` anytime or contact server administrators.
+
+_Powered by Solana blockchain • Non-custodial • Secure_`;
 
 client.on(Events.InteractionCreate, async interaction => {
   if (!interaction.isChatInputCommand()) return;
