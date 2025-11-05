@@ -10,7 +10,8 @@ const CONFIG = {
     API_BASE_URL: 'https://api.justthetip.site', // TODO: Replace with your backend URL
     VERIFIED_NFT_COLLECTION: 'YOUR_COLLECTION_ADDRESS', // TODO: Replace after creating collection
     SOLANA_NETWORK: 'mainnet-beta', // or 'devnet' for testing
-    RPC_ENDPOINT: 'https://api.mainnet-beta.solana.com'
+    RPC_ENDPOINT: 'https://api.mainnet-beta.solana.com',
+    GUIDE_URL: 'https://jmenichole.github.io/justthetip.app/guide'
 };
 
 // ===== STATE MANAGEMENT =====
@@ -346,7 +347,7 @@ function updateOnboardingStep(step) {
                         </svg>
                         Verify Wallet
                     </button>
-                    <p class="step-hint">Need help? Type <code>/help</code> or visit <a href="https://jmenichole.github.io/justthetip.app/guide" target="_blank">jmenichole.github.io/justthetip.app/guide</a></p>
+                    <p class="step-hint">Need help? Type <code>/help</code> or visit <a href="${CONFIG.GUIDE_URL}" target="_blank">${CONFIG.GUIDE_URL.replace('https://', '')}</a></p>
                 </div>
             `;
             document.getElementById('connectWalletBtn').addEventListener('click', handleWalletConnect);
