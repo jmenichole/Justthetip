@@ -9,16 +9,14 @@
 
 const fs = require('fs');
 const path = require('path');
-
-// ANSI color codes for terminal output
-const colors = {
-  reset: '\x1b[0m',
-  red: '\x1b[31m',
-  green: '\x1b[32m',
-  yellow: '\x1b[33m',
-  blue: '\x1b[34m',
-  cyan: '\x1b[36m',
-};
+const {
+  log,
+  logHeader,
+  validateVar,
+  validateGroup,
+  printSummary,
+  commonVars,
+} = require('../src/utils/envValidation');
 
 // Required environment variables for different bot modes
 const requiredVars = {
@@ -50,13 +48,6 @@ const securityWarnings = [
 ];
 
 /**
- * Print formatted message to console
- */
-function log(message, color = 'reset') {
-  console.log(`${colors[color]}${message}${colors.reset}`);
-}
-
-/**
  * Check if .env file exists
  */
 function checkEnvFile() {
@@ -84,43 +75,7 @@ function loadEnv() {
   }
 }
 
-/**
- * Validate a single environment variable
- */
-function validateVar(varConfig) {
-  const value = process.env[varConfig.name];
-  const exists = value !== undefined && value !== '';
-  
-  if (!exists) {
-    if (varConfig.optional) {
-      log(`  ⚠️  ${varConfig.name}: Not set (optional)`, 'yellow');
-      if (varConfig.default) {
-        log(`      Using default: ${varConfig.default}`, 'cyan');
-      }
-      if (varConfig.description) {
-        log(`      ${varConfig.description}`, 'cyan');
-      }
-      return { status: 'warning', name: varConfig.name };
-    } else {
-      log(`  ❌ ${varConfig.name}: MISSING (required)`, 'red');
-      if (varConfig.description) {
-        log(`      ${varConfig.description}`, 'cyan');
-      }
-      return { status: 'error', name: varConfig.name };
-    }
-  } else {
-    // Mask sensitive values
-    const displayValue = varConfig.name.includes('KEY') || 
-                        varConfig.name.includes('TOKEN') || 
-                        varConfig.name.includes('SECRET') ||
-                        varConfig.name.includes('PASSWORD')
-      ? '***' + value.slice(-4)
-      : value.length > 50 ? value.slice(0, 47) + '...' : value;
-    
-    log(`  ✅ ${varConfig.name}: ${displayValue}`, 'green');
-    return { status: 'ok', name: varConfig.name };
-  }
-}
+// Note: validateVar is now imported from shared utils
 
 /**
  * Check for security issues
@@ -161,9 +116,7 @@ function getBotMode() {
  * Main verification function
  */
 function verifyEnvironment() {
-  log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'cyan');
-  log('  JustTheTip Environment Variable Verification', 'cyan');
-  log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n', 'cyan');
+  logHeader('JustTheTip Environment Variable Verification');
   
   // Check .env file exists
   if (!checkEnvFile()) {
@@ -220,13 +173,14 @@ function verifyEnvironment() {
     log('\n  Consider using AWS Secrets Manager, HashiCorp Vault, or similar.', 'cyan');
   }
   
-  // Summary
-  log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'cyan');
-  log('Summary:', 'cyan');
-  log(`  ✅ OK: ${results.ok.length}`, 'green');
-  log(`  ⚠️  Warnings: ${results.warning.length}`, 'yellow');
-  log(`  ❌ Errors: ${results.error.length}`, 'red');
-  log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n', 'cyan');
+  // Summary - use shared utility
+  const allResults = {
+    valid: results.ok,
+    warning: results.warning,
+    error: results.error,
+    invalid: [],
+  };
+  printSummary(allResults);
   
   // Exit with appropriate code
   if (results.error.length > 0) {

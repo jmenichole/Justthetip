@@ -20,6 +20,10 @@ const { PublicKey } = require('@solana/web3.js');
 const { JustTheTipSDK } = require('./contracts/sdk');
 const { handleSwapCommand, handleSwapHelpButton } = require('./src/commands/swapCommand');
 const db = require('./db/database');
+const {
+  createOnChainBalanceEmbed,
+  createWalletRegisteredEmbed,
+} = require('./src/utils/embedBuilders');
 
 const client = new Client({ 
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] 
@@ -134,10 +138,7 @@ client.on(Events.InteractionCreate, async interaction => {
       
       userWallets.set(userId, address);
       
-      const embed = new EmbedBuilder()
-        .setTitle('✅ Wallet Registered')
-        .setDescription(`Your Solana wallet has been registered for smart contract operations.\n\n**Address:** \`${address}\``)
-        .setColor(0x8b5cf6);
+      const embed = createWalletRegisteredEmbed('SOL', address, false);
         
       await interaction.reply({ embeds: [embed], ephemeral: true });
       
@@ -216,14 +217,7 @@ client.on(Events.InteractionCreate, async interaction => {
       
       const balance = await getSolanaBalance(walletAddress);
       
-      const embed = new EmbedBuilder()
-        .setTitle('💰 On-Chain Balance')
-        .setDescription(
-          `**Wallet:** \`${walletAddress.slice(0, 8)}...${walletAddress.slice(-8)}\`\n` +
-          `**Balance:** ${balance.toFixed(6)} SOL\n\n` +
-          `*This is your actual on-chain balance, queried directly from the Solana blockchain.*`
-        )
-        .setColor(0x1e3a8a);
+      const embed = createOnChainBalanceEmbed(walletAddress, balance);
         
       const refreshButton = new ActionRowBuilder()
         .addComponents(
@@ -322,15 +316,7 @@ client.on(Events.InteractionCreate, async interaction => {
     
     const balance = await getSolanaBalance(walletAddress);
     
-    const embed = new EmbedBuilder()
-      .setTitle('💰 On-Chain Balance')
-      .setDescription(
-        `**Wallet:** \`${walletAddress.slice(0, 8)}...${walletAddress.slice(-8)}\`\n` +
-        `**Balance:** ${balance.toFixed(6)} SOL\n\n` +
-        `*Balance updated from Solana blockchain*`
-      )
-      .setColor(0x1e3a8a)
-      .setFooter({ text: 'Last updated: ' + new Date().toLocaleString() });
+    const embed = createOnChainBalanceEmbed(walletAddress, balance, true);
       
     await interaction.update({ embeds: [embed] });
     
