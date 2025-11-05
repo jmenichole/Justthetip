@@ -59,7 +59,7 @@ describe('Dotenv Configuration', () => {
     expect(content).toContain("require('dotenv-safe').config({ allowEmptyValues: true })");
   });
 
-  test('.env.example should contain DISCORD_REDIRECT_URI and DATABASE_URL', () => {
+  test('.env.example should document optional variables as commented', () => {
     const envExamplePath = path.join(process.cwd(), '.env.example');
     
     if (!fs.existsSync(envExamplePath)) {
@@ -68,8 +68,31 @@ describe('Dotenv Configuration', () => {
 
     const content = fs.readFileSync(envExamplePath, 'utf-8');
     
-    // Verify required variables are documented
+    // Verify optional variables are documented but commented out
+    // This prevents dotenv-safe from requiring them while still documenting them
     expect(content).toContain('DISCORD_REDIRECT_URI');
     expect(content).toContain('DATABASE_URL');
+    
+    // Verify they are commented out (prefixed with # on the actual assignment line)
+    expect(content).toMatch(/# DISCORD_REDIRECT_URI=/);
+    expect(content).toMatch(/# DATABASE_URL=/);
+  });
+
+  test('.env.example should only have required variables uncommented', () => {
+    const envExamplePath = path.join(process.cwd(), '.env.example');
+    
+    if (!fs.existsSync(envExamplePath)) {
+      throw new Error('.env.example not found');
+    }
+
+    const content = fs.readFileSync(envExamplePath, 'utf-8');
+    
+    // Required variables for smart contract bot should be uncommented
+    expect(content).toMatch(/^DISCORD_BOT_TOKEN=/m);
+    expect(content).toMatch(/^DISCORD_CLIENT_ID=/m);
+    expect(content).toMatch(/^DISCORD_CLIENT_SECRET=/m);
+    expect(content).toMatch(/^SOLANA_RPC_URL=/m);
+    expect(content).toMatch(/^MONGODB_URI=/m);
+    expect(content).toMatch(/^NODE_ENV=/m);
   });
 });
