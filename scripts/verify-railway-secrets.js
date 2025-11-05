@@ -189,7 +189,7 @@ function verifyRailwaySecrets() {
       importantIssues === 0 ? 'green' : 'yellow');
   log(`Optional: ${results.optional.valid.length}/${OPTIONAL_SECRETS.length} set`, 'cyan');
 
-  // Exit code logic
+  // Display result messages (but don't exit - let caller decide)
   if (criticalIssues > 0) {
     log('\n❌ CRITICAL SECRETS MISSING - Bot cannot start!', 'red');
     log('\nTo fix:', 'yellow');
@@ -197,10 +197,7 @@ function verifyRailwaySecrets() {
     log('2. Navigate to your project > Variables tab', 'cyan');
     log('3. Add the missing variables shown above', 'cyan');
     log('4. Redeploy the service\n', 'cyan');
-    process.exit(1);
-  }
-
-  if (importantIssues > 0) {
+  } else if (importantIssues > 0) {
     log('\n⚠️  Important secrets missing - Some features may not work', 'yellow');
     log('Bot will start but functionality may be limited\n', 'cyan');
   } else {
