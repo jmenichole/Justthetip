@@ -317,24 +317,36 @@ function updateOnboardingStep(step) {
             break;
 
         case 'wallet':
-            title.textContent = 'Step 2: Connect Wallet';
+            title.textContent = '🪙 How to Link Your Wallet';
             content.innerHTML = `
                 <div class="onboarding-step">
-                    <div class="step-icon">👛</div>
-                    <p class="step-description">Connect your Solana wallet to verify ownership.</p>
-                    <div class="user-badge">
+                    <p class="step-description" style="margin-bottom: 1.5rem; font-weight: 600;">Follow these 3 quick steps:</p>
+                    <div class="user-badge" style="margin-bottom: 1.5rem;">
                         <img src="https://cdn.discordapp.com/avatars/${AppState.discordUser.id}/${AppState.discordUser.avatar}.png" 
                              alt="Avatar" class="user-avatar-small">
                         <span>${AppState.discordUser.username}</span>
+                    </div>
+                    <div style="text-align: left; margin-bottom: 1.5rem; padding: 0 1rem;">
+                        <p style="margin-bottom: 1rem; line-height: 1.6;">
+                            <strong>1️⃣ Click <strong>Verify Wallet</strong> below.</strong><br>
+                            <span style="margin-left: 1.5rem; color: #94a3b8; font-size: 0.9rem;">(No private key, no funds — just proof of ownership.)</span>
+                        </p>
+                        <p style="margin-bottom: 1rem; line-height: 1.6;">
+                            <strong>2️⃣ Approve the message in your wallet (Phantom/Solflare/etc.)</strong><br>
+                            <span style="margin-left: 1.5rem; color: #94a3b8; font-size: 0.9rem;">This confirms it's really you.</span>
+                        </p>
+                        <p style="margin-bottom: 1rem; line-height: 1.6;">
+                            <strong>3️⃣ Return here — your wallet will show as "Verified ✅".</strong>
+                        </p>
                     </div>
                     <button class="btn btn-primary" id="connectWalletBtn">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <rect x="2" y="5" width="20" height="14" rx="2"/>
                             <path d="M2 10h20"/>
                         </svg>
-                        Connect Phantom Wallet
+                        Verify Wallet
                     </button>
-                    <p class="step-hint">Don't have a Solana wallet? <a href="https://phantom.app" target="_blank">Get Phantom</a></p>
+                    <p class="step-hint">Need help? Type <code>/help</code> or visit <a href="https://jmenichole.github.io/justthetip.app/guide" target="_blank">jmenichole.github.io/justthetip.app/guide</a></p>
                 </div>
             `;
             document.getElementById('connectWalletBtn').addEventListener('click', handleWalletConnect);
