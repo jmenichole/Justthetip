@@ -13,7 +13,7 @@
  * This software may not be sold commercially without permission.
  */
 
-const { Client, GatewayIntentBits, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Events, REST, Routes } = require('discord.js');
+const { Client, GatewayIntentBits, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Events, REST, Routes, ChannelType } = require('discord.js');
 
 // Load environment variables - handle case where .env file doesn't exist in production
 try {
@@ -732,7 +732,7 @@ client.on(Events.MessageCreate, async message => {
   if (message.author.bot) return;
   
   // Only handle DMs
-  if (message.channel.type !== 1) return; // 1 = DM channel
+  if (message.channel.type !== ChannelType.DM) return;
   
   // Check for $ prefix commands
   if (!message.content.startsWith('$')) return;

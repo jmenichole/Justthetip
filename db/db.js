@@ -11,7 +11,9 @@ const Database = require('better-sqlite3');
 const path = require('path');
 
 // Create or connect to local database
-const db = new Database(path.join(__dirname, 'justthetip.db'));
+// For production deployments, consider using process.env.DB_PATH to override location
+const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'justthetip.db');
+const db = new Database(DB_PATH);
 
 // Enable Write-Ahead Logging for better performance
 db.pragma('journal_mode = WAL');
