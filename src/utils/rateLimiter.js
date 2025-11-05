@@ -17,6 +17,8 @@
 class RateLimiter {
   constructor() {
     this.limits = {};
+    // Maximum age for rate limit entries before cleanup (1 hour)
+    this.CLEANUP_MAX_AGE_MS = 3600000;
   }
 
   /**
@@ -67,10 +69,9 @@ class RateLimiter {
    */
   cleanup() {
     const now = Date.now();
-    const maxAge = 3600000; // 1 hour
     
     for (const [key, value] of Object.entries(this.limits)) {
-      if (now - value.timestamp > maxAge) {
+      if (now - value.timestamp > this.CLEANUP_MAX_AGE_MS) {
         delete this.limits[key];
       }
     }

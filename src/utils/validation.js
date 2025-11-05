@@ -82,6 +82,8 @@ function isValidAddress(address, coin) {
 
 /**
  * Sanitize user input string
+ * Note: This provides basic sanitization by removing < and > characters.
+ * For more comprehensive XSS protection, consider using a dedicated library like DOMPurify.
  * @param {string} str - String to sanitize
  * @param {number} maxLength - Maximum length (default: 100)
  * @returns {string} Sanitized string

@@ -13,7 +13,7 @@
  * This software may not be sold commercially without permission.
  */
 
-const { Client, GatewayIntentBits, ActionRowBuilder, ButtonBuilder, ButtonStyle, Events, REST, Routes } = require('discord.js');
+const { Client, GatewayIntentBits, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Events, REST, Routes } = require('discord.js');
 require('dotenv-safe').config({ allowEmptyValues: true });
 const db = require('./db/database');
 const { handleLeaderboardCommand } = require('./src/commands/leaderboardCommand');
@@ -311,7 +311,6 @@ client.on(Events.InteractionCreate, async interaction => {
       }
       
     } else if (commandName === 'help') {
-      const { EmbedBuilder } = require('discord.js');
       const embed = new EmbedBuilder()
         .setTitle('🤖 JustTheTip Helper Bot')
         .setColor(0x7289da)
@@ -420,7 +419,6 @@ client.on(Events.InteractionCreate, async interaction => {
       }
       
     } else if (commandName === 'deposit') {
-      const { EmbedBuilder } = require('discord.js');
       const embed = new EmbedBuilder()
         .setTitle('💰 How to Deposit Funds')
         .setColor(0x3498db)
@@ -479,7 +477,6 @@ client.on(Events.InteractionCreate, async interaction => {
         });
       }
       
-      const { EmbedBuilder } = require('discord.js');
       const embed = new EmbedBuilder()
         .setTitle('🏦 Withdrawal Request Submitted')
         .setColor(0xf39c12)
@@ -567,7 +564,6 @@ client.on(Events.InteractionCreate, async interaction => {
         });
       }
       
-      const { EmbedBuilder } = require('discord.js');
       const embed = new EmbedBuilder()
         .setTitle('🔥 Thank You for Your Support!')
         .setColor(0xe74c3c)
@@ -585,7 +581,6 @@ client.on(Events.InteractionCreate, async interaction => {
       
     } else {
       // Fallback for any unimplemented commands
-      const { EmbedBuilder } = require('discord.js');
       const embed = new EmbedBuilder()
         .setTitle('Command Received')
         .setDescription(`The \`/${commandName}\` command was executed. Full functionality coming soon!`)

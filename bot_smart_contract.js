@@ -14,7 +14,7 @@
  * This software may not be sold commercially without permission.
  */
 
-const { Client, GatewayIntentBits, ActionRowBuilder, ButtonBuilder, ButtonStyle, Events, REST, Routes } = require('discord.js');
+const { Client, GatewayIntentBits, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Events, REST, Routes } = require('discord.js');
 require('dotenv-safe').config({ allowEmptyValues: true });
 const { PublicKey } = require('@solana/web3.js');
 const { JustTheTipSDK } = require('./contracts/sdk');
@@ -181,7 +181,6 @@ client.on(Events.InteractionCreate, async interaction => {
         });
       }
       
-      const { EmbedBuilder } = require('discord.js');
       const embed = new EmbedBuilder()
         .setTitle('💎 Smart Contract Tip Created')
         .setDescription(
@@ -245,7 +244,6 @@ client.on(Events.InteractionCreate, async interaction => {
         });
       }
       
-      const { EmbedBuilder } = require('discord.js');
       const embed = new EmbedBuilder()
         .setTitle('🔗 Program Derived Address')
         .setDescription(
@@ -258,7 +256,6 @@ client.on(Events.InteractionCreate, async interaction => {
       await interaction.reply({ embeds: [embed], ephemeral: true });
       
     } else if (commandName === 'sc-info') {
-      const { EmbedBuilder } = require('discord.js');
       const embed = new EmbedBuilder()
         .setTitle('⚡ JustTheTip Smart Contract Bot')
         .setDescription(
