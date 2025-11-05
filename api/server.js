@@ -7,6 +7,7 @@ const express = require('express');
 const cors = require('cors');
 const { PublicKey } = require('@solana/web3.js');
 const { MongoClient } = require('mongodb');
+const nacl = require('tweetnacl');
 const adminRoutes = require('./adminRoutes');
 const solanaDevTools = require('../src/utils/solanaDevTools');
 const coinbaseClient = require('../src/utils/coinbaseClient');

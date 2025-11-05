@@ -22,6 +22,9 @@
   },
   "author": "",
   "license": "Custom",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "dependencies": {
     "@bitcoinerlab/secp256k1": "^1.2.0",
     "@metaplex-foundation/js": "^0.20.1",
