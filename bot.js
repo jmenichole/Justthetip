@@ -19,6 +19,7 @@ const db = require('./db/database');
 const { handleLeaderboardCommand } = require('./src/commands/leaderboardCommand');
 const { handleSwapCommand, handleSwapHelpButton } = require('./src/commands/swapCommand');
 const fs = require('fs');
+const crypto = require('crypto');
 const { isValidSolanaAddress, verifySignature } = require('./src/utils/validation');
 const rateLimiter = require('./src/utils/rateLimiter');
 const {
@@ -110,16 +111,7 @@ const commands = [
   },
   {
     name: 'registerwallet',
-    description: 'Register your wallet addresses with signature verification',
-    options: [
-      { name: 'currency', type: 3, description: 'Currency (SOL, USDC)', required: true, choices: [
-        { name: 'SOL', value: 'SOL' },
-        { name: 'USDC', value: 'USDC' }
-      ]
-      },
-      { name: 'address', type: 3, description: 'Your Solana wallet address', required: true },
-      { name: 'signature', type: 3, description: 'Signed message from your wallet (base58)', required: true }
-    ]
+    description: 'Link your Solana wallet with one-click signature verification',
   },
   {
     name: 'burn',
@@ -135,7 +127,19 @@ const commands = [
   },
   {
     name: 'help',
-    description: 'Complete command reference',
+    description: 'Show bot commands and usage guide',
+    options: [
+      { 
+        name: 'section', 
+        type: 3, 
+        description: 'Help section to display (leave empty for basic commands)', 
+        required: false,
+        choices: [
+          { name: 'advanced', value: 'advanced' },
+          { name: 'register', value: 'register' }
+        ]
+      }
+    ]
   },
   {
     name: 'leaderboard',
@@ -185,7 +189,28 @@ const airdrops = loadAirdrops();
 
 // Note: Rate limiting is now handled by the shared rateLimiter module
 
-const HELP_MESSAGE = `# 🤖 JustTheTip Bot - Your Crypto Tipping Companion
+// Concise help message for default /help command
+const HELP_MESSAGE_BASIC = `## 💰 Basic Commands
+
+\`/balance\` — Check your funds
+\`/deposit\` — Get deposit instructions
+\`/tip @user <amount> <token>\` — Send a tip
+\`/withdraw <address> <amount> <token>\` — Withdraw funds
+\`/registerwallet\` — Link your Solana wallet
+
+## ⚙️ More Commands
+Use \`/help advanced\` for swap, airdrop, leaderboard, and burn commands
+
+## 🧩 Supported Tokens
+**SOL**, **USDC** (Solana network)
+
+## 🔒 Pro Tips
+• Start small, double-check addresses
+• Never share private keys
+• Use \`/help register\` for wallet setup guide`;
+
+// Advanced help message with full command list
+const HELP_MESSAGE_ADVANCED = `# 🤖 JustTheTip Bot - Complete Command Reference
 
 ⚠️ **IMPORTANT:** This bot handles real cryptocurrency. Always start with small test amounts!
 
@@ -215,8 +240,8 @@ const HELP_MESSAGE = `# 🤖 JustTheTip Bot - Your Crypto Tipping Companion
   _⏱️ Processing time: 5-15 minutes_
 
 **Register External Wallet**
-• \`/registerwallet <currency> <address> <signature>\` — Link your external wallet with verification
-  _Required for deposits and withdrawals_
+• \`/registerwallet\` — Link your Solana wallet with one-click verification
+  _Use \`/help register\` for detailed wallet registration guide_
 
 ---
 
@@ -253,7 +278,9 @@ const HELP_MESSAGE = `# 🤖 JustTheTip Bot - Your Crypto Tipping Companion
   _Example: \`/burn 0.01 SOL\` — Every contribution helps!_
 
 **Get Help**
-• \`/help\` — Display this helpful guide anytime
+• \`/help\` — Display concise command guide
+• \`/help advanced\` — Display this complete reference
+• \`/help register\` — Wallet registration instructions
 
 ---
 
@@ -279,6 +306,35 @@ _Both run on the Solana blockchain for instant transactions_
 **Need more help?** Use \`/help\` anytime or contact server administrators.
 
 _Powered by Solana blockchain • Non-custodial • Secure_`;
+
+// Wallet registration help message
+const HELP_MESSAGE_REGISTER = `## 🔐 Wallet Registration Guide
+
+**Why register your wallet?**
+Wallet registration allows you to deposit and withdraw funds securely using signature verification.
+
+**How it works:**
+1. Run the \`/registerwallet\` command
+2. Click the provided link to open the registration page
+3. Connect your Phantom or Solflare wallet
+4. Sign the verification message (non-custodial - no keys stored!)
+5. Your wallet is instantly registered and verified ✅
+
+**Supported Wallets:**
+• Phantom (recommended)
+• Solflare
+• Any Solana wallet with signMessage support
+
+**Security Features:**
+• ✅ Non-custodial: Your private keys never leave your wallet
+• ✅ Time-limited: Registration links expire after 10 minutes
+• ✅ Signature-based: Cryptographically proves wallet ownership
+• ✅ No storage: Signatures are never stored permanently
+
+**Need help?**
+Use \`/help\` for general commands or contact server administrators.
+
+_🔒 Your security is our priority. Never share your private keys or seed phrases!_`;
 
 client.on(Events.InteractionCreate, async interaction => {
   if (!interaction.isChatInputCommand()) return;
@@ -311,10 +367,23 @@ client.on(Events.InteractionCreate, async interaction => {
       }
       
     } else if (commandName === 'help') {
+      const section = interaction.options.getString('section');
+      
+      let helpMessage = HELP_MESSAGE_BASIC;
+      let title = '🤖 JustTheTip Bot - Quick Reference';
+      
+      if (section === 'advanced') {
+        helpMessage = HELP_MESSAGE_ADVANCED;
+        title = '🤖 JustTheTip Bot - Complete Guide';
+      } else if (section === 'register') {
+        helpMessage = HELP_MESSAGE_REGISTER;
+        title = '🔐 Wallet Registration Guide';
+      }
+      
       const embed = new EmbedBuilder()
-        .setTitle('🤖 JustTheTip Helper Bot')
+        .setTitle(title)
         .setColor(0x7289da)
-        .setDescription(HELP_MESSAGE);
+        .setDescription(helpMessage);
       await interaction.reply({ embeds: [embed], ephemeral: true });
       
     } else if (commandName === 'leaderboard') {
@@ -426,7 +495,7 @@ client.on(Events.InteractionCreate, async interaction => {
         .addFields(
           { 
             name: '1️⃣ Register Your Wallet', 
-            value: 'First, register your wallet address using `/registerwallet currency address`', 
+            value: 'First, use `/registerwallet` to link your Solana wallet with one-click verification', 
             inline: false 
           },
           { 
@@ -445,7 +514,7 @@ client.on(Events.InteractionCreate, async interaction => {
             inline: false 
           }
         )
-        .setFooter({ text: 'Need help? Use /help for more information' });
+        .setFooter({ text: 'Need help? Use /help register for wallet setup guide' });
         
       await interaction.reply({ embeds: [embed], ephemeral: true });
       
@@ -495,51 +564,53 @@ client.on(Events.InteractionCreate, async interaction => {
       console.log(`Withdrawal request: ${interaction.user.id} -> ${address}: ${amount} ${currency}`);
       
     } else if (commandName === 'registerwallet') {
-      const currency = interaction.options.getString('currency');
-      const address = interaction.options.getString('address');
-      const signature = interaction.options.getString('signature');
-      
-      // Validate Solana address
-      if (!isValidSolanaAddress(address)) {
-        return await interaction.reply({ 
-          content: '❌ Invalid Solana wallet address. Please provide a valid base58 encoded address.', 
-          ephemeral: true 
-        });
-      }
-      
       try {
-        // Create the message that should have been signed
-        const message = `Register wallet for JustTheTip Discord Bot\nUser: ${interaction.user.id}\nWallet: ${address}\nCurrency: ${currency}\nTimestamp: ${Date.now()}`;
+        // Generate a unique nonce for this registration attempt
+        const nonce = crypto.randomUUID();
+        const discordUserId = interaction.user.id;
+        const discordUsername = interaction.user.username;
         
-        // Verify the signature using shared utility
-        const isValid = verifySignature(message, signature, address);
+        // Create registration URL (will point to our web-based signing page)
+        const apiBaseUrl = process.env.API_BASE_URL || 'http://localhost:3000';
+        const registrationUrl = `${apiBaseUrl}/sign.html?user=${encodeURIComponent(discordUserId)}&username=${encodeURIComponent(discordUsername)}&nonce=${nonce}`;
         
-        if (!isValid) {
-          return await interaction.reply({ 
-            content: '❌ Invalid signature. Please sign the message with your wallet and provide the correct signature.\n\n' +
-                     '**How to get the signature:**\n' +
-                     '1. Use your Solana wallet (Phantom, Solflare, etc.)\n' +
-                     '2. Sign the message provided by the bot\n' +
-                     '3. Copy the base58 encoded signature\n' +
-                     '4. Use it in the command', 
-            ephemeral: true 
-          });
-        }
-        
-        const embed = createWalletRegisteredEmbed(currency, address, true);
+        const embed = new EmbedBuilder()
+          .setTitle('🔐 Register Your Solana Wallet')
+          .setColor(0x7289da)
+          .setDescription('Click the link below to securely register your wallet using signature verification.')
+          .addFields(
+            { 
+              name: '📝 Registration Link', 
+              value: `[Click here to register your wallet](${registrationUrl})`,
+              inline: false 
+            },
+            { 
+              name: '✨ What happens next?', 
+              value: '1. Connect your Phantom or Solflare wallet\n2. Sign a verification message\n3. Your wallet will be instantly registered!',
+              inline: false 
+            },
+            { 
+              name: '🔒 Security', 
+              value: '• Non-custodial (your keys never leave your wallet)\n• Link expires in 10 minutes\n• Signature proves wallet ownership',
+              inline: false 
+            },
+            { 
+              name: '💡 Need help?', 
+              value: 'Use `/help register` for detailed instructions',
+              inline: false 
+            }
+          )
+          .setFooter({ text: 'Never share your private keys or seed phrases!' });
           
         await interaction.reply({ embeds: [embed], ephemeral: true });
         
-        // In a production environment, this would save to database with verified status
-        console.log(`Wallet registered and verified: ${interaction.user.id} - ${currency}: ${address}`);
+        // Store nonce temporarily in database for verification (will be implemented in backend)
+        console.log(`Wallet registration link generated: ${discordUserId} - nonce: ${nonce}`);
         
       } catch (error) {
         console.error('Wallet registration error:', error);
         return await interaction.reply({ 
-          content: '❌ Error verifying wallet signature. Please ensure:\n' +
-                   '• Your wallet address is correct\n' +
-                   '• Your signature is in base58 format\n' +
-                   '• The signature matches the wallet address\n\n' +
+          content: '❌ Error generating registration link. Please try again later.\n\n' +
                    `Error: ${error.message}`, 
           ephemeral: true 
         });

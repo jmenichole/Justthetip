@@ -47,6 +47,19 @@ app.use(express.json({
     }
 }));
 
+// Serve static files from public directory
+app.use(express.static('api/public'));
+
+// Rate limiting for wallet registration
+const rateLimit = require('express-rate-limit');
+const walletRegistrationLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 5, // Limit each IP to 5 requests per windowMs
+    message: 'Too many registration attempts, please try again later.',
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
 // ===== DATABASE =====
 let db;
 let connection;
@@ -69,6 +82,10 @@ async function initializeDatabase() {
         await db.collection('verifications').createIndex({ nftMintAddress: 1 });
         await db.collection('tickets').createIndex({ discordId: 1 });
         await db.collection('tickets').createIndex({ createdAt: -1 });
+        await db.collection('wallet_registrations').createIndex({ discordUserId: 1 }, { unique: true });
+        await db.collection('wallet_registrations').createIndex({ walletAddress: 1 });
+        await db.collection('registration_nonces').createIndex({ nonce: 1 }, { unique: true });
+        await db.collection('registration_nonces').createIndex({ createdAt: 1 }, { expireAfterSeconds: 600 }); // Auto-expire after 10 minutes
         
         console.log('✅ MongoDB connected');
     } catch (error) {
@@ -168,7 +185,317 @@ async function createNFTMetadata(discordId, discordUsername, walletAddress, term
     return metadata;
 }
 
+// ===== WALLET REGISTRATION STORAGE =====
+// In-memory fallback for nonces when database is unavailable
+const registrationNoncesMemory = new Map();
+
+// Helper function to clean up expired nonces from memory
+function cleanupExpiredNoncesMemory() {
+    const now = Date.now();
+    const TEN_MINUTES = 10 * 60 * 1000;
+    
+    for (const [nonce, data] of registrationNoncesMemory.entries()) {
+        if (now - data.createdAt > TEN_MINUTES) {
+            registrationNoncesMemory.delete(nonce);
+        }
+    }
+}
+
+// Helper function to clean up expired nonces from database
+async function cleanupExpiredNoncesDB() {
+    if (!db) return;
+    
+    try {
+        const TEN_MINUTES_AGO = new Date(Date.now() - 10 * 60 * 1000);
+        await db.collection('registration_nonces').deleteMany({
+            createdAt: { $lt: TEN_MINUTES_AGO }
+        });
+    } catch (error) {
+        console.error('Error cleaning up nonces:', error);
+    }
+}
+
+// Run cleanup every 5 minutes
+setInterval(() => {
+    cleanupExpiredNoncesMemory();
+    cleanupExpiredNoncesDB();
+}, 5 * 60 * 1000);
+
+// Helper function to check and store nonce
+async function checkAndStoreNonce(nonce, discordUserId, discordUsername) {
+    // Validate input parameters to prevent injection
+    if (typeof nonce !== 'string' || typeof discordUserId !== 'string') {
+        throw new Error('Invalid parameter types');
+    }
+    
+    if (db) {
+        // Use database for persistent storage
+        const existing = await db.collection('registration_nonces').findOne({ nonce: String(nonce) });
+        if (existing) {
+            return { valid: false, used: existing.used };
+        }
+        
+        // Store nonce in database
+        await db.collection('registration_nonces').insertOne({
+            nonce: String(nonce),
+            discordUserId: String(discordUserId),
+            discordUsername: String(discordUsername),
+            createdAt: new Date(),
+            used: false
+        });
+        
+        return { valid: true, used: false };
+    } else {
+        // Fallback to in-memory storage
+        if (registrationNoncesMemory.has(nonce)) {
+            const data = registrationNoncesMemory.get(nonce);
+            return { valid: false, used: data.used };
+        }
+        
+        registrationNoncesMemory.set(nonce, {
+            discordUserId,
+            discordUsername,
+            createdAt: Date.now(),
+            used: false
+        });
+        
+        return { valid: true, used: false };
+    }
+}
+
+// Helper function to mark nonce as used
+async function markNonceAsUsed(nonce) {
+    // Validate input parameter
+    if (typeof nonce !== 'string') {
+        throw new Error('Invalid nonce type');
+    }
+    
+    if (db) {
+        await db.collection('registration_nonces').updateOne(
+            { nonce: String(nonce) },
+            { $set: { used: true, usedAt: new Date() } }
+        );
+    } else {
+        const data = registrationNoncesMemory.get(nonce);
+        if (data) {
+            data.used = true;
+            registrationNoncesMemory.set(nonce, data);
+        }
+    }
+}
+
 // ===== API ENDPOINTS =====
+
+// Verify wallet signature and register wallet
+app.post('/api/registerwallet/verify', walletRegistrationLimiter, async (req, res) => {
+    try {
+        const {
+            message,
+            publicKey,
+            signature,
+            discordUserId,
+            discordUsername,
+            nonce
+        } = req.body;
+
+        // Validate required fields
+        if (!message || !publicKey || !signature || !discordUserId || !nonce) {
+            return res.status(400).json({
+                success: false,
+                error: 'Missing required fields'
+            });
+        }
+        
+        // Validate field types to prevent injection
+        if (typeof message !== 'string' || typeof publicKey !== 'string' || 
+            typeof signature !== 'string' || typeof discordUserId !== 'string' || 
+            typeof nonce !== 'string') {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid field types'
+            });
+        }
+        
+        // Validate Discord user ID format (should be numeric string)
+        if (!/^\d+$/.test(discordUserId)) {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid Discord user ID format'
+            });
+        }
+        
+        // Validate nonce format (UUID v4)
+        if (!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(nonce)) {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid nonce format'
+            });
+        }
+
+        // Check and store nonce
+        const nonceCheck = await checkAndStoreNonce(nonce, discordUserId, discordUsername);
+        if (!nonceCheck.valid) {
+            if (nonceCheck.used) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Nonce already used. Please request a new registration link.'
+                });
+            }
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid nonce. Please request a new registration link.'
+            });
+        }
+
+        // Parse and validate the message
+        let messageData;
+        try {
+            messageData = JSON.parse(message);
+        } catch (error) {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid message format'
+            });
+        }
+
+        // Verify message timestamp (not older than 10 minutes)
+        const messageTime = new Date(messageData.timestamp).getTime();
+        const now = Date.now();
+        const TEN_MINUTES = 10 * 60 * 1000;
+
+        if (now - messageTime > TEN_MINUTES) {
+            return res.status(400).json({
+                success: false,
+                error: 'Registration link expired. Please request a new one.'
+            });
+        }
+
+        // Verify the signature
+        try {
+            const messageBytes = new TextEncoder().encode(message);
+            const signatureBytes = Buffer.from(signature, 'base64');
+            const publicKeyBytes = new PublicKey(publicKey).toBytes();
+            
+            const isValid = nacl.sign.detached.verify(
+                messageBytes,
+                signatureBytes,
+                publicKeyBytes
+            );
+
+            if (!isValid) {
+                return res.status(401).json({
+                    success: false,
+                    error: 'Invalid signature'
+                });
+            }
+        } catch (error) {
+            console.error('Signature verification error:', error);
+            return res.status(401).json({
+                success: false,
+                error: 'Signature verification failed'
+            });
+        }
+
+        // Check if wallet already registered to a different user
+        if (db) {
+            const existingWallet = await db.collection('wallet_registrations').findOne({ 
+                walletAddress: String(publicKey)
+            });
+            
+            if (existingWallet && existingWallet.discordUserId !== String(discordUserId)) {
+                return res.status(409).json({
+                    success: false,
+                    error: 'Wallet already registered to another user'
+                });
+            }
+        }
+
+        // Mark nonce as used
+        await markNonceAsUsed(nonce);
+
+        // Store wallet registration
+        const registration = {
+            discordUserId: String(discordUserId),
+            discordUsername: String(discordUsername || 'Unknown'),
+            walletAddress: String(publicKey),
+            verifiedAt: new Date().toISOString(),
+            nonce: String(nonce),
+            messageData
+        };
+
+        if (db) {
+            // Upsert wallet registration in database
+            await db.collection('wallet_registrations').updateOne(
+                { discordUserId: String(discordUserId) },
+                { $set: registration },
+                { upsert: true }
+            );
+        }
+
+        console.log(`✅ Wallet registered: ${discordUserId} -> ${publicKey}`);
+
+        res.json({
+            success: true,
+            message: 'Wallet registered successfully',
+            walletAddress: publicKey
+        });
+
+    } catch (error) {
+        console.error('Wallet registration error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Internal server error',
+            message: error.message
+        });
+    }
+});
+
+// Get wallet registration status
+app.get('/api/registerwallet/status/:discordUserId', walletRegistrationLimiter, async (req, res) => {
+    try {
+        const { discordUserId } = req.params;
+        
+        // Validate Discord user ID format
+        if (!/^\d+$/.test(discordUserId)) {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid Discord user ID format'
+            });
+        }
+
+        if (!db) {
+            return res.status(503).json({
+                success: false,
+                error: 'Database not available'
+            });
+        }
+
+        const registration = await db.collection('wallet_registrations').findOne({ 
+            discordUserId: String(discordUserId)
+        });
+
+        if (!registration) {
+            return res.json({
+                success: true,
+                registered: false
+            });
+        }
+
+        res.json({
+            success: true,
+            registered: true,
+            walletAddress: registration.walletAddress,
+            verifiedAt: registration.verifiedAt
+        });
+
+    } catch (error) {
+        console.error('Status check error:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
 
 // Health check
 app.get('/api/health', (req, res) => {
