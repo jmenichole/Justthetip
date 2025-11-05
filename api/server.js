@@ -6,13 +6,20 @@
 const express = require('express');
 const cors = require('cors');
 const { PublicKey } = require('@solana/web3.js');
-const { MongoClient } = require('mongodb');
 const nacl = require('tweetnacl');
 const adminRoutes = require('./adminRoutes');
 const solanaDevTools = require('../src/utils/solanaDevTools');
 const coinbaseClient = require('../src/utils/coinbaseClient');
 const { verifySignature } = require('../src/utils/validation');
 require('dotenv').config();
+
+// Try to load MongoDB if available (optional dependency)
+let MongoClient;
+try {
+    MongoClient = require('mongodb').MongoClient;
+} catch (error) {
+    console.log('⚠️  MongoDB module not found - MongoDB features will be disabled');
+}
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -73,6 +80,11 @@ async function initializeDatabase() {
             return;
         }
 
+        if (!MongoClient) {
+            console.warn('⚠️  MongoDB module not available - using in-memory storage');
+            return;
+        }
+
         const client = new MongoClient(CONFIG.MONGODB_URI);
         await client.connect();
         db = client.db('justthetip');
@@ -91,6 +103,7 @@ async function initializeDatabase() {
         console.log('✅ MongoDB connected');
     } catch (error) {
         console.error('❌ MongoDB connection failed:', error.message);
+        console.log('⚠️  Continuing with in-memory storage');
     }
 }
 
