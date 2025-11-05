@@ -6,6 +6,11 @@ data/
 .DS_Store
 RAILWAY_ENV_VARS.txt
 
+# SQLite database files
+db/*.db
+db/*.db-shm
+db/*.db-wal
+
 # Build artifacts
 dist/
 build/

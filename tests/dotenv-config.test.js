@@ -92,7 +92,6 @@ describe('Dotenv Configuration', () => {
     expect(content).toMatch(/^DISCORD_CLIENT_ID=/m);
     expect(content).toMatch(/^DISCORD_CLIENT_SECRET=/m);
     expect(content).toMatch(/^SOLANA_RPC_URL=/m);
-    expect(content).toMatch(/^MONGODB_URI=/m);
     expect(content).toMatch(/^NODE_ENV=/m);
   });
 
@@ -133,7 +132,6 @@ describe('Dotenv Configuration', () => {
       expect(content).toMatch(/requiredVars\s*=/);
       expect(content).toContain('DISCORD_BOT_TOKEN');
       expect(content).toContain('DISCORD_CLIENT_ID');
-      expect(content).toContain('MONGODB_URI');
       expect(content).toMatch(/missingVars/);
     }
   });
