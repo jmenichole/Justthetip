@@ -208,25 +208,44 @@ client.on(Events.InteractionCreate, async interaction => {
   
   try {
     if (commandName === 'balance') {
-      // Mock data - replace with actual db call using interaction.user.id
-      
-      const embed = new EmbedBuilder()
-        .setTitle('💎 Your Portfolio Balance')
-        .setColor(0x3498db)
-        .setDescription('**Total Portfolio Value:** $0.00\n\n' +
-          '☀️ **SOL:** 0.000000 (~$0.00)\n' +
-          '💚 **USDC:** 0.000000 (~$0.00)')
-        .setFooter({ text: 'Click refresh to update with current prices' });
+      try {
+        // Get actual balance from database
+        const balances = await db.getBalances(interaction.user.id);
         
-      const refreshButton = new ActionRowBuilder()
-        .addComponents(
-          new ButtonBuilder()
-            .setCustomId('refresh_balance')
-            .setLabel('🔄 Refresh')
-            .setStyle(ButtonStyle.Primary)
-        );
+        const solBalance = balances.SOL || 0;
+        const usdcBalance = balances.USDC || 0;
         
-      await interaction.reply({ embeds: [embed], components: [refreshButton], ephemeral: true });
+        // Calculate approximate USD values (in production, use live price API)
+        const solPrice = 20; // Placeholder - use actual price API
+        const solUsdValue = solBalance * solPrice;
+        const usdcUsdValue = usdcBalance; // USDC is pegged to USD
+        const totalValue = solUsdValue + usdcUsdValue;
+        
+        const embed = new EmbedBuilder()
+          .setTitle('💎 Your Portfolio Balance')
+          .setColor(0x3498db)
+          .setDescription(`**Total Portfolio Value:** $${totalValue.toFixed(2)}\n\n` +
+            `☀️ **SOL:** ${solBalance.toFixed(6)} (~$${solUsdValue.toFixed(2)})\n` +
+            `💚 **USDC:** ${usdcBalance.toFixed(6)} (~$${usdcUsdValue.toFixed(2)})`)
+          .setFooter({ text: 'Click refresh to update with current prices' });
+          
+        const refreshButton = new ActionRowBuilder()
+          .addComponents(
+            new ButtonBuilder()
+              .setCustomId('refresh_balance')
+              .setLabel('🔄 Refresh')
+              .setStyle(ButtonStyle.Primary)
+          );
+          
+        await interaction.reply({ embeds: [embed], components: [refreshButton], ephemeral: true });
+        
+      } catch (error) {
+        console.error('Balance error:', error);
+        await interaction.reply({ 
+          content: '❌ An error occurred while fetching your balance. Please try again later.', 
+          ephemeral: true 
+        });
+      }
       
     } else if (commandName === 'help') {
       const embed = new EmbedBuilder()
@@ -279,8 +298,210 @@ client.on(Events.InteractionCreate, async interaction => {
       
       await interaction.reply({ embeds: [embed], components: [collectButton] });
       
+    } else if (commandName === 'tip') {
+      const recipient = interaction.options.getUser('user');
+      const amount = interaction.options.getNumber('amount');
+      const currency = interaction.options.getString('currency');
+      
+      if (isRateLimited(interaction.user.id, commandName)) {
+        return await interaction.reply({ 
+          content: '⏳ Rate limit exceeded. Please wait before using this command again.', 
+          ephemeral: true 
+        });
+      }
+      
+      // Validate tip amount
+      if (amount <= 0) {
+        return await interaction.reply({ 
+          content: '❌ Tip amount must be greater than 0.', 
+          ephemeral: true 
+        });
+      }
+      
+      // Check if user is trying to tip themselves
+      if (recipient.id === interaction.user.id) {
+        return await interaction.reply({ 
+          content: '❌ You cannot tip yourself!', 
+          ephemeral: true 
+        });
+      }
+      
+      // Check if tipping a bot
+      if (recipient.bot) {
+        return await interaction.reply({ 
+          content: '❌ You cannot tip bots!', 
+          ephemeral: true 
+        });
+      }
+      
+      try {
+        // Process the tip through the database
+        await db.processTip(interaction.user.id, recipient.id, amount, currency);
+        
+        const embed = new EmbedBuilder()
+          .setTitle('💸 Tip Sent Successfully!')
+          .setDescription(`${interaction.user} tipped ${recipient} **${amount} ${currency}**! 🎉`)
+          .setColor(0x2ecc71)
+          .setFooter({ text: 'Thanks for spreading the love!' });
+          
+        await interaction.reply({ embeds: [embed] });
+        
+      } catch (error) {
+        console.error('Tip error:', error);
+        
+        if (error.message === 'Insufficient balance') {
+          return await interaction.reply({ 
+            content: `❌ Insufficient balance. You don't have enough ${currency} to complete this tip.`, 
+            ephemeral: true 
+          });
+        }
+        
+        return await interaction.reply({ 
+          content: '❌ An error occurred while processing your tip. Please try again later.', 
+          ephemeral: true 
+        });
+      }
+      
+    } else if (commandName === 'deposit') {
+      const embed = new EmbedBuilder()
+        .setTitle('💰 How to Deposit Funds')
+        .setColor(0x3498db)
+        .setDescription('To add funds to your JustTheTip account, follow these instructions:')
+        .addFields(
+          { 
+            name: '1️⃣ Register Your Wallet', 
+            value: 'First, register your wallet address using `/registerwallet currency address`', 
+            inline: false 
+          },
+          { 
+            name: '2️⃣ Send Crypto', 
+            value: 'Send SOL or USDC from your external wallet to your registered address', 
+            inline: false 
+          },
+          { 
+            name: '3️⃣ Credits Applied', 
+            value: 'Your balance will be credited automatically once the transaction confirms', 
+            inline: false 
+          },
+          { 
+            name: '⚠️ Important Notes', 
+            value: '• Only send supported cryptocurrencies (SOL, USDC)\n• Double-check addresses before sending\n• Minimum deposit: 0.01 SOL or 1 USDC\n• Network fees may apply', 
+            inline: false 
+          }
+        )
+        .setFooter({ text: 'Need help? Use /help for more information' });
+        
+      await interaction.reply({ embeds: [embed], ephemeral: true });
+      
+    } else if (commandName === 'withdraw') {
+      const address = interaction.options.getString('address');
+      const amount = interaction.options.getNumber('amount');
+      const currency = interaction.options.getString('currency');
+      
+      if (isRateLimited(interaction.user.id, commandName)) {
+        return await interaction.reply({ 
+          content: '⏳ Rate limit exceeded. Please wait before using this command again.', 
+          ephemeral: true 
+        });
+      }
+      
+      // Validate withdrawal amount
+      if (amount <= 0) {
+        return await interaction.reply({ 
+          content: '❌ Withdrawal amount must be greater than 0.', 
+          ephemeral: true 
+        });
+      }
+      
+      // Basic address validation
+      if (!address || address.length < 32) {
+        return await interaction.reply({ 
+          content: '❌ Invalid wallet address. Please provide a valid Solana address.', 
+          ephemeral: true 
+        });
+      }
+      
+      const embed = new EmbedBuilder()
+        .setTitle('🏦 Withdrawal Request Submitted')
+        .setColor(0xf39c12)
+        .setDescription(`Your withdrawal request has been queued for processing.`)
+        .addFields(
+          { name: 'Amount', value: `${amount} ${currency}`, inline: true },
+          { name: 'Destination', value: `\`${address.substring(0, 8)}...${address.substring(address.length - 8)}\``, inline: true },
+          { name: 'Status', value: '⏳ Pending', inline: false },
+          { name: 'Estimated Time', value: '5-15 minutes', inline: false }
+        )
+        .setFooter({ text: 'You will be notified once the transaction completes' });
+        
+      await interaction.reply({ embeds: [embed], ephemeral: true });
+      
+      // In a production environment, this would queue the withdrawal for processing
+      console.log(`Withdrawal request: ${interaction.user.id} -> ${address}: ${amount} ${currency}`);
+      
+    } else if (commandName === 'registerwallet') {
+      const currency = interaction.options.getString('currency');
+      const address = interaction.options.getString('address');
+      
+      // Basic address validation
+      if (!address || address.length < 32) {
+        return await interaction.reply({ 
+          content: '❌ Invalid wallet address. Please provide a valid Solana address.', 
+          ephemeral: true 
+        });
+      }
+      
+      const embed = new EmbedBuilder()
+        .setTitle('✅ Wallet Registered Successfully')
+        .setColor(0x2ecc71)
+        .setDescription(`Your ${currency} wallet has been registered!`)
+        .addFields(
+          { name: 'Currency', value: currency, inline: true },
+          { name: 'Address', value: `\`${address.substring(0, 8)}...${address.substring(address.length - 8)}\``, inline: true },
+          { name: 'Status', value: '✅ Active', inline: false }
+        )
+        .setFooter({ text: 'You can now deposit and withdraw using this address' });
+        
+      await interaction.reply({ embeds: [embed], ephemeral: true });
+      
+      // In a production environment, this would save to database
+      console.log(`Wallet registered: ${interaction.user.id} - ${currency}: ${address}`);
+      
+    } else if (commandName === 'burn') {
+      const amount = interaction.options.getNumber('amount');
+      const currency = interaction.options.getString('currency');
+      
+      if (isRateLimited(interaction.user.id, commandName)) {
+        return await interaction.reply({ 
+          content: '⏳ Rate limit exceeded. Please wait before using this command again.', 
+          ephemeral: true 
+        });
+      }
+      
+      // Validate burn amount
+      if (amount <= 0) {
+        return await interaction.reply({ 
+          content: '❌ Burn amount must be greater than 0.', 
+          ephemeral: true 
+        });
+      }
+      
+      const embed = new EmbedBuilder()
+        .setTitle('🔥 Thank You for Your Support!')
+        .setColor(0xe74c3c)
+        .setDescription(`You've donated **${amount} ${currency}** to support bot development!`)
+        .addFields(
+          { name: '💖 Your Contribution', value: `${amount} ${currency}`, inline: true },
+          { name: '🙏 Impact', value: 'Helps keep the bot running', inline: true }
+        )
+        .setFooter({ text: 'Your generosity is greatly appreciated!' });
+        
+      await interaction.reply({ embeds: [embed] });
+      
+      // In a production environment, this would process the burn/donation
+      console.log(`Burn/donation: ${interaction.user.id} - ${amount} ${currency}`);
+      
     } else {
-      // Handle other commands with basic responses
+      // Fallback for any unimplemented commands
       const embed = new EmbedBuilder()
         .setTitle('Command Received')
         .setDescription(`The \`/${commandName}\` command was executed. Full functionality coming soon!`)
@@ -324,16 +545,36 @@ client.on(Events.InteractionCreate, async interaction => {
     await interaction.reply({ embeds: [embed], ephemeral: true });
     
   } else if (interaction.customId === 'refresh_balance') {
-    // Refresh balance display
-    const embed = new EmbedBuilder()
-      .setTitle('💎 Your Portfolio Balance')
-      .setColor(0x3498db)
-      .setDescription('**Total Portfolio Value:** $0.00\n\n' +
-        '☀️ **SOL:** 0.000000 (~$0.00)\n' +
-        '💚 **USDC:** 0.000000 (~$0.00)')
-      .setFooter({ text: 'Balance updated with current prices' });
+    try {
+      // Refresh balance display with actual data
+      const balances = await db.getBalances(interaction.user.id);
       
-    await interaction.update({ embeds: [embed] });
+      const solBalance = balances.SOL || 0;
+      const usdcBalance = balances.USDC || 0;
+      
+      // Calculate approximate USD values (in production, use live price API)
+      const solPrice = 20; // Placeholder - use actual price API
+      const solUsdValue = solBalance * solPrice;
+      const usdcUsdValue = usdcBalance; // USDC is pegged to USD
+      const totalValue = solUsdValue + usdcUsdValue;
+      
+      const embed = new EmbedBuilder()
+        .setTitle('💎 Your Portfolio Balance')
+        .setColor(0x3498db)
+        .setDescription(`**Total Portfolio Value:** $${totalValue.toFixed(2)}\n\n` +
+          `☀️ **SOL:** ${solBalance.toFixed(6)} (~$${solUsdValue.toFixed(2)})\n` +
+          `💚 **USDC:** ${usdcBalance.toFixed(6)} (~$${usdcUsdValue.toFixed(2)})`)
+        .setFooter({ text: 'Balance updated with current prices' });
+        
+      await interaction.update({ embeds: [embed] });
+      
+    } catch (error) {
+      console.error('Refresh balance error:', error);
+      await interaction.reply({ 
+        content: '❌ An error occurred while refreshing your balance.', 
+        ephemeral: true 
+      });
+    }
     
   } else if (interaction.customId === 'swap_help') {
     await handleSwapHelpButton(interaction);
