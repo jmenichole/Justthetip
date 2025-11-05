@@ -19,7 +19,6 @@ const db = require('./db/database');
 const { handleLeaderboardCommand } = require('./src/commands/leaderboardCommand');
 const { handleSwapCommand, handleSwapHelpButton } = require('./src/commands/swapCommand');
 const fs = require('fs');
-const { PublicKey } = require('@solana/web3.js');
 const { isValidSolanaAddress, verifySignature } = require('./src/utils/validation');
 const rateLimiter = require('./src/utils/rateLimiter');
 const {

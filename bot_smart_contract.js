@@ -181,6 +181,7 @@ client.on(Events.InteractionCreate, async interaction => {
         });
       }
       
+      const { EmbedBuilder } = require('discord.js');
       const embed = new EmbedBuilder()
         .setTitle('💎 Smart Contract Tip Created')
         .setDescription(
@@ -244,6 +245,7 @@ client.on(Events.InteractionCreate, async interaction => {
         });
       }
       
+      const { EmbedBuilder } = require('discord.js');
       const embed = new EmbedBuilder()
         .setTitle('🔗 Program Derived Address')
         .setDescription(
@@ -256,6 +258,7 @@ client.on(Events.InteractionCreate, async interaction => {
       await interaction.reply({ embeds: [embed], ephemeral: true });
       
     } else if (commandName === 'sc-info') {
+      const { EmbedBuilder } = require('discord.js');
       const embed = new EmbedBuilder()
         .setTitle('⚡ JustTheTip Smart Contract Bot')
         .setDescription(
