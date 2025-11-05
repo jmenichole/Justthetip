@@ -75,6 +75,8 @@ async function initializeDatabase() {
         await db.collection('tickets').createIndex({ createdAt: -1 });
         await db.collection('wallet_registrations').createIndex({ discordUserId: 1 }, { unique: true });
         await db.collection('wallet_registrations').createIndex({ walletAddress: 1 });
+        await db.collection('registration_nonces').createIndex({ nonce: 1 }, { unique: true });
+        await db.collection('registration_nonces').createIndex({ createdAt: 1 }, { expireAfterSeconds: 600 }); // Auto-expire after 10 minutes
         
         console.log('✅ MongoDB connected');
     } catch (error) {
@@ -186,23 +188,93 @@ async function createNFTMetadata(discordId, discordUsername, walletAddress, term
 }
 
 // ===== WALLET REGISTRATION STORAGE =====
-// In-memory storage for nonces (should be replaced with database in production)
-const registrationNonces = new Map();
+// In-memory fallback for nonces when database is unavailable
+const registrationNoncesMemory = new Map();
 
-// Helper function to clean up expired nonces
-function cleanupExpiredNonces() {
+// Helper function to clean up expired nonces from memory
+function cleanupExpiredNoncesMemory() {
     const now = Date.now();
     const TEN_MINUTES = 10 * 60 * 1000;
     
-    for (const [nonce, data] of registrationNonces.entries()) {
+    for (const [nonce, data] of registrationNoncesMemory.entries()) {
         if (now - data.createdAt > TEN_MINUTES) {
-            registrationNonces.delete(nonce);
+            registrationNoncesMemory.delete(nonce);
         }
     }
 }
 
+// Helper function to clean up expired nonces from database
+async function cleanupExpiredNoncesDB() {
+    if (!db) return;
+    
+    try {
+        const TEN_MINUTES_AGO = new Date(Date.now() - 10 * 60 * 1000);
+        await db.collection('registration_nonces').deleteMany({
+            createdAt: { $lt: TEN_MINUTES_AGO }
+        });
+    } catch (error) {
+        console.error('Error cleaning up nonces:', error);
+    }
+}
+
 // Run cleanup every 5 minutes
-setInterval(cleanupExpiredNonces, 5 * 60 * 1000);
+setInterval(() => {
+    cleanupExpiredNoncesMemory();
+    cleanupExpiredNoncesDB();
+}, 5 * 60 * 1000);
+
+// Helper function to check and store nonce
+async function checkAndStoreNonce(nonce, discordUserId, discordUsername) {
+    if (db) {
+        // Use database for persistent storage
+        const existing = await db.collection('registration_nonces').findOne({ nonce });
+        if (existing) {
+            return { valid: false, used: existing.used };
+        }
+        
+        // Store nonce in database
+        await db.collection('registration_nonces').insertOne({
+            nonce,
+            discordUserId,
+            discordUsername,
+            createdAt: new Date(),
+            used: false
+        });
+        
+        return { valid: true, used: false };
+    } else {
+        // Fallback to in-memory storage
+        if (registrationNoncesMemory.has(nonce)) {
+            const data = registrationNoncesMemory.get(nonce);
+            return { valid: false, used: data.used };
+        }
+        
+        registrationNoncesMemory.set(nonce, {
+            discordUserId,
+            discordUsername,
+            createdAt: Date.now(),
+            used: false
+        });
+        
+        return { valid: true, used: false };
+    }
+}
+
+// Helper function to mark nonce as used
+async function markNonceAsUsed(nonce) {
+    if (db) {
+        await db.collection('registration_nonces').updateOne(
+            { nonce },
+            { $set: { used: true, usedAt: new Date() } }
+        );
+    } else {
+        const data = registrationNoncesMemory.get(nonce);
+        if (data) {
+            data.used = true;
+            registrationNoncesMemory.set(nonce, data);
+        }
+    }
+}
 
 // ===== API ENDPOINTS =====
 
@@ -226,23 +298,19 @@ app.post('/api/registerwallet/verify', async (req, res) => {
             });
         }
 
-        // Verify nonce hasn't been used
-        if (!registrationNonces.has(nonce)) {
-            // Store nonce to track this registration attempt
-            registrationNonces.set(nonce, {
-                discordUserId,
-                discordUsername,
-                createdAt: Date.now(),
-                used: false
-            });
-        } else {
-            const nonceData = registrationNonces.get(nonce);
-            if (nonceData.used) {
+        // Check and store nonce
+        const nonceCheck = await checkAndStoreNonce(nonce, discordUserId, discordUsername);
+        if (!nonceCheck.valid) {
+            if (nonceCheck.used) {
                 return res.status(400).json({
                     success: false,
                     error: 'Nonce already used. Please request a new registration link.'
                 });
             }
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid nonce. Please request a new registration link.'
+            });
         }
 
         // Parse and validate the message
@@ -309,9 +377,7 @@ app.post('/api/registerwallet/verify', async (req, res) => {
         }
 
         // Mark nonce as used
-        const nonceData = registrationNonces.get(nonce);
-        nonceData.used = true;
-        registrationNonces.set(nonce, nonceData);
+        await markNonceAsUsed(nonce);
 
         // Store wallet registration
         const registration = {

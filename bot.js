@@ -19,6 +19,7 @@ const db = require('./db/database');
 const { handleLeaderboardCommand } = require('./src/commands/leaderboardCommand');
 const { handleSwapCommand, handleSwapHelpButton } = require('./src/commands/swapCommand');
 const fs = require('fs');
+const crypto = require('crypto');
 
 // Load fee wallet addresses (reserved for future use)
 const feeWallets = require('./security/feeWallet.json');
@@ -596,10 +597,9 @@ client.on(Events.InteractionCreate, async interaction => {
     } else if (commandName === 'registerwallet') {
       try {
         // Generate a unique nonce for this registration attempt
-        const crypto = require('crypto');
         const nonce = crypto.randomUUID();
         const discordUserId = interaction.user.id;
-        const discordUsername = `${interaction.user.username}#${interaction.user.discriminator}`;
+        const discordUsername = interaction.user.username;
         
         // Create registration URL (will point to our web-based signing page)
         const apiBaseUrl = process.env.API_BASE_URL || 'http://localhost:3000';

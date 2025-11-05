@@ -307,8 +307,8 @@
                 // Request signature
                 const signedMessage = await provider.signMessage(encodedMessage, 'utf8');
                 
-                // Convert signature to base58
-                const signatureBase58 = btoa(String.fromCharCode(...signedMessage.signature));
+                // Convert signature to base64 for transmission
+                const signatureBase64 = btoa(String.fromCharCode(...signedMessage.signature));
 
                 showStatus('pending', '<span class="loading"></span>Verifying signature...');
 
@@ -322,7 +322,7 @@
                     body: JSON.stringify({
                         message: messageString,
                         publicKey: publicKey,
-                        signature: signatureBase58,
+                        signature: signatureBase64,
                         discordUserId: discordUserId,
                         discordUsername: discordUsername,
                         nonce: nonce
