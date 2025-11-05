@@ -328,7 +328,7 @@ function updateOnboardingStep(step) {
                     </div>
                     <div style="text-align: left; margin-bottom: 1.5rem; padding: 0 1rem;">
                         <p style="margin-bottom: 1rem; line-height: 1.6;">
-                            <strong>1️⃣ Click <strong>Verify Wallet</strong> below.</strong><br>
+                            <strong>1️⃣ Click "Verify Wallet" below.</strong><br>
                             <span style="margin-left: 1.5rem; color: #94a3b8; font-size: 0.9rem;">(No private key, no funds — just proof of ownership.)</span>
                         </p>
                         <p style="margin-bottom: 1rem; line-height: 1.6;">
