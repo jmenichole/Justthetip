@@ -27,8 +27,8 @@ describe('Dotenv Configuration', () => {
       
       // Check if file uses dotenv-safe
       if (content.includes("require('dotenv-safe')")) {
-        // Verify it includes allowEmptyValues: true
-        expect(content).toMatch(/require\('dotenv-safe'\)\.config\(\s*\{\s*allowEmptyValues:\s*true\s*\}\s*\)/);
+        // Verify it includes allowEmptyValues: true (may be in try-catch)
+        expect(content).toMatch(/allowEmptyValues:\s*true/);
       }
     }
   });
@@ -42,8 +42,8 @@ describe('Dotenv Configuration', () => {
 
     const content = fs.readFileSync(filePath, 'utf-8');
     
-    // Verify the specific configuration
-    expect(content).toContain("require('dotenv-safe').config({ allowEmptyValues: true })");
+    // Verify the configuration includes allowEmptyValues
+    expect(content).toMatch(/allowEmptyValues:\s*true/);
   });
 
   test('bot.js should maintain allowEmptyValues: true configuration', () => {
@@ -55,8 +55,8 @@ describe('Dotenv Configuration', () => {
 
     const content = fs.readFileSync(filePath, 'utf-8');
     
-    // Verify the specific configuration
-    expect(content).toContain("require('dotenv-safe').config({ allowEmptyValues: true })");
+    // Verify the configuration includes allowEmptyValues
+    expect(content).toMatch(/allowEmptyValues:\s*true/);
   });
 
   test('.env.example should document optional variables as commented', () => {
@@ -94,5 +94,47 @@ describe('Dotenv Configuration', () => {
     expect(content).toMatch(/^SOLANA_RPC_URL=/m);
     expect(content).toMatch(/^MONGODB_URI=/m);
     expect(content).toMatch(/^NODE_ENV=/m);
+  });
+
+  test('bot files should have try-catch wrapper for dotenv-safe to handle missing .env file', () => {
+    const criticalBotFiles = ['bot.js', 'bot_smart_contract.js'];
+    
+    for (const file of criticalBotFiles) {
+      const filePath = path.join(process.cwd(), file);
+      
+      if (!fs.existsSync(filePath)) {
+        console.warn(`Warning: ${file} not found, skipping test`);
+        continue;
+      }
+
+      const content = fs.readFileSync(filePath, 'utf-8');
+      
+      // Verify try-catch wrapper exists for production deployments
+      expect(content).toMatch(/try\s*{[\s\S]*require\('dotenv-safe'\)\.config/);
+      expect(content).toMatch(/catch\s*\(/);
+      expect(content).toMatch(/require\('dotenv'\)\.config\(\)/);
+    }
+  });
+
+  test('bot files should validate required environment variables', () => {
+    const criticalBotFiles = ['bot.js', 'bot_smart_contract.js'];
+    
+    for (const file of criticalBotFiles) {
+      const filePath = path.join(process.cwd(), file);
+      
+      if (!fs.existsSync(filePath)) {
+        console.warn(`Warning: ${file} not found, skipping test`);
+        continue;
+      }
+
+      const content = fs.readFileSync(filePath, 'utf-8');
+      
+      // Verify required variables are checked
+      expect(content).toMatch(/requiredVars\s*=/);
+      expect(content).toContain('DISCORD_BOT_TOKEN');
+      expect(content).toContain('DISCORD_CLIENT_ID');
+      expect(content).toContain('MONGODB_URI');
+      expect(content).toMatch(/missingVars/);
+    }
   });
 });

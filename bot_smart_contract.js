@@ -15,7 +15,31 @@
  */
 
 const { Client, GatewayIntentBits, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Events, REST, Routes } = require('discord.js');
-require('dotenv-safe').config({ allowEmptyValues: true });
+
+// Load environment variables - handle case where .env file doesn't exist in production
+try {
+  require('dotenv-safe').config({ allowEmptyValues: true });
+} catch (error) {
+  // If .env file doesn't exist (e.g., in Docker/Railway), try regular dotenv
+  // and continue if essential variables are in the environment
+  require('dotenv').config();
+  
+  // Only fail if truly required variables are missing (smart contract bot)
+  const requiredVars = ['DISCORD_BOT_TOKEN', 'DISCORD_CLIENT_ID', 'MONGODB_URI', 'SOLANA_RPC_URL'];
+  const missingVars = requiredVars.filter(v => !process.env[v]);
+  
+  if (missingVars.length > 0) {
+    console.error('❌ Missing required environment variables:', missingVars.join(', '));
+    console.error('Please set these variables in your environment or .env file');
+    process.exit(1);
+  }
+  
+  // Warn about .env file but continue
+  if (error.message.includes('ENOENT')) {
+    console.warn('⚠️  No .env file found - using environment variables');
+  }
+}
+
 const { PublicKey } = require('@solana/web3.js');
 const { JustTheTipSDK } = require('./contracts/sdk');
 const { handleSwapCommand, handleSwapHelpButton } = require('./src/commands/swapCommand');
