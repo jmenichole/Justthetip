@@ -24,7 +24,7 @@ try {
   // and continue if essential variables are in the environment
   require('dotenv').config();
   
-  // Only fail if truly required variables are missing
+  // Only fail if truly required variables are missing (smart contract bot)
   const requiredVars = ['DISCORD_BOT_TOKEN', 'DISCORD_CLIENT_ID', 'MONGODB_URI', 'SOLANA_RPC_URL'];
   const missingVars = requiredVars.filter(v => !process.env[v]);
   

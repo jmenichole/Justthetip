@@ -23,7 +23,7 @@ try {
   // and continue if essential variables are in the environment
   require('dotenv').config();
   
-  // Only fail if truly required variables are missing
+  // Only fail if truly required variables are missing (legacy bot)
   const requiredVars = ['DISCORD_BOT_TOKEN', 'DISCORD_CLIENT_ID', 'MONGODB_URI'];
   const missingVars = requiredVars.filter(v => !process.env[v]);
   
