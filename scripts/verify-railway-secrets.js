@@ -52,19 +52,20 @@ function verifyRailwaySecrets() {
   const results = {
     critical: { valid: [], invalid: [], missing: [] },
     important: { valid: [], invalid: [], missing: [] },
-    optional: { valid: [], missing: [] },
+    optional: { valid: [], missing: [], invalid: [] },
   };
 
   // Check critical secrets
   log('🔴 CRITICAL SECRETS (Bot won\'t start without these):', 'red');
   for (const secret of CRITICAL_SECRETS) {
     const result = validateVar(secret);
-    const status = result.status === 'valid' ? 'valid' : result.status;
+    // Map 'error' status to 'missing' for critical secrets
+    const status = result.status === 'error' ? 'missing' : result.status;
     results.critical[status].push(result);
 
     if (result.status === 'valid') {
       log(`  ✅ ${result.name}: ${result.value}`, 'green');
-    } else if (result.status === 'missing') {
+    } else if (result.status === 'error' || result.status === 'missing') {
       log(`  ❌ ${result.name}: MISSING`, 'red');
       log(`     ${result.message}`, 'yellow');
     } else if (result.status === 'invalid') {
@@ -77,17 +78,25 @@ function verifyRailwaySecrets() {
   log('\n🟡 IMPORTANT SECRETS (Recommended for full functionality):', 'yellow');
   for (const secret of IMPORTANT_SECRETS) {
     const result = validateVar(secret);
-    const status = result.status === 'valid' ? 'valid' : result.status;
+    // Map 'error' and 'warning' status to 'missing' for important secrets
+    let status = result.status;
+    if (status === 'error' || status === 'warning') {
+      status = 'missing';
+    }
     results.important[status].push(result);
 
     if (result.status === 'valid') {
       log(`  ✅ ${result.name}: ${result.value}`, 'green');
-    } else if (result.status === 'missing') {
+    } else if (result.status === 'error' || result.status === 'warning' || result.status === 'missing') {
       log(`  ⚠️  ${result.name}: NOT SET`, 'yellow');
-      log(`     ${result.message}`, 'cyan');
+      if (result.message) {
+        log(`     ${result.message}`, 'cyan');
+      }
     } else if (result.status === 'invalid') {
       log(`  ⚠️  ${result.name}: INVALID`, 'yellow');
-      log(`     ${result.message}`, 'cyan');
+      if (result.message) {
+        log(`     ${result.message}`, 'cyan');
+      }
     }
   }
 
@@ -95,11 +104,20 @@ function verifyRailwaySecrets() {
   log('\n🟢 OPTIONAL SECRETS (Enhanced features):', 'green');
   for (const secret of OPTIONAL_SECRETS) {
     const result = validateVar(secret);
-    const status = result.status === 'valid' ? 'valid' : result.status === 'warning' ? 'missing' : result.status;
+    // Map 'warning' and 'error' status to 'missing' for optional secrets
+    let status = result.status;
+    if (status === 'warning' || status === 'error') {
+      status = 'missing';
+    }
     results.optional[status].push(result);
 
     if (result.status === 'valid') {
       log(`  ✅ ${result.name}: ${result.value}`, 'green');
+    } else if (result.status === 'invalid') {
+      log(`  ⚠️  ${result.name}: INVALID`, 'yellow');
+      if (result.message) {
+        log(`     ${result.message}`, 'cyan');
+      }
     } else {
       const defaultMsg = secret.defaultValue ? ` (using default: ${secret.defaultValue})` : '';
       log(`  ⚪ ${result.name}: Not set${defaultMsg}`, 'cyan');
