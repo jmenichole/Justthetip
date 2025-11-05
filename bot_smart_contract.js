@@ -15,7 +15,7 @@
  */
 
 const { Client, GatewayIntentBits, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Events, REST, Routes } = require('discord.js');
-require('dotenv-safe').config();
+require('dotenv-safe').config({ allowEmptyValues: true });
 const { PublicKey } = require('@solana/web3.js');
 const { JustTheTipSDK } = require('./contracts/sdk');
 const { handleSwapCommand, handleSwapHelpButton } = require('./src/commands/swapCommand');
