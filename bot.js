@@ -13,7 +13,7 @@
  * This software may not be sold commercially without permission.
  */
 
-const { Client, GatewayIntentBits, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Events, REST, Routes } = require('discord.js');
+const { Client, GatewayIntentBits, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Events, REST, Routes, ChannelType } = require('discord.js');
 
 // Load environment variables - handle case where .env file doesn't exist in production
 try {
@@ -24,7 +24,7 @@ try {
   require('dotenv').config();
   
   // Only fail if truly required variables are missing (legacy bot)
-  const requiredVars = ['DISCORD_BOT_TOKEN', 'DISCORD_CLIENT_ID', 'MONGODB_URI'];
+  const requiredVars = ['DISCORD_BOT_TOKEN', 'DISCORD_CLIENT_ID'];
   const missingVars = requiredVars.filter(v => !process.env[v]);
   
   if (missingVars.length > 0) {
@@ -40,7 +40,6 @@ try {
 }
 
 const db = require('./db/database');
-const { handleLeaderboardCommand } = require('./src/commands/leaderboardCommand');
 const { handleSwapCommand, handleSwapHelpButton } = require('./src/commands/swapCommand');
 const fs = require('fs');
 const crypto = require('crypto');
@@ -165,10 +164,7 @@ const commands = [
       }
     ]
   },
-  {
-    name: 'leaderboard',
-    description: 'View top tippers and recipients',
-  },
+
   {
     name: 'swap',
     description: 'Swap tokens using Jupiter aggregator',
@@ -223,7 +219,7 @@ const HELP_MESSAGE_BASIC = `## 💰 Basic Commands
 \`/registerwallet\` — Link your Solana wallet
 
 ## ⚙️ More Commands
-Use \`/help advanced\` for swap, airdrop, leaderboard, and burn commands
+Use \`/help advanced\` for swap, airdrop, and burn commands
 
 ## 🧩 Supported Tokens
 **SOL**, **USDC** (Solana network)
@@ -292,10 +288,6 @@ const HELP_MESSAGE_ADVANCED = `# 🤖 JustTheTip Bot - Complete Command Referenc
 • \`/swap <from> <to> <amount>\` — Exchange between supported tokens
   _Example: \`/swap SOL USDC 0.1\` converts 0.1 SOL to USDC_
   _Powered by Jupiter aggregator for best rates_
-
-**View Leaderboard**
-• \`/leaderboard\` — See top tippers and most generous community members 🏆
-  _Track your ranking and celebrate top contributors_
 
 **Support Development**
 • \`/burn <amount> <currency>\` — Donate to help maintain the bot
@@ -409,9 +401,6 @@ client.on(Events.InteractionCreate, async interaction => {
         .setColor(0x7289da)
         .setDescription(helpMessage);
       await interaction.reply({ embeds: [embed], ephemeral: true });
-      
-    } else if (commandName === 'leaderboard') {
-      await handleLeaderboardCommand(interaction, db);
       
     } else if (commandName === 'swap') {
       // Note: userWallets map would need to be implemented for full functionality
@@ -734,6 +723,80 @@ client.on(Events.InteractionCreate, async interaction => {
     
   } else if (interaction.customId === 'swap_help') {
     await handleSwapHelpButton(interaction);
+  }
+});
+
+// Handle DM messages with $ prefix
+client.on(Events.MessageCreate, async message => {
+  // Ignore bot messages
+  if (message.author.bot) return;
+  
+  // Only handle DMs
+  if (message.channel.type !== ChannelType.DM) return;
+  
+  // Check for $ prefix commands
+  if (!message.content.startsWith('$')) return;
+  
+  const args = message.content.slice(1).trim().split(/\s+/);
+  const command = args[0].toLowerCase();
+  
+  try {
+    if (command === 'history' || command === 'transactions') {
+      // Get user transactions
+      const limit = parseInt(args[1]) || 10;
+      const transactions = await db.getUserTransactions(message.author.id, Math.min(limit, 50));
+      
+      if (transactions.length === 0) {
+        return message.reply('You have no transaction history yet.');
+      }
+      
+      // Build transaction history message
+      let historyText = `**📜 Your Recent Transactions (Last ${transactions.length}):**\n\n`;
+      
+      transactions.forEach((tx, index) => {
+        const isSent = tx.sender === message.author.id;
+        const type = isSent ? '📤 Sent' : '📥 Received';
+        const otherUser = isSent ? tx.receiver : tx.sender;
+        const direction = isSent ? 'to' : 'from';
+        const date = new Date(tx.created_at).toLocaleString();
+        
+        historyText += `${index + 1}. ${type} **${tx.amount}** ${tx.currency} ${direction} <@${otherUser}>\n`;
+        historyText += `   _${date}_\n\n`;
+      });
+      
+      historyText += `\nUse \`$history <number>\` to see more (max 50).`;
+      
+      await message.reply(historyText);
+      
+    } else if (command === 'balance') {
+      // Get balance
+      const balances = await db.getBalances(message.author.id);
+      
+      const embed = createBalanceEmbed(balances, PRICE_CONFIG);
+      await message.reply({ embeds: [embed] });
+      
+    } else if (command === 'help') {
+      const helpText = `**💡 JustTheTip DM Commands:**
+
+Commands you can use in DMs with the \`$\` prefix:
+
+• \`$history [number]\` - View your transaction history (default: 10, max: 50)
+• \`$transactions\` - Alias for $history
+• \`$balance\` - Check your current balance
+• \`$help\` - Show this help message
+
+**Note:** For tipping and airdrops, use slash commands (/) in a server channel.
+
+_Your security is our priority. Never share your private keys!_`;
+      
+      await message.reply(helpText);
+      
+    } else {
+      await message.reply(`Unknown command: \`$${command}\`. Use \`$help\` to see available commands.`);
+    }
+  } catch (error) {
+    console.error('DM command error:', error);
+    await message.reply('❌ An error occurred while processing your command. Please try again later.');
   }
 });
 

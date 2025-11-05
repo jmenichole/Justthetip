@@ -47,7 +47,7 @@ JustTheTip delivers a production-ready experience for communities that need prov
         │                   │                        │ --> Coinbase Commerce (fiat)
         │                   └────────────────────────┘
         │                                ↓
-        │                          MongoDB (verifications, tickets)
+        │                          SQLite (local storage, tips, transactions)
         │                                ↓
         └───────── Front-end / Docs (GitHub Pages deployment)
 ```
@@ -72,7 +72,7 @@ JustTheTip delivers a production-ready experience for communities that need prov
 - Node.js 18+ and npm 9+
 - Anchor CLI (`anchor --version`) for building Solana programs
 - Solana CLI configured with access to the desired cluster
-- MongoDB instance (local or managed) if you require persistence beyond in-memory storage
+- SQLite database (auto-created, zero configuration required)
 
 ### Installation
 ```bash
@@ -101,7 +101,6 @@ Define configuration in a `.env` file (or your hosting provider). Key variables 
 | `DISCORD_CLIENT_ID` | Required | OAuth client used for the Discord login flow. |
 | `DISCORD_CLIENT_SECRET` | Required | Secret for exchanging OAuth codes. |
 | `DISCORD_REDIRECT_URI` | Required | Redirect URL registered with Discord. |
-| `MONGODB_URI` | Optional | Connection string for persistent verification/ticket storage. |
 | `COINBASE_COMMERCE_API_KEY` | Optional | Enables fiat charge creation and retrieval. |
 | `COINBASE_COMMERCE_WEBHOOK_SECRET` | Optional | Required to validate Coinbase webhook signatures. |
 
@@ -120,7 +119,7 @@ Additional blockchain-specific guides live in the `/docs` and root-level `*_GUID
 | `npm run test:contracts` | Executes Anchor integration tests. |
 | `npm run deploy:devnet` / `deploy:mainnet` | Deploys the Solana program to the respective cluster. |
 
-Services expect MongoDB and Solana RPC endpoints to be reachable from the execution environment.
+Services expect Solana RPC endpoints to be reachable from the execution environment. Database is stored locally using SQLite.
 
 ---
 
@@ -160,7 +159,7 @@ The Express API (see `api/server.js`) provides:
 - `GET /api/diag` – Sanitized diagnostics confirming RPC hosts and mint authority previews.
 - `POST /api/discord/token` – Exchanges Discord OAuth codes for access tokens and user identity.
 - `POST /api/mintBadge` – Mints verification NFTs after signature validation.
-- `GET /api/verification/:discordId` – Retrieves verification status stored in MongoDB.
+- `GET /api/verification/:discordId` – Retrieves verification status.
 - `POST /api/ticket` & `GET /api/tickets/:discordId` – Minimal support ticket intake and history.
 - Solana developer tooling and Coinbase Commerce routes described above.
 
@@ -197,7 +196,7 @@ CI/CD pipelines should run linting, unit tests, and contract tests before deploy
 
 ### Security
 - Production environments must secure secrets through managed secret stores and restrict webhook endpoints to HTTPS.
-- Use Railway environment variables for all secrets (DISCORD_BOT_TOKEN, DISCORD_CLIENT_ID, MONGODB_URI, etc.)
+- Use Railway environment variables for all secrets (DISCORD_BOT_TOKEN, DISCORD_CLIENT_ID, etc.)
 
 ---
 
