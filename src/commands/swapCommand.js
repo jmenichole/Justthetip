@@ -1,7 +1,5 @@
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { JupiterSwap, TOKEN_MINTS, TOKEN_DECIMALS } = require('../utils/jupiterSwap');
-
-const SUPPORTED_TOKENS = Object.keys(TOKEN_MINTS);
+const { JupiterSwap, TOKEN_MINTS, TOKEN_DECIMALS, SUPPORTED_TOKENS } = require('../utils/jupiterSwap');
 const DEFAULT_SLIPPAGE_BPS = 50;
 
 function formatOutputAmount(amount, decimals) {

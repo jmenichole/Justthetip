@@ -106,8 +106,12 @@ const TOKEN_DECIMALS = {
   PYTH: 6,
 };
 
+// Export a frozen list so command builders and handlers stay perfectly in sync
+const SUPPORTED_TOKENS = Object.freeze(Object.keys(TOKEN_MINTS));
+
 module.exports = {
   JupiterSwap,
   TOKEN_MINTS,
   TOKEN_DECIMALS,
+  SUPPORTED_TOKENS,
 };
