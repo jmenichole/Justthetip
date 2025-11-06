@@ -68,25 +68,52 @@ async function performHealthChecks() {
     log('⚠️  Warning: Node.js 16+ recommended', 'yellow');
   }
   
-  // Check required modules
-  const requiredModules = ['discord.js', 'dotenv-safe', 'mongodb'];
+  // Check required and optional modules
+  const moduleChecks = [
+    { name: 'discord.js', required: true },
+    { name: 'dotenv-safe', required: true },
+    {
+      name: 'mongodb',
+      required: false,
+      shouldCheck: () => Boolean(process.env.MONGODB_URI),
+      message: 'MongoDB features disabled. Install mongodb package to enable database sync.',
+    },
+  ];
+
   let modulesOk = true;
-  
-  for (const module of requiredModules) {
+  let optionalWarnings = false;
+
+  for (const check of moduleChecks) {
+    if (check.shouldCheck && !check.shouldCheck()) {
+      continue;
+    }
+
     try {
-      require.resolve(module);
-      log(`✅ Module ${module}: Found`, 'green');
+      require.resolve(check.name);
+      log(`✅ Module ${check.name}: Found`, 'green');
     } catch (error) {
-      log(`❌ Module ${module}: Missing`, 'red');
-      modulesOk = false;
+      if (check.required) {
+        log(`❌ Module ${check.name}: Missing`, 'red');
+        modulesOk = false;
+      } else {
+        log(`⚠️  Module ${check.name}: Missing`, 'yellow');
+        if (check.message) {
+          log(`    ${check.message}`, 'cyan');
+        }
+        optionalWarnings = true;
+      }
     }
   }
-  
+
   if (!modulesOk) {
     log('\n❌ Required modules missing. Run: npm install', 'red');
     process.exit(1);
   }
-  
+
+  if (optionalWarnings) {
+    log('\n⚠️  Optional modules missing. Continuing with reduced features.', 'yellow');
+  }
+
   log('\n✅ Health checks passed\n', 'green');
 }
 
