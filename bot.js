@@ -259,6 +259,18 @@ _🔒 Your security is our priority. Never share your private keys or seed phras
 client.on(Events.InteractionCreate, async interaction => {
   if (!interaction.isChatInputCommand()) return;
   const { commandName } = interaction;
+
+  if (commandName === 'swap') {
+    if (rateLimiter.isRateLimited(interaction.user.id, commandName)) {
+      return await interaction.reply({
+        content: '⏳ Rate limit exceeded. Please wait before using this command again.',
+        ephemeral: true
+      });
+    }
+
+    await handleSwapCommand(interaction);
+    return;
+  }
   
   try {
     if (commandName === 'balance') {
@@ -378,17 +390,6 @@ client.on(Events.InteractionCreate, async interaction => {
         .setFooter({ text: 'Need help? Use /help register for wallet setup guide' });
         
       await interaction.reply({ embeds: [embed], ephemeral: true });
-      
-    } else if (commandName === 'swap') {
-      if (rateLimiter.isRateLimited(interaction.user.id, commandName)) {
-        return await interaction.reply({
-          content: '⏳ Rate limit exceeded. Please wait before using this command again.',
-          ephemeral: true
-        });
-      }
-
-      await handleSwapCommand(interaction);
-
     } else if (commandName === 'withdraw') {
       const address = interaction.options.getString('address');
       const amount = interaction.options.getNumber('amount');
@@ -542,7 +543,22 @@ client.on(Events.InteractionCreate, async interaction => {
 // Handle button interactions
 client.on(Events.InteractionCreate, async interaction => {
   if (!interaction.isButton()) return;
-  
+
+  if (interaction.customId === 'swap_help') {
+    try {
+      await handleSwapHelpButton(interaction);
+    } catch (error) {
+      console.error('Swap help error:', error);
+      if (!interaction.replied && !interaction.deferred) {
+        await interaction.reply({
+          content: '❌ Unable to show swap instructions right now.',
+          ephemeral: true
+        });
+      }
+    }
+    return;
+  }
+
   if (interaction.customId === 'collect_airdrop') {
     const userId = interaction.user.id;
     
@@ -577,19 +593,6 @@ client.on(Events.InteractionCreate, async interaction => {
         content: '❌ An error occurred while refreshing your balance.',
         ephemeral: true
       });
-    }
-
-  } else if (interaction.customId === 'swap_help') {
-    try {
-      await handleSwapHelpButton(interaction);
-    } catch (error) {
-      console.error('Swap help error:', error);
-      if (!interaction.replied && !interaction.deferred) {
-        await interaction.reply({
-          content: '❌ Unable to show swap instructions right now.',
-          ephemeral: true
-        });
-      }
     }
 
   }
