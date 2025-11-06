@@ -26,11 +26,11 @@ const AppState = {
     nftMinted: false,
     nftMintAddress: null,
     currentStep: 'terms', // terms, discord, wallet, nft, bot, complete
-    mintFeeEnabled: false,
-    mintFeeSol: null,
+    mintFeeEnabled: true,
+    mintFeeSol: CONFIG.DEFAULT_MINT_FEE_SOL,
     mintFeeDestination: null,
-    mintFeeLookbackMinutes: null,
-    mintFeeFallback: false
+    mintFeeLookbackMinutes: 30,
+    mintFeeFallback: true
 };
 
 // ===== MINT PRICE HELPERS =====

@@ -872,7 +872,7 @@ function generateFinalReport() {
     logInfo('4. Fund mint authority wallet with SOL');
     logInfo('5. Deploy backend to Railway/Render');
     logInfo('6. Update API_BASE_URL in docs/landing-app.js');
-    logInfo('7. Rename docs/landing_NEW.html to docs/landing.html');
+    logInfo('7. Keep docs/index.html and docs/landing.html in sync (landing_NEW.html stays as a redirect)');
     logInfo('8. Test complete flow in browser');
     logInfo('9. Monitor logs for errors');
   }
