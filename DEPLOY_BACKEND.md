@@ -54,7 +54,7 @@ In **Variables** tab, add these one by one:
 # Discord OAuth
 DISCORD_CLIENT_ID=1419742988128616479
 DISCORD_CLIENT_SECRET=<get_from_discord_portal>
-DISCORD_REDIRECT_URI=https://jmenichole.github.io/Justthetip/landing.html
+DISCORD_REDIRECT_URI=https://jmenichole.github.io/Justthetip/
 
 # Solana
 SOLANA_RPC_URL=https://api.mainnet-beta.solana.com
@@ -86,7 +86,7 @@ Edit `docs/landing-app.js`:
 ```javascript
 const CONFIG = {
   DISCORD_CLIENT_ID: '1419742988128616479',
-  DISCORD_REDIRECT_URI: 'https://jmenichole.github.io/Justthetip/landing.html',
+  DISCORD_REDIRECT_URI: 'https://jmenichole.github.io/Justthetip/',
   API_BASE_URL: 'https://your-railway-url.up.railway.app', // ← Update this
   TERMS_VERSION: '1.0',
   PINATA_CID: 'bafybeihdwvqhzw3zaecne4o43mtoan23sc5janjgtnqvdrds5qkjk6lowu'
@@ -103,7 +103,7 @@ curl https://your-railway-url.up.railway.app/api/health
 # {"status":"ok","timestamp":"2025-01-XX...","message":"JustTheTip API is running"}
 
 # Test from browser
-open https://jmenichole.github.io/Justthetip/landing.html
+open https://jmenichole.github.io/Justthetip/
 ```
 
 ---
@@ -290,7 +290,7 @@ curl https://your-railway-url.up.railway.app/api/health
 # Test Discord token exchange
 curl -X POST https://your-railway-url.up.railway.app/api/discord/token \
   -H "Content-Type: application/json" \
-  -d '{"code":"test","redirectUri":"https://jmenichole.github.io/Justthetip/landing.html"}'
+  -d '{"code":"test","redirectUri":"https://jmenichole.github.io/Justthetip/"}'
 
 # View Railway logs
 railway logs --follow

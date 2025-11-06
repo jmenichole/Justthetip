@@ -42,7 +42,7 @@ class VerificationChecker {
             if (!verification) {
                 return {
                     verified: false,
-                    message: 'Not verified. Please visit https://jmenichole.github.io/Justthetip/landing.html to verify'
+                    message: 'Not verified. Please visit https://jmenichole.github.io/Justthetip/ to verify'
                 };
             }
 
@@ -196,7 +196,7 @@ class VerificationChecker {
             
             if (!verification.verified) {
                 await interaction.reply({
-                    content: `⚠️ **Verification Required**\n\n${verification.message || 'You must verify your account before using this command.'}\n\n🔗 Get verified at: https://jmenichole.github.io/Justthetip/landing.html`,
+                    content: `⚠️ **Verification Required**\n\n${verification.message || 'You must verify your account before using this command.'}\n\n🔗 Get verified at: https://jmenichole.github.io/Justthetip/`,
                     ephemeral: true
                 });
                 return false;

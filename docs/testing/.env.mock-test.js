@@ -74,7 +74,7 @@ const mockAppState = {
 // Mock Configuration (simulates landing-app.js CONFIG)
 const mockConfig = {
   DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID || '1419742988128616479',
-  DISCORD_REDIRECT_URI: 'https://jmenichole.github.io/Justthetip/landing.html',
+  DISCORD_REDIRECT_URI: 'https://jmenichole.github.io/Justthetip/',
   API_BASE_URL: process.env.API_BASE_URL || 'http://localhost:5500',
   TERMS_VERSION: '1.0',
   PINATA_CID: 'bafybeihdwvqhzw3zaecne4o43mtoan23sc5janjgtnqvdrds5qkjk6lowu'

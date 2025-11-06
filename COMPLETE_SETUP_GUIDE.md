@@ -131,7 +131,7 @@ Your API will be at: `https://your-app.railway.app`
 2. Click "Add Redirect"
 3. Add these redirect URIs:
    ```
-   https://jmenichole.github.io/Justthetip/landing.html
+   https://jmenichole.github.io/Justthetip/
    http://localhost:5500/docs/landing.html (for local testing)
    ```
 4. Copy your **Client Secret**
@@ -251,7 +251,7 @@ node init-database.js
 ```javascript
 const CONFIG = {
     DISCORD_CLIENT_ID: '1419742988128616479',
-    DISCORD_REDIRECT_URI: 'https://jmenichole.github.io/Justthetip/landing.html',
+    DISCORD_REDIRECT_URI: 'https://jmenichole.github.io/Justthetip/',
     API_BASE_URL: 'https://your-app.railway.app', // Your backend URL
     VERIFIED_NFT_COLLECTION: 'YOUR_COLLECTION_ADDRESS',
     SOLANA_NETWORK: 'mainnet-beta',
@@ -273,9 +273,9 @@ Visit: `http://localhost:5500/landing.html`
 
 ### Step 3: Deploy to GitHub Pages
 ```bash
-# Replace old landing page
-mv docs/landing.html docs/landing_OLD.html
-# Legacy file docs/landing_NEW.html now redirects to docs/landing.html
+# Ensure GitHub Pages root serves the latest landing UI
+cp docs/landing.html docs/index.html
+# Legacy file docs/landing_NEW.html continues to redirect to landing.html
 
 # Commit and push
 git add docs/
@@ -315,7 +315,7 @@ client.on('interactionCreate', async interaction => {
     
     if (!verification.verified) {
         return interaction.reply({
-            content: `⚠️ **Verification Required**\n\n${verification.message}\n\n🔗 Get verified: https://jmenichole.github.io/Justthetip/landing.html`,
+            content: `⚠️ **Verification Required**\n\n${verification.message}\n\n🔗 Get verified: https://jmenichole.github.io/Justthetip/`,
             ephemeral: true
         });
     }
@@ -337,7 +337,7 @@ module.exports = {
         
         if (!stats) {
             return interaction.reply({
-                content: '❌ You are not verified.\n🔗 Get verified: https://jmenichole.github.io/Justthetip/landing.html',
+                content: '❌ You are not verified.\n🔗 Get verified: https://jmenichole.github.io/Justthetip/',
                 ephemeral: true
             });
         }
@@ -362,7 +362,7 @@ module.exports = {
 
 1. **Visit Landing Page**
    ```
-   https://jmenichole.github.io/Justthetip/landing.html
+   https://jmenichole.github.io/Justthetip/
    ```
 
 2. **Click "Get Started"**

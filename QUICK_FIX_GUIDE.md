@@ -110,7 +110,7 @@ railway up  # or render deploy
 # 3. Update landing-app.js CONFIG.API_BASE_URL with production URL
 
 # 4. Activate new landing page (if needed)
-# Landing flow now lives in docs/landing.html
+# GitHub Pages root (index.html) now mirrors docs/landing.html
 # docs/landing_NEW.html simply redirects for compatibility
 
 # 5. Commit and push
@@ -119,7 +119,7 @@ git commit -m "Fix: Complete NFT verification system configuration"
 git push origin main
 
 # 6. Test production flow at:
-# https://jmenichole.github.io/Justthetip/landing.html
+# https://jmenichole.github.io/Justthetip/
 ```
 
 ---

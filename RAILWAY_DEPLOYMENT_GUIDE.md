@@ -100,7 +100,7 @@ In Railway dashboard, go to **Variables** tab and add:
 # Discord OAuth
 DISCORD_CLIENT_ID=1419742988128616479
 DISCORD_CLIENT_SECRET=YOUR_SECRET_FROM_DISCORD_PORTAL
-DISCORD_REDIRECT_URI=https://jmenichole.github.io/Justthetip/landing.html
+DISCORD_REDIRECT_URI=https://jmenichole.github.io/Justthetip/
 
 # Solana
 SOLANA_RPC_URL=https://api.mainnet-beta.solana.com

@@ -27,7 +27,7 @@ const CONFIG = {
     MONGODB_URI: process.env.MONGODB_URI,
     DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID || '1419742988128616479',
     DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET, // Required
-    DISCORD_REDIRECT_URI: process.env.DISCORD_REDIRECT_URI || 'https://jmenichole.github.io/Justthetip/landing.html',
+    DISCORD_REDIRECT_URI: process.env.DISCORD_REDIRECT_URI || 'https://jmenichole.github.io/Justthetip/',
     MINT_AUTHORITY_KEYPAIR: process.env.MINT_AUTHORITY_KEYPAIR, // Base58 private key
     VERIFIED_COLLECTION_ADDRESS: process.env.VERIFIED_COLLECTION_ADDRESS,
     NFT_STORAGE_API_KEY: process.env.NFT_STORAGE_API_KEY,

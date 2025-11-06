@@ -6,7 +6,7 @@
 // ===== CONFIGURATION =====
 const CONFIG = {
     DISCORD_CLIENT_ID: '1419742988128616479',
-    DISCORD_REDIRECT_URI: 'https://jmenichole.github.io/Justthetip/landing.html',
+    DISCORD_REDIRECT_URI: 'https://jmenichole.github.io/Justthetip/',
     API_BASE_URL: 'https://api.justthetip.site', // TODO: Replace with your backend URL
     VERIFIED_NFT_COLLECTION: 'YOUR_COLLECTION_ADDRESS', // TODO: Replace after creating collection
     SOLANA_NETWORK: 'mainnet-beta', // or 'devnet' for testing

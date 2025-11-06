@@ -201,7 +201,7 @@ CI/CD pipelines should run linting, unit tests, and contract tests before deploy
 ---
 
 ## Additional Resources
-- [GitHub Pages Landing Page](https://jmenichole.github.io/Justthetip/landing.html) – Live marketing site, verification walkthrough, and documentation portal.
+- [GitHub Pages Landing Page](https://jmenichole.github.io/Justthetip/) – Live marketing site, verification walkthrough, and documentation portal.
 - [COMPLETE_SETUP_GUIDE.md](./COMPLETE_SETUP_GUIDE.md) – End-to-end bot and API provisioning.
 - [IMPLEMENTATION_SUMMARY_SOLANA.md](./IMPLEMENTATION_SUMMARY_SOLANA.md) – Program architecture and PDA design decisions.
 - [CRYPTO_SUPPORT_GUIDE.md](./CRYPTO_SUPPORT_GUIDE.md) – Multi-chain wallet support notes.

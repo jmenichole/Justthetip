@@ -65,8 +65,8 @@ If you want to **fix issues and deploy**, read these in order:
 ### GitHub Pages Documentation Site
 | Page | Purpose | URL |
 |------|---------|-----|
-| **landing.html** | Primary marketing & verification landing page | https://jmenichole.github.io/Justthetip/landing.html |
-| **index.html** | Legacy overview page | https://jmenichole.github.io/Justthetip/ |
+| **index.html** | GitHub Pages root with modern landing experience | https://jmenichole.github.io/Justthetip/ |
+| **landing.html** | Repo-synced copy of the landing page (used for local previews) | https://jmenichole.github.io/Justthetip/landing.html |
 | **support.html** | Support ticket submission | https://jmenichole.github.io/Justthetip/support.html |
 | **investor.html** | Investor information | https://jmenichole.github.io/Justthetip/investor.html |
 | **terms.html** | Terms of service | https://jmenichole.github.io/Justthetip/terms.html |
@@ -220,14 +220,14 @@ VERIFIED_COLLECTION_ADDRESS=...
 - [ ] Re-run mock test (should pass 92/92)
 - [ ] Test backend locally (node api/server.js)
 - [ ] Test health endpoint (curl http://localhost:5500/api/health)
-- [ ] Test frontend locally (open landing.html)
+- [ ] Test frontend locally (open landing.html → mirrors index.html)
 - [ ] Verify Terms modal appears
 - [ ] Check browser console for errors
 
 ### Phase 5: Deployment 🚀 NOT STARTED
 - [ ] Deploy backend to Railway/Render
 - [ ] Update API_BASE_URL in landing-app.js
-- [ ] Confirm landing_NEW.html redirect points to landing.html
+- [ ] Confirm landing_NEW.html redirect points to landing.html (and index.html matches landing.html)
 - [ ] Push to GitHub (triggers Pages deployment)
 - [ ] Test production flow end-to-end
 - [ ] Integrate verificationChecker into bot commands

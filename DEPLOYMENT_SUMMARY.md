@@ -61,7 +61,7 @@ In Railway **Variables** tab:
 ```bash
 DISCORD_CLIENT_ID=1419742988128616479
 DISCORD_CLIENT_SECRET=<from_discord_portal>
-DISCORD_REDIRECT_URI=https://jmenichole.github.io/Justthetip/landing.html
+DISCORD_REDIRECT_URI=https://jmenichole.github.io/Justthetip/
 
 SOLANA_RPC_URL=https://api.mainnet-beta.solana.com
 MINT_AUTHORITY_KEYPAIR=<from_mint-keypair.txt>
@@ -86,7 +86,7 @@ Edit `docs/landing-app.js`:
 ```javascript
 const CONFIG = {
   DISCORD_CLIENT_ID: '1419742988128616479',
-  DISCORD_REDIRECT_URI: 'https://jmenichole.github.io/Justthetip/landing.html',
+  DISCORD_REDIRECT_URI: 'https://jmenichole.github.io/Justthetip/',
   API_BASE_URL: 'https://your-railway-url.up.railway.app', // ← Update
   TERMS_VERSION: '1.0',
   PINATA_CID: 'bafybeihdwvqhzw3zaecne4o43mtoan23sc5janjgtnqvdrds5qkjk6lowu'
@@ -229,7 +229,7 @@ curl https://your-app.up.railway.app/api/health
 
 ```bash
 # Open in browser
-open https://jmenichole.github.io/Justthetip/landing.html
+open https://jmenichole.github.io/Justthetip/
 
 # Or test locally
 open docs/landing.html

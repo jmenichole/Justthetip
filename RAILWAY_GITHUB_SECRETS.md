@@ -29,7 +29,7 @@ Go to your GitHub repository → Settings → Secrets and variables → Actions,
 | `DISCORD_CLIENT_ID` | Discord application client ID | `1419742988128616479` |
 | `GUILD_ID` | Discord server/guild ID for testing | `1413961128522023024` |
 | `DISCORD_CLIENT_SECRET` | Discord OAuth client secret | `your_oauth_secret_here` |
-| `DISCORD_REDIRECT_URI` | OAuth redirect URL | `https://jmenichole.github.io/Justthetip/landing.html` |
+| `DISCORD_REDIRECT_URI` | OAuth redirect URL | `https://jmenichole.github.io/Justthetip/` |
 
 #### Solana Configuration Secrets
 
