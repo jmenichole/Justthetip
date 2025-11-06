@@ -38,9 +38,12 @@ This directory contains the GitHub Pages site for JustTheTip, deployed at https:
   - Data handling policies
 
 ### Alternative Landing Pages
-- **landing_NEW.html** - Secondary variation of landing page
-  - Different styling approach
-  - Useful for A/B testing or campaign-specific messaging
+- **landing.html** - Primary onboarding page with consolidated modals
+  - Guided onboarding flow
+  - Direct call-to-action buttons
+- **landing_NEW.html** - Legacy redirect to landing.html
+  - Preserved for compatibility with older docs/tests
+  - Instantly forwards visitors to the main page
 
 ### Assets
 - **logo.png** - JustTheTip logo (947KB)

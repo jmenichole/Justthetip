@@ -190,11 +190,11 @@ node .env.mock-test.js
 **Latest:** `15f0db3` - "Implement complete NFT verification onboarding system"
 - 6 files changed
 - 2,583 insertions
-- Files: landing-app.js, landing_NEW.html, server.js, verificationChecker.js, COMPLETE_SETUP_GUIDE.md, IMPLEMENTATION_SUMMARY.md
+- Files: landing-app.js, landing.html, server.js, verificationChecker.js, COMPLETE_SETUP_GUIDE.md, IMPLEMENTATION_SUMMARY.md
 
 ### Files Created/Modified
 1. **docs/landing-app.js** (528 lines) - Complete frontend state machine
-2. **docs/landing_NEW.html** (462 lines) - Landing page with modals
+2. **docs/landing.html** (consolidated) - Landing page with modals
 3. **api/server.js** (460 lines) - Backend API with 6 endpoints
 4. **utils/verificationChecker.js** (210 lines) - Bot verification middleware
 5. **COMPLETE_SETUP_GUIDE.md** (580 lines) - Full deployment guide
@@ -278,10 +278,10 @@ node .env.mock-test.js
 
 ### Before Deployment
 11. ⏭️ Test backend locally: `node api/server.js`
-12. ⏭️ Test frontend locally: Open landing_NEW.html in browser
+12. ⏭️ Test frontend locally: Open landing.html in browser
 13. ⏭️ Deploy backend to Railway/Render
 14. ⏭️ Update API_BASE_URL in landing-app.js CONFIG
-15. ⏭️ Rename landing_NEW.html to landing.html
+15. ⏭️ Legacy note: landing_NEW.html now redirects to landing.html
 16. ⏭️ Push to GitHub
 17. ⏭️ Test production flow
 

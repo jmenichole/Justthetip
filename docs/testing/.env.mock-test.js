@@ -214,14 +214,14 @@ function testFileStructure() {
   const requiredFiles = [
     { path: 'api/server.js', description: 'Backend API server' },
     { path: 'docs/landing-app.js', description: 'Frontend JavaScript' },
-    { path: 'docs/landing_NEW.html', description: 'Landing page with modals' },
+    { path: 'docs/landing.html', description: 'Landing page with onboarding modals' },
     { path: 'utils/verificationChecker.js', description: 'Bot verification middleware' },
     { path: 'COMPLETE_SETUP_GUIDE.md', description: 'Setup documentation' },
     { path: 'IMPLEMENTATION_SUMMARY.md', description: 'Implementation summary' }
   ];
-  
+
   const optionalFiles = [
-    { path: 'docs/landing.html', description: 'Active landing page' },
+    { path: 'docs/landing_NEW.html', description: 'Legacy landing page redirect' },
     { path: 'docs/landing-styles.css', description: 'Landing page styles' },
     { path: 'security/mint-authority.json', description: 'Mint authority keypair file' },
     { path: 'security/X509-cert-1238302248811631245.pem', description: 'MongoDB certificate' }

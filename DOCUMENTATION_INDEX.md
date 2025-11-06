@@ -194,7 +194,7 @@ VERIFIED_COLLECTION_ADDRESS=...
 - [x] Frontend state machine (landing-app.js)
 - [x] Backend API (server.js)
 - [x] Verification checker (verificationChecker.js)
-- [x] Landing page with modals (landing_NEW.html)
+- [x] Landing page with modals (landing.html)
 - [x] Documentation (3 guides)
 - [x] Commit and push to GitHub (15f0db3)
 
@@ -220,14 +220,14 @@ VERIFIED_COLLECTION_ADDRESS=...
 - [ ] Re-run mock test (should pass 92/92)
 - [ ] Test backend locally (node api/server.js)
 - [ ] Test health endpoint (curl http://localhost:5500/api/health)
-- [ ] Test frontend locally (open landing_NEW.html)
+- [ ] Test frontend locally (open landing.html)
 - [ ] Verify Terms modal appears
 - [ ] Check browser console for errors
 
 ### Phase 5: Deployment 🚀 NOT STARTED
 - [ ] Deploy backend to Railway/Render
 - [ ] Update API_BASE_URL in landing-app.js
-- [ ] Rename landing_NEW.html to landing.html
+- [ ] Confirm landing_NEW.html redirect points to landing.html
 - [ ] Push to GitHub (triggers Pages deployment)
 - [ ] Test production flow end-to-end
 - [ ] Integrate verificationChecker into bot commands
@@ -382,7 +382,7 @@ sugar create-collection --config nft-collection/collection.json --keypair securi
 │
 ├── Implementation Files (Completed - Commit 15f0db3)
 │   ├── docs/landing-app.js             Frontend state machine
-│   ├── docs/landing_NEW.html           Landing page with modals
+│   ├── docs/landing.html               Landing page with modals
 │   ├── api/server.js                   Backend API
 │   ├── utils/verificationChecker.js    Bot middleware
 │   ├── COMPLETE_SETUP_GUIDE.md         Deployment guide

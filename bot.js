@@ -40,8 +40,8 @@ try {
 }
 
 const db = require('./db/database');
-const { handleSwapCommand, handleSwapHelpButton } = require('./src/commands/swapCommand');
-const { handleTipCommand } = require('./src/commands/tipCommand');
+const { slashCommands } = require('./src/commands/slashCommands');
+const { handleTipCommand, executeTip, TipError } = require('./src/commands/tipCommand');
 const fs = require('fs');
 const crypto = require('crypto');
 const { isValidSolanaAddress, verifySignature } = require('./src/utils/validation');
@@ -86,102 +86,7 @@ client.once('ready', async () => {
 });
 
 // Register slash commands
-const commands = [
-  {
-    name: 'balance',
-    description: 'Show your portfolio with crypto amounts and USD values 💎',
-  },
-  {
-    name: 'tip',
-    description: 'Send crypto to another user',
-    options: [
-      { name: 'user', type: 6, description: 'User to tip', required: true },
-      { name: 'amount', type: 10, description: 'Amount to tip', required: true },
-      { name: 'currency', type: 3, description: 'Currency (SOL, USDC)', required: true, choices: [
-          { name: 'SOL', value: 'SOL' },
-          { name: 'USDC', value: 'USDC' }
-        ]
-      }
-    ]
-  },
-  {
-    name: 'airdrop',
-    description: 'Create airdrop with USD amounts (e.g. $5.00 worth of SOL)',
-    options: [
-      { name: 'amount', type: 10, description: 'Amount to airdrop', required: true },
-      { name: 'currency', type: 3, description: 'Currency (SOL, USDC)', required: true, choices: [
-          { name: 'SOL', value: 'SOL' },
-          { name: 'USDC', value: 'USDC' }
-        ]
-      }
-    ]
-  },
-  {
-    name: 'withdraw',
-    description: 'Send crypto to external wallet',
-    options: [
-      { name: 'address', type: 3, description: 'External wallet address', required: true },
-      { name: 'amount', type: 10, description: 'Amount to withdraw', required: true },
-      { name: 'currency', type: 3, description: 'Currency (SOL, USDC)', required: true, choices: [
-          { name: 'SOL', value: 'SOL' },
-          { name: 'USDC', value: 'USDC' }
-        ]
-      }
-    ]
-  },
-  {
-    name: 'deposit',
-    description: 'Get instructions for adding funds',
-  },
-  {
-    name: 'registerwallet',
-    description: 'Link your Solana wallet with one-click signature verification',
-  },
-  {
-    name: 'burn',
-    description: 'Donate to support bot development',
-    options: [
-      { name: 'amount', type: 10, description: 'Amount to burn', required: true },
-      { name: 'currency', type: 3, description: 'Currency (SOL, USDC)', required: true, choices: [
-          { name: 'SOL', value: 'SOL' },
-          { name: 'USDC', value: 'USDC' }
-        ]
-      }
-    ]
-  },
-  {
-    name: 'help',
-    description: 'Show bot commands and usage guide',
-    options: [
-      { 
-        name: 'section', 
-        type: 3, 
-        description: 'Help section to display (leave empty for basic commands)', 
-        required: false,
-        choices: [
-          { name: 'advanced', value: 'advanced' },
-          { name: 'register', value: 'register' }
-        ]
-      }
-    ]
-  },
-
-  {
-    name: 'swap',
-    description: 'Swap tokens using Jupiter aggregator',
-    options: [
-      { name: 'from', type: 3, description: 'Token to swap from', required: true, choices: [
-        { name: 'SOL', value: 'SOL' },
-        { name: 'USDC', value: 'USDC' }
-      ]},
-      { name: 'to', type: 3, description: 'Token to swap to', required: true, choices: [
-        { name: 'SOL', value: 'SOL' },
-        { name: 'USDC', value: 'USDC' }
-      ]},
-      { name: 'amount', type: 10, description: 'Amount to swap', required: true }
-    ]
-  }
-];
+const commands = slashCommands.map(builder => builder.toJSON());
 
 const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_BOT_TOKEN);
 
@@ -220,7 +125,10 @@ const HELP_MESSAGE_BASIC = `## 💰 Basic Commands
 \`/registerwallet\` — Link your Solana wallet
 
 ## ⚙️ More Commands
-Use \`/help advanced\` for swap, airdrop, and burn commands
+Use \`/help advanced\` for airdrop and burn commands
+
+## 📬 Slash Commands Blocked?
+DM the bot: \`$tip <@user> <amount>\`, \`$balance\`, or \`$help\`
 
 ## 🧩 Supported Tokens
 **SOL**, **USDC** (Solana network)
@@ -269,9 +177,8 @@ const HELP_MESSAGE_ADVANCED = `# 🤖 JustTheTip Bot - Complete Command Referenc
 ## 🎁 Sending & Receiving Tips
 
 **Send a Tip**
-• \`/tip <@user> <amount> <currency>\` — Send crypto to another Discord user
-  _Example: \`/tip @Alice 0.05 SOL\` sends 5 cents worth of SOL_
-  _Example: \`/tip @Bob 1 USDC\` sends $1 in USDC_
+• \`/tip <@user> <amount>\` — Send SOL to another Discord user
+  _Example: \`/tip @Alice 0.05\` sends roughly 5 cents worth of SOL_
 
 **Create an Airdrop**
 • \`/airdrop <amount> <currency>\` — Drop crypto for others to collect
@@ -284,11 +191,6 @@ const HELP_MESSAGE_ADVANCED = `# 🤖 JustTheTip Bot - Complete Command Referenc
 ---
 
 ## 🔄 Advanced Features
-
-**Token Swapping**
-• \`/swap <from> <to> <amount>\` — Exchange between supported tokens
-  _Example: \`/swap SOL USDC 0.1\` converts 0.1 SOL to USDC_
-  _Powered by Jupiter aggregator for best rates_
 
 **Support Development**
 • \`/burn <amount> <currency>\` — Donate to help maintain the bot
@@ -403,12 +305,6 @@ client.on(Events.InteractionCreate, async interaction => {
         .setDescription(helpMessage);
       await interaction.reply({ embeds: [embed], ephemeral: true });
       
-    } else if (commandName === 'swap') {
-      // Note: userWallets map would need to be implemented for full functionality
-      // For now, use a Map as a placeholder
-      const userWallets = new Map();
-      await handleSwapCommand(interaction, userWallets);
-      
     } else if (commandName === 'airdrop') {
       const amount = interaction.options.getNumber('amount');
       const currency = interaction.options.getString('currency');
@@ -445,13 +341,6 @@ client.on(Events.InteractionCreate, async interaction => {
       if (rateLimiter.isRateLimited(interaction.user.id, commandName)) {
         return await interaction.reply({
           content: '⏳ Rate limit exceeded. Please wait before using this command again.',
-          ephemeral: true
-        });
-      }
-
-      if (interaction.options.getUser('user').bot) {
-        return await interaction.reply({
-          content: '🤖 Tips are for humans only. Bots work for free!',
           ephemeral: true
         });
       }
@@ -679,12 +568,24 @@ client.on(Events.InteractionCreate, async interaction => {
       });
     }
     
-  } else if (interaction.customId === 'swap_help') {
-    await handleSwapHelpButton(interaction);
   }
 });
 
 // Handle DM messages with $ prefix
+function extractUserId(raw) {
+  if (!raw) return null;
+  const mentionMatch = raw.match(/^<@!?(\d+)>$/);
+  if (mentionMatch) {
+    return mentionMatch[1];
+  }
+
+  if (/^\d{17,20}$/.test(raw)) {
+    return raw;
+  }
+
+  return null;
+}
+
 client.on(Events.MessageCreate, async message => {
   // Ignore bot messages
   if (message.author.bot) return;
@@ -703,7 +604,7 @@ client.on(Events.MessageCreate, async message => {
       // Get user transactions
       const limit = parseInt(args[1]) || 10;
       const transactions = await db.getUserTransactions(message.author.id, Math.min(limit, 50));
-      
+
       if (transactions.length === 0) {
         return message.reply('You have no transaction history yet.');
       }
@@ -729,10 +630,55 @@ client.on(Events.MessageCreate, async message => {
     } else if (command === 'balance') {
       // Get balance
       const balances = await db.getBalances(message.author.id);
-      
+
       const embed = createBalanceEmbed(balances, PRICE_CONFIG);
       await message.reply({ embeds: [embed] });
-      
+
+    } else if (command === 'tip') {
+      if (args.length < 3) {
+        return message.reply('Usage: `$tip <@user|userId> <amount> [SOL]`');
+      }
+
+      const recipientId = extractUserId(args[1]);
+      if (!recipientId) {
+        return message.reply('❌ Please mention a user or provide a numeric Discord ID.');
+      }
+
+      if (rateLimiter.isRateLimited(message.author.id, 'tip')) {
+        return message.reply('⏳ Rate limit exceeded. Please wait before sending another tip.');
+      }
+
+      let recipient;
+      try {
+        recipient = await client.users.fetch(recipientId);
+      } catch (error) {
+        console.error('DM tip fetch error:', error);
+      }
+
+      if (!recipient) {
+        return message.reply('❌ I couldn’t find that user. Make sure they share a server with the bot.');
+      }
+
+      const amountArg = args[2];
+      const currency = (args[3] || 'SOL').toUpperCase();
+
+      try {
+        await message.channel.sendTyping();
+        const embed = await executeTip({
+          sender: message.author,
+          recipient,
+          amount: Number(amountArg),
+          currency,
+        });
+
+        await message.reply({ embeds: [embed] });
+      } catch (error) {
+        const errorMessage = error instanceof TipError
+          ? error.userMessage
+          : `❌ Tip failed: ${error.message}`;
+        await message.reply(errorMessage);
+      }
+
     } else if (command === 'help') {
       const helpText = `**💡 JustTheTip DM Commands:**
 
@@ -741,12 +687,13 @@ Commands you can use in DMs with the \`$\` prefix:
 • \`$history [number]\` - View your transaction history (default: 10, max: 50)
 • \`$transactions\` - Alias for $history
 • \`$balance\` - Check your current balance
+• \`$tip <@user> <amount> [SOL]\` - Send a SOL tip via DM
 • \`$help\` - Show this help message
 
-**Note:** For tipping and airdrops, use slash commands (/) in a server channel.
+**Note:** Airdrops and withdrawals still require slash commands in a server channel.
 
 _Your security is our priority. Never share your private keys!_`;
-      
+
       await message.reply(helpText);
       
     } else {

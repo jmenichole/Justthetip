@@ -109,9 +109,9 @@ railway up  # or render deploy
 
 # 3. Update landing-app.js CONFIG.API_BASE_URL with production URL
 
-# 4. Activate new landing page
-mv docs/landing.html docs/landing_OLD.html
-mv docs/landing_NEW.html docs/landing.html
+# 4. Activate new landing page (if needed)
+# Landing flow now lives in docs/landing.html
+# docs/landing_NEW.html simply redirects for compatibility
 
 # 5. Commit and push
 git add .

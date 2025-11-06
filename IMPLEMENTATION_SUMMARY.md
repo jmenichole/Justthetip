@@ -14,7 +14,7 @@ All missing pieces from the audit have been implemented:
   - Modal management for each step
   - Error handling and loading states
 
-- ✅ **landing_NEW.html** - Updated landing page with:
+- ✅ **landing.html** - Updated landing page with:
   - Terms of Service modal with checkbox
   - Onboarding flow modals
   - All "Get Started" buttons wire up to onboarding flow
@@ -204,7 +204,7 @@ cp .env.example .env
 node api/server.js
 
 # 6. Deploy frontend
-git add docs/landing_NEW.html docs/landing-app.js
+git add docs/landing.html docs/landing-app.js
 git commit -m "Add complete NFT verification system"
 git push origin main
 ```
@@ -242,7 +242,7 @@ git push origin main
 ```
 /Users/fullsail/justthetip/
 ├── docs/
-│   ├── landing_NEW.html          # NEW: Updated landing page
+│   ├── landing.html              # NEW: Updated landing page
 │   ├── landing-app.js            # NEW: Complete onboarding logic
 │   ├── landing-styles.css        # Existing styles
 │   ├── support.html              # Existing support page
@@ -296,7 +296,7 @@ Total New Code: ~1,800 lines
 - **Backend API:** `/api/server.js`
 - **Frontend Logic:** `/docs/landing-app.js`
 - **Bot Integration:** `/utils/verificationChecker.js`
-- **Landing Page:** `/docs/landing_NEW.html`
+- **Landing Page:** `/docs/landing.html`
 
 ---
 

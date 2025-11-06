@@ -269,13 +269,13 @@ cd docs
 live-server --port=5500
 ```
 
-Visit: `http://localhost:5500/landing_NEW.html`
+Visit: `http://localhost:5500/landing.html`
 
 ### Step 3: Deploy to GitHub Pages
 ```bash
 # Replace old landing page
 mv docs/landing.html docs/landing_OLD.html
-mv docs/landing_NEW.html docs/landing.html
+# Legacy file docs/landing_NEW.html now redirects to docs/landing.html
 
 # Commit and push
 git add docs/

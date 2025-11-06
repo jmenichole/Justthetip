@@ -232,7 +232,7 @@ curl https://your-app.up.railway.app/api/health
 open https://jmenichole.github.io/Justthetip/landing.html
 
 # Or test locally
-open docs/landing_NEW.html
+open docs/landing.html
 
 # Check:
 # ✓ Terms modal appears
