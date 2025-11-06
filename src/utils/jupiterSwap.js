@@ -111,9 +111,15 @@ const TOKEN_DECIMALS = {
 // Export a frozen list so command builders and handlers stay perfectly in sync
 const SUPPORTED_TOKENS = Object.freeze(Object.keys(TOKEN_MINTS));
 
+// Pre-build the Discord choice objects so multiple consumers stay aligned.
+const SWAP_TOKEN_CHOICES = Object.freeze(
+  SUPPORTED_TOKENS.map(token => ({ name: token, value: token }))
+);
+
 module.exports = {
   JupiterSwap,
   TOKEN_MINTS,
   TOKEN_DECIMALS,
   SUPPORTED_TOKENS,
+  SWAP_TOKEN_CHOICES,
 };
