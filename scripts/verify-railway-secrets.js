@@ -23,16 +23,16 @@ const CRITICAL_SECRETS = [
 
 // Important secrets for full bot functionality
 const IMPORTANT_SECRETS = [
-  commonVars.MONGODB_URI,
-  commonVars.SOLANA_RPC_URL,
+  { ...commonVars.MONGODB_URI },
+  { ...commonVars.SOLANA_RPC_URL, optional: true },
 ];
 
 // Optional secrets that enhance functionality
 const OPTIONAL_SECRETS = [
-  { name: 'GUILD_ID', description: 'Discord server ID for testing' },
-  { name: 'HELIUS_API_KEY', description: 'Helius API key for optimized RPC' },
-  { name: 'SUPER_ADMIN_USER_IDS', description: 'Admin Discord user IDs' },
-  { name: 'NODE_ENV', description: 'Environment mode', defaultValue: 'production', optional: true },
+  { name: 'GUILD_ID', description: 'Discord server ID for testing', optional: true },
+  { name: 'HELIUS_API_KEY', description: 'Helius API key for optimized RPC', optional: true },
+  { name: 'SUPER_ADMIN_USER_IDS', description: 'Admin Discord user IDs', optional: true },
+  { name: 'NODE_ENV', description: 'Environment mode', default: 'production', optional: true },
 ];
 
 // Note: validateVar from shared utils replaces verifySecret
@@ -59,69 +59,30 @@ function verifyRailwaySecrets() {
   log('🔴 CRITICAL SECRETS (Bot won\'t start without these):', 'red');
   for (const secret of CRITICAL_SECRETS) {
     const result = validateVar(secret);
-    // Map 'error' status to 'missing' for critical secrets
     const status = result.status === 'error' ? 'missing' : result.status;
     results.critical[status].push(result);
-
-    if (result.status === 'valid') {
-      log(`  ✅ ${result.name}: ${result.value}`, 'green');
-    } else if (result.status === 'error' || result.status === 'missing') {
-      log(`  ❌ ${result.name}: MISSING`, 'red');
-      log(`     ${result.message}`, 'yellow');
-    } else if (result.status === 'invalid') {
-      log(`  ⚠️  ${result.name}: INVALID`, 'red');
-      log(`     ${result.message}`, 'yellow');
-    }
   }
 
   // Check important secrets
   log('\n🟡 IMPORTANT SECRETS (Recommended for full functionality):', 'yellow');
   for (const secret of IMPORTANT_SECRETS) {
     const result = validateVar(secret);
-    // Map 'error' and 'warning' status to 'missing' for important secrets
     let status = result.status;
     if (status === 'error' || status === 'warning') {
       status = 'missing';
     }
     results.important[status].push(result);
-
-    if (result.status === 'valid') {
-      log(`  ✅ ${result.name}: ${result.value}`, 'green');
-    } else if (result.status === 'error' || result.status === 'warning' || result.status === 'missing') {
-      log(`  ⚠️  ${result.name}: NOT SET`, 'yellow');
-      if (result.message) {
-        log(`     ${result.message}`, 'cyan');
-      }
-    } else if (result.status === 'invalid') {
-      log(`  ⚠️  ${result.name}: INVALID`, 'yellow');
-      if (result.message) {
-        log(`     ${result.message}`, 'cyan');
-      }
-    }
   }
 
   // Check optional secrets
   log('\n🟢 OPTIONAL SECRETS (Enhanced features):', 'green');
   for (const secret of OPTIONAL_SECRETS) {
     const result = validateVar(secret);
-    // Map 'warning' and 'error' status to 'missing' for optional secrets
     let status = result.status;
     if (status === 'warning' || status === 'error') {
       status = 'missing';
     }
     results.optional[status].push(result);
-
-    if (result.status === 'valid') {
-      log(`  ✅ ${result.name}: ${result.value}`, 'green');
-    } else if (result.status === 'invalid') {
-      log(`  ⚠️  ${result.name}: INVALID`, 'yellow');
-      if (result.message) {
-        log(`     ${result.message}`, 'cyan');
-      }
-    } else {
-      const defaultMsg = secret.defaultValue ? ` (using default: ${secret.defaultValue})` : '';
-      log(`  ⚪ ${result.name}: Not set${defaultMsg}`, 'cyan');
-    }
   }
 
   // Summary
