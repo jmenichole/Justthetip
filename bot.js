@@ -260,18 +260,6 @@ client.on(Events.InteractionCreate, async interaction => {
   if (!interaction.isChatInputCommand()) return;
   const { commandName } = interaction;
 
-  if (commandName === 'swap') {
-    if (rateLimiter.isRateLimited(interaction.user.id, commandName)) {
-      return await interaction.reply({
-        content: '⏳ Rate limit exceeded. Please wait before using this command again.',
-        ephemeral: true
-      });
-    }
-
-    await handleSwapCommand(interaction);
-    return;
-  }
-  
   try {
     if (commandName === 'balance') {
       try {
@@ -298,6 +286,16 @@ client.on(Events.InteractionCreate, async interaction => {
         });
       }
       
+    } else if (commandName === 'swap') {
+      if (rateLimiter.isRateLimited(interaction.user.id, commandName)) {
+        return await interaction.reply({
+          content: '⏳ Rate limit exceeded. Please wait before using this command again.',
+          ephemeral: true
+        });
+      }
+
+      await handleSwapCommand(interaction);
+
     } else if (commandName === 'help') {
       const section = interaction.options.getString('section');
       
@@ -556,10 +554,7 @@ client.on(Events.InteractionCreate, async interaction => {
         });
       }
     }
-    return;
-  }
-
-  if (interaction.customId === 'collect_airdrop') {
+  } else if (interaction.customId === 'collect_airdrop') {
     const userId = interaction.user.id;
     
     // Find unclaimed airdrop for collection
