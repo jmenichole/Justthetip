@@ -98,11 +98,19 @@ Define configuration in a `.env` file (or your hosting provider). Key variables 
 | `MINT_AUTHORITY_KEYPAIR` | Recommended | Base58 secret key enabling NFT minting via Metaplex. |
 | `VERIFIED_COLLECTION_ADDRESS` | Optional | Collection address to group verification NFTs. |
 | `NFT_STORAGE_API_KEY` | Optional | Enables Arweave uploads via Metaplex irys storage adapter. |
+| `NFT_MINT_FEE_ENABLED` | Optional | Set to `true` to require users to pay the mint fee before minting their verification NFT. |
+| `NFT_MINT_FEE_SOL` | Optional | SOL amount users must send to mint (e.g., `0.02`). |
+| `FEE_PAYMENT_SOL_ADDRESS` | Optional | Your Solana wallet that receives mint payments and platform fees. |
+| `NFT_PAYMENT_LOOKBACK_MINUTES` | Optional | Minutes of payment history to scan when validating mint payments (default `30`). |
+| `NFT_PAYMENT_SEARCH_LIMIT` | Optional | Number of recent transactions to inspect for mint payments (default `50`). |
+| `NFT_PAYMENT_REQUIRED_CONFIRMATIONS` | Optional | Require `finalized` confirmations before accepting a mint payment (default `1`). |
 | `DISCORD_CLIENT_ID` | Required | OAuth client used for the Discord login flow. |
 | `DISCORD_CLIENT_SECRET` | Required | Secret for exchanging OAuth codes. |
 | `DISCORD_REDIRECT_URI` | Required | Redirect URL registered with Discord. |
 | `COINBASE_COMMERCE_API_KEY` | Optional | Enables fiat charge creation and retrieval. |
 | `COINBASE_COMMERCE_WEBHOOK_SECRET` | Optional | Required to validate Coinbase webhook signatures. |
+| `TIP_PLATFORM_FEE_BPS` | Optional | Basis points (1/100 of a percent) to skim from every tip to your wallet (e.g., `250` = 2.5%). |
+| `TIP_PLATFORM_FEE_WALLET` | Optional | Wallet that receives the platform fee from each tip when `TIP_PLATFORM_FEE_BPS` > 0. |
 
 Additional blockchain-specific guides live in the `/docs` and root-level `*_GUIDE.md` files.
 

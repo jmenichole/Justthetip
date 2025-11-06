@@ -116,12 +116,35 @@ function createWalletRegisteredEmbed(currency, address, isVerified = false) {
  * @param {string} currency - Currency type
  * @returns {EmbedBuilder} Discord embed for successful tip
  */
-function createTipSuccessEmbed(sender, recipient, amount, currency) {
-  return new EmbedBuilder()
+function createTipSuccessEmbed(sender, recipient, amount, currency, details = {}) {
+  const parts = [`${sender} tipped ${recipient} **${amount} ${currency}**! 🎉`];
+
+  if (typeof details.recipientAmount === 'number') {
+    parts.push(`✅ Recipient receives **${details.recipientAmount.toFixed(4)} ${currency}**`);
+  }
+
+  if (typeof details.feeAmount === 'number' && details.feeAmount > 0) {
+    const walletPreview = details.feeWallet
+      ? ` → \`${details.feeWallet.slice(0, 4)}…${details.feeWallet.slice(-4)}\``
+      : '';
+    parts.push(`🏦 Platform fee: **${details.feeAmount.toFixed(4)} ${currency}**${walletPreview}`);
+  }
+
+  const embed = new EmbedBuilder()
     .setTitle('💸 Tip Sent Successfully!')
-    .setDescription(`${sender} tipped ${recipient} **${amount} ${currency}**! 🎉`)
+    .setDescription(parts.join('\n'))
     .setColor(0x2ecc71)
     .setFooter({ text: 'Thanks for spreading the love!' });
+
+  if (details.feeSignature) {
+    embed.addFields({
+      name: 'Fee Signature',
+      value: `\`${details.feeSignature.slice(0, 8)}…${details.feeSignature.slice(-8)}\``,
+      inline: false,
+    });
+  }
+
+  return embed;
 }
 
 /**

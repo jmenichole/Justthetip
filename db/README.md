@@ -48,6 +48,8 @@ const transactions = await db.getUserTransactions(userId, 10);
   - `receiver` (TEXT) - Receiver Discord ID
   - `amount` (REAL) - Transaction amount
   - `currency` (TEXT) - Currency type (SOL, USDC, etc.)
+  - `signature` (TEXT) - On-chain transaction signature (nullable)
+  - `platform_fee` (REAL) - Platform fee captured for the tip
   - `created_at` (TEXT) - Timestamp (ISO format)
 
 ## Features
@@ -56,7 +58,7 @@ const transactions = await db.getUserTransactions(userId, 10);
 
 - `getUser(id)` - Get or create user with default balance 0
 - `updateBalance(id, amount)` - Update user balance (supports negative amounts)
-- `recordTip(sender, receiver, amount, currency)` - Log a tip transaction
+- `recordTip(sender, receiver, amount, currency, signature?, platformFee?)` - Log a tip transaction
 - `getUserTransactions(id, limit)` - Get recent transactions (sent or received)
 
 ### Wrapper Functions (database.js)

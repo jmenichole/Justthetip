@@ -46,12 +46,21 @@ function initDatabase() {
         amount REAL NOT NULL,
         currency TEXT NOT NULL,
         signature TEXT,
+        platform_fee REAL DEFAULT 0,
         created_at TEXT DEFAULT CURRENT_TIMESTAMP
       )
     `);
 
     try {
       db.exec('ALTER TABLE tips ADD COLUMN signature TEXT');
+    } catch (error) {
+      if (!String(error.message).includes('duplicate column name')) {
+        throw error;
+      }
+    }
+
+    try {
+      db.exec('ALTER TABLE tips ADD COLUMN platform_fee REAL DEFAULT 0');
     } catch (error) {
       if (!String(error.message).includes('duplicate column name')) {
         throw error;
@@ -129,12 +138,12 @@ function updateBalance(id, amount) {
  * @param {number} amount - Tip amount
  * @param {string} currency - Currency type
  */
-function recordTip(sender, receiver, amount, currency, signature = null) {
+function recordTip(sender, receiver, amount, currency, signature = null, platformFee = 0) {
   try {
     db.prepare(`
-      INSERT INTO tips (sender, receiver, amount, currency, signature)
-      VALUES (?, ?, ?, ?, ?)
-    `).run(sender, receiver, amount, currency, signature);
+      INSERT INTO tips (sender, receiver, amount, currency, signature, platform_fee)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `).run(sender, receiver, amount, currency, signature, platformFee);
   } catch (error) {
     console.error('Error recording tip:', error);
     throw error;
@@ -166,7 +175,7 @@ function getUserTransactions(id, limit = 10) {
 function getRecentTips(limit = 20) {
   try {
     return db.prepare(`
-      SELECT sender, receiver, amount, currency, created_at as timestamp, signature
+      SELECT sender, receiver, amount, currency, created_at as timestamp, signature, platform_fee
       FROM tips
       ORDER BY created_at DESC
       LIMIT ?
@@ -273,7 +282,7 @@ updateBalance('123456789', 100);
 updateBalance('123456789', -25);
 
 // Record a tip
-recordTip('123456789', '987654321', 10, 'SOL');
+recordTip('123456789', '987654321', 10, 'SOL', null, 0.5);
 
 // Get user transactions
 const transactions = getUserTransactions('123456789', 10);

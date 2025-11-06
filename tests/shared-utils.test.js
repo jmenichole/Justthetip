@@ -229,6 +229,23 @@ describe('Embed Builders', () => {
       expect(embed.data.title).toBe('💸 Tip Sent Successfully!');
       expect(embed.data.description).toContain('10 SOL');
     });
+
+    it('should include fee details when provided', () => {
+      const sender = { toString: () => '@sender' };
+      const recipient = { toString: () => '@recipient' };
+
+      const embed = createTipSuccessEmbed(sender, recipient, 10, 'SOL', {
+        recipientAmount: 9.5,
+        feeAmount: 0.5,
+        feeWallet: 'FeeWalletExample1234567890abcdef',
+        feeSignature: 'feeSig1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
+      });
+
+      expect(embed.data.description).toContain('9.5000 SOL');
+      expect(embed.data.description).toContain('0.5000 SOL');
+      expect(embed.data.fields).toBeDefined();
+      expect(embed.data.fields[0].name).toBe('Fee Signature');
+    });
   });
 
   describe('createAirdropEmbed', () => {

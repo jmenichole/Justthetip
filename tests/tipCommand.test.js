@@ -1,6 +1,8 @@
 describe('handleTipCommand', () => {
   beforeEach(() => {
     process.env.X402_PAYER_SECRET = '2'.repeat(88);
+    delete process.env.TIP_PLATFORM_FEE_BPS;
+    delete process.env.TIP_PLATFORM_FEE_WALLET;
     jest.resetModules();
   });
 
@@ -54,7 +56,65 @@ describe('handleTipCommand', () => {
     expect(trustBadgeMock.requireBadge).toHaveBeenCalledTimes(2);
     expect(trustBadgeMock.adjustReputation).toHaveBeenNthCalledWith(1, 'sender', 1);
     expect(trustBadgeMock.adjustReputation).toHaveBeenNthCalledWith(2, 'receiver', 2);
-    expect(sqliteMock.recordTip).toHaveBeenCalledWith('sender', 'receiver', 1.5, 'SOL', 'sig123');
+    expect(sqliteMock.recordTip).toHaveBeenCalledWith('sender', 'receiver', 1.5, 'SOL', 'sig123', 0);
     expect(interaction.editReply).toHaveBeenCalled();
+  });
+
+  it('routes platform fee when configured', async () => {
+    process.env.TIP_PLATFORM_FEE_BPS = '500'; // 5%
+    process.env.TIP_PLATFORM_FEE_WALLET = 'FeeWallet111111111111111111111111111111111';
+
+    const { executeTip } = require('../src/commands/tipCommand');
+
+    const sender = { id: 'sender', username: 'Alice' };
+    const recipient = { id: 'receiver', username: 'Bob', bot: false };
+
+    const x402Mock = {
+      sendPayment: jest
+        .fn()
+        .mockResolvedValueOnce({ signature: 'sig-recipient' })
+        .mockResolvedValueOnce({ signature: 'sig-fee' }),
+    };
+
+    const trustBadgeMock = {
+      requireBadge: jest
+        .fn()
+        .mockResolvedValueOnce({ wallet_address: 'wallet-sender', mint_address: 'mint-sender' })
+        .mockResolvedValueOnce({ wallet_address: 'wallet-receiver', mint_address: 'mint-receiver' }),
+      adjustReputation: jest.fn().mockResolvedValueOnce(5).mockResolvedValueOnce(8),
+    };
+
+    const sqliteMock = {
+      getUser: jest.fn(),
+      recordTip: jest.fn(),
+    };
+
+    await executeTip({
+      sender,
+      recipient,
+      amount: 1,
+      currency: 'SOL',
+      dependencies: {
+        x402Client: x402Mock,
+        trustBadgeService: trustBadgeMock,
+        sqlite: sqliteMock,
+      },
+    });
+
+    expect(x402Mock.sendPayment).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        toAddress: 'wallet-receiver',
+        amountLamports: expect.any(Number),
+      }),
+    );
+    expect(x402Mock.sendPayment).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        toAddress: process.env.TIP_PLATFORM_FEE_WALLET,
+        amountLamports: expect.any(Number),
+      }),
+    );
+    expect(sqliteMock.recordTip).toHaveBeenCalledWith('sender', 'receiver', 1, 'SOL', 'sig-recipient', 0.05);
   });
 });

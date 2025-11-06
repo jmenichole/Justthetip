@@ -7,6 +7,8 @@ const { createTipSuccessEmbed } = require('../utils/embedBuilders');
 const { isValidAmount } = require('../utils/validation');
 
 const MICROPAYMENT_SIGNER = process.env.X402_PAYER_SECRET;
+const PLATFORM_FEE_BPS = Number.parseInt(process.env.TIP_PLATFORM_FEE_BPS || '0', 10);
+const PLATFORM_FEE_WALLET = process.env.TIP_PLATFORM_FEE_WALLET;
 
 class TipError extends Error {
   constructor(message) {
@@ -55,26 +57,68 @@ async function executeTip({ sender, recipient, amount, currency = 'SOL', depende
     throw new TipError('❌ Calculated lamports must be greater than zero.');
   }
 
+  const sanitizedFeeBps = Number.isFinite(PLATFORM_FEE_BPS) ? Math.max(PLATFORM_FEE_BPS, 0) : 0;
+  const feeWalletConfigured = sanitizedFeeBps > 0;
+
+  if (feeWalletConfigured && !PLATFORM_FEE_WALLET) {
+    throw new TipError('⚠️ Platform fee wallet not configured. Set TIP_PLATFORM_FEE_WALLET to enable fee capture.');
+  }
+
+  const feeLamports = feeWalletConfigured
+    ? Math.floor((lamports * Math.min(sanitizedFeeBps, 10000)) / 10000)
+    : 0;
+
+  const recipientLamports = lamports - feeLamports;
+  if (recipientLamports <= 0) {
+    throw new TipError('❌ Tip amount is too small after applying the platform fee.');
+  }
+
   let paymentResult;
   try {
     paymentResult = await payments.sendPayment({
       fromSecret: MICROPAYMENT_SIGNER,
       toAddress: recipientBadge.wallet_address,
-      amountLamports: lamports,
+      amountLamports: recipientLamports,
       reference: `tip:${sender.id}:${recipient.id}`,
     });
   } catch (error) {
     throw new TipError(`❌ Tip failed: ${error.message}`);
   }
 
+  let feeResult = null;
+  if (feeLamports > 0) {
+    try {
+      feeResult = await payments.sendPayment({
+        fromSecret: MICROPAYMENT_SIGNER,
+        toAddress: PLATFORM_FEE_WALLET,
+        amountLamports: feeLamports,
+        reference: `fee:${sender.id}:${recipient.id}`,
+      });
+    } catch (error) {
+      throw new TipError(`❌ Fee transfer failed: ${error.message}`);
+    }
+  }
+
   db.getUser(sender.id);
   db.getUser(recipient.id);
-  db.recordTip(sender.id, recipient.id, normalizedAmount, normalizedCurrency, paymentResult.signature);
+  db.recordTip(
+    sender.id,
+    recipient.id,
+    normalizedAmount,
+    normalizedCurrency,
+    paymentResult.signature,
+    feeLamports / LAMPORTS_PER_SOL,
+  );
 
   const senderScore = await badges.adjustReputation(sender.id, 1);
   const recipientScore = await badges.adjustReputation(recipient.id, 2);
 
-  return createTipSuccessEmbed(sender, recipient, normalizedAmount, normalizedCurrency)
+  return createTipSuccessEmbed(sender, recipient, normalizedAmount, normalizedCurrency, {
+    recipientAmount: recipientLamports / LAMPORTS_PER_SOL,
+    feeAmount: feeLamports / LAMPORTS_PER_SOL,
+    feeWallet: PLATFORM_FEE_WALLET,
+    feeSignature: feeResult?.signature || null,
+  })
     .setFooter({
       text: `Sig: ${paymentResult.signature.slice(0, 8)}… | Sender Rep ${senderScore} | Receiver Rep ${recipientScore}`,
     });

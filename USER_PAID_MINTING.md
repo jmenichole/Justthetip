@@ -4,6 +4,15 @@
 
 Your NFT verification system now uses a **user-paid model** where users cover their own minting costs plus a small profit margin for you.
 
+## ⚙️ Quick Setup Checklist (Jamie)
+
+1. **Confirm GitHub Actions secrets** – `MINT_AUTHORITY_KEYPAIR`, `FEE_PAYMENT_SOL_ADDRESS`, and `NFT_STORAGE_API_KEY` already live in your repo secrets. Double-check their values under *Settings → Secrets and variables → Actions* so deployments inherit them automatically.
+2. **Set mint fee env vars** – Add `NFT_MINT_FEE_ENABLED=true` and your chosen `NFT_MINT_FEE_SOL` (e.g. `0.02`) to the same secrets page or your hosting dashboard.
+3. **Route payments to your wallet** – Point `FEE_PAYMENT_SOL_ADDRESS` at the Solana wallet you control. Every user payment and platform fee now flows there.
+4. **Optional tune-ups** – Use `NFT_PAYMENT_LOOKBACK_MINUTES`, `NFT_PAYMENT_SEARCH_LIMIT`, and `NFT_PAYMENT_REQUIRED_CONFIRMATIONS` to match your RPC provider’s limits.
+5. **Smoke test** – Hit `GET https://<your-api>/api/health` and confirm `mintPayment.enabled` is `true` and the `paymentAddress` matches your wallet before letting users in.
+6. **Fund the mint authority** – Drop a little SOL (≈0.05) into the mint authority wallet so it can pay rent for new NFTs.
+
 ## 💵 Fee Structure
 
 ```javascript
@@ -47,127 +56,65 @@ POST /api/mintBadge
 
 ## 📝 Required Changes
 
-### 1. Update `.env` / Railway Variables
+### 1. Update `.env` / hosting variables
 
-Add these new variables:
+Set the following values wherever you manage environment variables (Railway, Fly.io, GitHub Actions secrets, etc.):
 
 ```bash
-NFT_MINT_FEE_SOL=0.02
 NFT_MINT_FEE_ENABLED=true
+NFT_MINT_FEE_SOL=0.02          # adjust if you want a different price
+FEE_PAYMENT_SOL_ADDRESS=<your-sol-wallet>
+TIP_PLATFORM_FEE_BPS=250       # optional: 2.5% fee on every tip
+TIP_PLATFORM_FEE_WALLET=<same-or-different-sol-wallet>
 ```
 
-### 2. Update `api/server.js`
+> 💡 Because your secrets already live in GitHub Actions, you can add these as new repository secrets and they’ll flow into deployments automatically.
 
-Add payment verification before minting (see code below)
+### 2. Backend payment verification (already committed)
 
-### 3. Update `docs/landing-app.js`
+`api/server.js` now calls `verifyMintPayment()` before minting. It scans your `FEE_PAYMENT_SOL_ADDRESS` for recent transfers from the requesting wallet and blocks minting until the required SOL arrives. No extra code changes needed—just keep your RPC credentials healthy.
 
-Add payment step in verification flow:
+### 3. Frontend messaging (optional polish)
 
-```javascript
-// Step 3.5: Request payment
-async function requestMintPayment() {
-    const fee = 0.02; // SOL
-    const message = `Send ${fee} SOL to mint your verification NFT`;
-    
-    // Show payment UI
-    showPaymentRequest({
-        amount: fee,
-        recipient: 'H8m2gN2GEPSbk4u6PoWa8JYkEZRJWH45DyWjbAm76uCX',
-        message: message
-    });
-    
-    // Wait for payment confirmation
-    await waitForPayment(userWallet, fee);
-    
-    // Proceed to mint
-    await mintVerificationNFT();
-}
-```
+If you want the landing flow to spell out the price, update the modal copy in `docs/landing.html` or `docs/index.html`. The backend already enforces payment even if the UI forgets to mention it.
 
 ## 💻 Implementation Code
 
 ### Server-Side Payment Verification
 
 ```javascript
-// Add to api/server.js BEFORE the mint call
+// api/server.js (excerpt)
+async function verifyMintPayment(walletAddress, requiredAmountSol) {
+  const feeWallet = new PublicKey(CONFIG.FEE_PAYMENT_SOL_ADDRESS);
+  const minimumLamports = Math.floor(requiredAmountSol * LAMPORTS_PER_SOL);
+  const signatures = await connection.getSignaturesForAddress(feeWallet, {
+    limit: CONFIG.NFT_PAYMENT_SEARCH_LIMIT,
+  });
+  const cutoff = Date.now() - CONFIG.NFT_PAYMENT_LOOKBACK_MINUTES * 60 * 1000;
 
-async function verifyPayment(walletAddress, requiredAmount) {
-    try {
-        const connection = new Connection(CONFIG.SOLANA_RPC_URL);
-        const feeWallet = new PublicKey(process.env.FEE_PAYMENT_SOL_ADDRESS);
-        const userWallet = new PublicKey(walletAddress);
-        
-        // Get recent transactions to fee wallet
-        const signatures = await connection.getSignaturesForAddress(
-            feeWallet,
-            { limit: 100 }
-        );
-        
-        // Check if payment from user exists (last 10 minutes)
-        const tenMinutesAgo = Date.now() - (10 * 60 * 1000);
-        
-        for (const sig of signatures) {
-            if (sig.blockTime * 1000 < tenMinutesAgo) break;
-            
-            const tx = await connection.getParsedTransaction(sig.signature);
-            const instructions = tx.transaction.message.instructions;
-            
-            for (const ix of instructions) {
-                if (ix.program === 'system' && ix.parsed?.type === 'transfer') {
-                    const info = ix.parsed.info;
-                    if (
-                        info.source === walletAddress &&
-                        info.destination === feeWallet.toString() &&
-                        info.lamports >= requiredAmount * 1e9
-                    ) {
-                        return {
-                            verified: true,
-                            signature: sig.signature,
-                            amount: info.lamports / 1e9
-                        };
-                    }
-                }
-            }
-        }
-        
-        return { verified: false };
-    } catch (error) {
-        console.error('Payment verification error:', error);
-        return { verified: false, error: error.message };
-    }
+  // Look for a recent system transfer from the user wallet into your fee wallet
+  for (const sigInfo of signatures) {
+    if (sigInfo.blockTime * 1000 < cutoff) break;
+    const tx = await connection.getParsedTransaction(sigInfo.signature, { maxSupportedTransactionVersion: 0 });
+    // ...match transfer + lamport amount...
+  }
+
+  return { verified: true, signature, amountSol };
 }
 
-// Update the /api/mintBadge endpoint:
 app.post('/api/mintBadge', async (req, res) => {
-    try {
-        // ... existing validation code ...
-        
-        // NEW: Check payment if fee enabled
-        if (process.env.NFT_MINT_FEE_ENABLED === 'true') {
-            const requiredFee = parseFloat(process.env.NFT_MINT_FEE_SOL || 0.02);
-            
-            const payment = await verifyPayment(walletAddress, requiredFee);
-            
-            if (!payment.verified) {
-                return res.status(402).json({
-                    error: 'Payment required',
-                    message: `Send ${requiredFee} SOL to ${process.env.FEE_PAYMENT_SOL_ADDRESS} to mint your NFT`,
-                    requiredAmount: requiredFee,
-                    paymentAddress: process.env.FEE_PAYMENT_SOL_ADDRESS
-                });
-            }
-            
-            console.log('✅ Payment verified:', payment.signature);
-        }
-        
-        // Proceed with minting...
-        const { nft } = await metaplex.nfts().create({ ... });
-        
-        // ... rest of existing code ...
-    } catch (error) {
-        // ... error handling ...
-    }
+  const paymentVerification = await verifyMintPayment(walletAddress, CONFIG.NFT_MINT_FEE_SOL);
+  if (!paymentVerification?.verified) {
+    return res.status(402).json({
+      error: 'Payment required',
+      details: {
+        requiredAmount: CONFIG.NFT_MINT_FEE_SOL,
+        paymentAddress: CONFIG.FEE_PAYMENT_SOL_ADDRESS,
+      },
+    });
+  }
+
+  // continue with metadata upload + minting
 });
 ```
 

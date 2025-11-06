@@ -5,7 +5,7 @@
 
 const express = require('express');
 const cors = require('cors');
-const { PublicKey } = require('@solana/web3.js');
+const { PublicKey, LAMPORTS_PER_SOL } = require('@solana/web3.js');
 const { MongoClient } = require('mongodb');
 const nacl = require('tweetnacl');
 const adminRoutes = require('./adminRoutes');
@@ -32,7 +32,13 @@ const CONFIG = {
     VERIFIED_COLLECTION_ADDRESS: process.env.VERIFIED_COLLECTION_ADDRESS,
     NFT_STORAGE_API_KEY: process.env.NFT_STORAGE_API_KEY,
     COINBASE_COMMERCE_API_KEY: process.env.COINBASE_COMMERCE_API_KEY,
-    COINBASE_COMMERCE_WEBHOOK_SECRET: process.env.COINBASE_COMMERCE_WEBHOOK_SECRET
+    COINBASE_COMMERCE_WEBHOOK_SECRET: process.env.COINBASE_COMMERCE_WEBHOOK_SECRET,
+    NFT_MINT_FEE_ENABLED: process.env.NFT_MINT_FEE_ENABLED === 'true',
+    NFT_MINT_FEE_SOL: parseFloat(process.env.NFT_MINT_FEE_SOL || '0'),
+    FEE_PAYMENT_SOL_ADDRESS: process.env.FEE_PAYMENT_SOL_ADDRESS,
+    NFT_PAYMENT_LOOKBACK_MINUTES: parseInt(process.env.NFT_PAYMENT_LOOKBACK_MINUTES || '30', 10),
+    NFT_PAYMENT_SEARCH_LIMIT: parseInt(process.env.NFT_PAYMENT_SEARCH_LIMIT || '50', 10),
+    NFT_PAYMENT_REQUIRED_CONFIRMATIONS: parseInt(process.env.NFT_PAYMENT_REQUIRED_CONFIRMATIONS || '1', 10)
 };
 
 // ===== MIDDLEWARE =====
@@ -193,7 +199,102 @@ async function createNFTMetadata(discordId, discordUsername, walletAddress, term
     return metadata;
 }
 
-async function storeTipRecord({ senderId, receiverId, amount, currency, signature, timestamp = new Date() }) {
+function isMintPaymentConfigured() {
+    if (!CONFIG.NFT_MINT_FEE_ENABLED) {
+        return false;
+    }
+
+    if (!CONFIG.FEE_PAYMENT_SOL_ADDRESS) {
+        throw new Error('FEE_PAYMENT_SOL_ADDRESS is required when NFT mint fees are enabled.');
+    }
+
+    if (!connection) {
+        throw new Error('Solana connection not initialized. NFT payment verification unavailable.');
+    }
+
+    return true;
+}
+
+async function verifyMintPayment(walletAddress, requiredAmountSol) {
+    if (!CONFIG.NFT_MINT_FEE_ENABLED) {
+        return { verified: true, reason: 'payment_disabled' };
+    }
+
+    if (!walletAddress) {
+        throw new Error('Wallet address is required for payment verification.');
+    }
+
+    if (!isMintPaymentConfigured()) {
+        return { verified: false, error: 'Mint payment configuration incomplete' };
+    }
+
+    const feeWallet = new PublicKey(CONFIG.FEE_PAYMENT_SOL_ADDRESS);
+    const minimumLamports = Math.floor(Math.max(requiredAmountSol || 0, 0) * LAMPORTS_PER_SOL);
+    const lookbackCutoff = Date.now() - (CONFIG.NFT_PAYMENT_LOOKBACK_MINUTES * 60 * 1000);
+    const signatures = await connection.getSignaturesForAddress(feeWallet, {
+        limit: CONFIG.NFT_PAYMENT_SEARCH_LIMIT,
+    });
+
+    for (const sigInfo of signatures) {
+        if (!sigInfo.blockTime) {
+            continue;
+        }
+
+        if (sigInfo.blockTime * 1000 < lookbackCutoff) {
+            break;
+        }
+
+        if (
+            CONFIG.NFT_PAYMENT_REQUIRED_CONFIRMATIONS > 1 &&
+            sigInfo.confirmationStatus !== 'finalized'
+        ) {
+            continue;
+        }
+
+        const tx = await connection.getParsedTransaction(sigInfo.signature, {
+            maxSupportedTransactionVersion: 0,
+        });
+
+        if (!tx?.transaction) {
+            continue;
+        }
+
+        const instructions = tx.transaction.message.instructions || [];
+        for (const instruction of instructions) {
+            if (instruction.program !== 'system') {
+                continue;
+            }
+
+            const parsed = instruction.parsed;
+            if (parsed?.type !== 'transfer') {
+                continue;
+            }
+
+            const info = parsed.info || {};
+            if (info.destination !== feeWallet.toString() || info.source !== walletAddress) {
+                continue;
+            }
+
+            const lamports = Number(info.lamports || 0);
+            if (lamports < minimumLamports) {
+                continue;
+            }
+
+            return {
+                verified: true,
+                signature: sigInfo.signature,
+                amountLamports: lamports,
+                amountSol: lamports / LAMPORTS_PER_SOL,
+                blockTime: sigInfo.blockTime,
+                confirmationStatus: sigInfo.confirmationStatus || 'confirmed',
+            };
+        }
+    }
+
+    return { verified: false };
+}
+
+async function storeTipRecord({ senderId, receiverId, amount, currency, signature, platformFee = 0, timestamp = new Date() }) {
     try {
         if (db) {
             await db.collection('tips').insertOne({
@@ -202,12 +303,13 @@ async function storeTipRecord({ senderId, receiverId, amount, currency, signatur
                 amount,
                 currency,
                 signature: signature || null,
+                platformFee,
                 createdAt: new Date(timestamp),
             });
             return;
         }
 
-        sqlite.recordTip(String(senderId), String(receiverId), amount, currency, signature || null);
+        sqlite.recordTip(String(senderId), String(receiverId), amount, currency, signature || null, platformFee);
     } catch (error) {
         console.error('Failed to store tip record:', error);
     }
@@ -230,6 +332,7 @@ async function fetchTipHistory(limit = 20) {
             currency: tip.currency,
             timestamp: tip.createdAt,
             signature: tip.signature || null,
+            platformFee: tip.platformFee || 0,
         }));
     }
 
@@ -240,6 +343,7 @@ async function fetchTipHistory(limit = 20) {
         currency: tip.currency,
         timestamp: tip.timestamp,
         signature: tip.signature || null,
+        platformFee: tip.platform_fee || 0,
     }));
 }
 
@@ -690,6 +794,44 @@ app.get('/api/registerwallet/status/:discordUserId', walletRegistrationLimiter, 
     }
 });
 
+app.get('/api/checkPayment/:walletAddress', async (req, res) => {
+    try {
+        const { walletAddress } = req.params;
+
+        if (!walletAddress) {
+            return res.status(400).json({ error: 'walletAddress is required' });
+        }
+
+        if (!CONFIG.NFT_MINT_FEE_ENABLED) {
+            return res.json({
+                required: false,
+                message: 'Payment not required - minting currently free',
+            });
+        }
+
+        const payment = await verifyMintPayment(walletAddress, CONFIG.NFT_MINT_FEE_SOL);
+
+        res.json({
+            required: true,
+            verified: Boolean(payment?.verified),
+            amount: CONFIG.NFT_MINT_FEE_SOL,
+            paymentAddress: CONFIG.FEE_PAYMENT_SOL_ADDRESS,
+            confirmationStatus: payment?.confirmationStatus || null,
+            payment: payment?.verified
+                ? {
+                    signature: payment.signature,
+                    lamports: payment.amountLamports,
+                    sol: payment.amountSol,
+                    blockTime: payment.blockTime,
+                }
+                : null,
+        });
+    } catch (error) {
+        console.error('Mint payment check error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Health check
 app.get('/api/health', (req, res) => {
     const devStatus = solanaDevTools.getStatus();
@@ -708,6 +850,12 @@ app.get('/api/health', (req, res) => {
             defaultCluster: devStatus.defaultCluster,
             connections: devStatus.connections.length,
             mintAuthorities: devStatus.mintAuthorities.map((item) => item.publicKey)
+        },
+        mintPayment: {
+            enabled: CONFIG.NFT_MINT_FEE_ENABLED,
+            feeSol: CONFIG.NFT_MINT_FEE_SOL,
+            paymentAddress: CONFIG.NFT_MINT_FEE_ENABLED ? CONFIG.FEE_PAYMENT_SOL_ADDRESS : null,
+            lookbackMinutes: CONFIG.NFT_PAYMENT_LOOKBACK_MINUTES,
         },
         // Debug fields (sanitized)
         hasMintKey: Boolean(CONFIG.MINT_AUTHORITY_KEYPAIR),
@@ -953,6 +1101,33 @@ app.post('/api/mintBadge', async (req, res) => {
             }
         }
 
+        let paymentVerification = null;
+        if (CONFIG.NFT_MINT_FEE_ENABLED) {
+            const requiredFee = Number.isFinite(CONFIG.NFT_MINT_FEE_SOL) ? CONFIG.NFT_MINT_FEE_SOL : 0;
+
+            try {
+                paymentVerification = await verifyMintPayment(walletAddress, requiredFee);
+            } catch (paymentError) {
+                console.error('NFT mint payment verification error:', paymentError);
+                return res.status(503).json({
+                    error: 'Payment verification unavailable',
+                    message: paymentError.message,
+                });
+            }
+
+            if (!paymentVerification?.verified) {
+                return res.status(402).json({
+                    error: 'Payment required',
+                    message: `Please send ${requiredFee} SOL to mint your verification NFT`,
+                    details: {
+                        requiredAmount: requiredFee,
+                        paymentAddress: CONFIG.FEE_PAYMENT_SOL_ADDRESS,
+                        lookbackMinutes: CONFIG.NFT_PAYMENT_LOOKBACK_MINUTES,
+                    },
+                });
+            }
+        }
+
         // Check if NFT minting is available
         if (!metaplex) {
             // Fallback: Save verification data without minting
@@ -964,6 +1139,7 @@ app.post('/api/mintBadge', async (req, res) => {
                 timestamp,
                 verified: true,
                 nftMintAddress: 'PENDING_MINT',
+                paymentInfo: paymentVerification,
                 createdAt: new Date()
             };
 
@@ -1010,6 +1186,7 @@ app.post('/api/mintBadge', async (req, res) => {
             termsVersion,
             timestamp,
             verified: true,
+            paymentInfo: paymentVerification,
             createdAt: new Date()
         };
 
@@ -1021,7 +1198,9 @@ app.post('/api/mintBadge', async (req, res) => {
             success: true,
             nftMintAddress,
             transactionSignature: nft.address.toString(),
-            message: 'Verification NFT minted successfully!'
+            message: 'Verification NFT minted successfully!',
+            paymentReceived: paymentVerification?.amountSol || null,
+            paymentSignature: paymentVerification?.signature || null
         });
 
     } catch (error) {

@@ -66,7 +66,7 @@ class Database {
       sqlite.updateBalance(recipientId, amount);
 
       // Record the tip
-      sqlite.recordTip(senderId, recipientId, amount, currency);
+      sqlite.recordTip(senderId, recipientId, amount, currency, null, 0);
 
       console.log(`✅ Tip processed: ${amount} ${currency} from ${senderId} to ${recipientId}`);
     } catch (error) {
