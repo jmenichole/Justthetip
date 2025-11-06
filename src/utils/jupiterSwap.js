@@ -88,6 +88,8 @@ class JupiterSwap {
   }
 }
 
+// Canonical mint addresses for the tokens we expose through /swap.
+
 const TOKEN_MINTS = {
   SOL: 'So11111111111111111111111111111111111111112',
   USDC: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
@@ -96,6 +98,8 @@ const TOKEN_MINTS = {
   JTO: 'jtojtomepa8beP8AuQc6eXt5FriJwfFMwQx2v2f9mCL',
   PYTH: 'HZ1JovNiVvGrGNiiYvEozEVgZ58xaU3RKwX8eACQBCt3',
 };
+
+// Decimal precision for each supported token (used when converting to base units).
 
 const TOKEN_DECIMALS = {
   SOL: 9,
@@ -109,9 +113,17 @@ const TOKEN_DECIMALS = {
 // Export a frozen list so command builders and handlers stay perfectly in sync
 const SUPPORTED_TOKENS = Object.freeze(Object.keys(TOKEN_MINTS));
 
+// Pre-build the Discord choice objects so multiple consumers stay aligned.
+const SWAP_TOKEN_CHOICES = Object.freeze(
+  SUPPORTED_TOKENS.map(token => ({ name: token, value: token }))
+);
+
+
 module.exports = {
   JupiterSwap,
   TOKEN_MINTS,
   TOKEN_DECIMALS,
   SUPPORTED_TOKENS,
+  SWAP_TOKEN_CHOICES,
+
 };
