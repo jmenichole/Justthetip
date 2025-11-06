@@ -42,7 +42,6 @@ try {
 
 const { PublicKey } = require('@solana/web3.js');
 const { JustTheTipSDK } = require('./contracts/sdk');
-const { handleSwapCommand, handleSwapHelpButton } = require('./src/commands/swapCommand');
 const db = require('./db/database');
 const {
   createOnChainBalanceEmbed,
@@ -81,21 +80,6 @@ const smartContractCommands = [
   {
     name: 'sc-info',
     description: 'View smart contract bot information'
-  },
-  {
-    name: 'swap',
-    description: 'Swap tokens using Jupiter aggregator',
-    options: [
-      { name: 'from', type: 3, description: 'Token to swap from', required: true, choices: [
-        { name: 'SOL', value: 'SOL' },
-        { name: 'USDC', value: 'USDC' }
-      ]},
-      { name: 'to', type: 3, description: 'Token to swap to', required: true, choices: [
-        { name: 'SOL', value: 'SOL' },
-        { name: 'USDC', value: 'USDC' }
-      ]},
-      { name: 'amount', type: 10, description: 'Amount to swap', required: true }
-    ]
   }
 ];
 
@@ -287,22 +271,18 @@ client.on(Events.InteractionCreate, async interaction => {
           `**⚡ Smart Contracts:** All transactions through Solana programs\n` +
           `**🔗 PDAs:** Program Derived Addresses for advanced features\n` +
           `**🛠️ TypeScript SDK:** Fully typed with comprehensive documentation\n` +
-          `**⚙️ Zero Private Keys:** Bot never handles sensitive information\n` +
-          `**🔄 Jupiter Swaps:** Cross-token tipping via Jupiter Aggregator\n\n` +
+          `**⚙️ Zero Private Keys:** Bot never handles sensitive information\n\n` +
           `**Commands:**\n` +
           `• \`/register-wallet\` - Register your Solana wallet\n` +
           `• \`/sc-tip\` - Create smart contract tip\n` +
           `• \`/sc-balance\` - Check on-chain balance\n` +
           `• \`/generate-pda\` - Generate your PDA\n` +
-          `• \`/swap\` - Convert tokens via Jupiter\n` +
           `• \`/sc-info\` - Show this information`
         )
         .setColor(0x8b5cf6);
-        
+
       await interaction.reply({ embeds: [embed], ephemeral: true });
-      
-    } else if (commandName === 'swap') {
-      await handleSwapCommand(interaction, userWallets);
+
     }
     
   } catch (error) {
@@ -344,8 +324,6 @@ client.on(Events.InteractionCreate, async interaction => {
       
     await interaction.update({ embeds: [embed] });
     
-  } else if (interaction.customId === 'swap_help') {
-    await handleSwapHelpButton(interaction);
   }
 });
 

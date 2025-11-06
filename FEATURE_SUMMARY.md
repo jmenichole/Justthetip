@@ -134,7 +134,7 @@ Also includes:
 #### `/help advanced`
 Shows complete command reference:
 - All basic commands with detailed descriptions
-- Advanced features (swap, leaderboard, burn)
+- Advanced features (leaderboard, burn, DM tipping)
 - Full examples and use cases
 - Tips for power users
 - Complete cryptocurrency guide

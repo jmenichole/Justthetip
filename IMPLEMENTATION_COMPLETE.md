@@ -29,23 +29,7 @@ November 1, 2025
 - Error handling in all functions
 - Zero security vulnerabilities
 
-### ✅ 2. Jupiter Swap Integration (src/utils/jupiterSwap.js)
-
-**Status**: Complete
-
-**Features**:
-- Token swap quotes with slippage tolerance
-- Swap transaction generation
-- Token list retrieval from Jupiter API
-- Price impact calculation
-- Support for cross-token tipping
-- Common token mint addresses (SOL, USDC, USDT, BONK, etc.)
-
-**Integration**:
-- Used by `/swap` command in both bot files
-- Ready for cross-token tip functionality
-
-### ✅ 3. Leaderboard System (src/commands/leaderboardCommand.js)
+### ✅ 2. Leaderboard System (src/commands/leaderboardCommand.js)
 
 **Status**: Complete
 
@@ -60,23 +44,7 @@ November 1, 2025
 **Commands**:
 - `/leaderboard` - View rankings
 
-### ✅ 4. Token Swap Command (src/commands/swapCommand.js)
-
-**Status**: Complete
-
-**Features**:
-- Interactive swap interface
-- Jupiter quote generation
-- Price impact display
-- Unsigned transaction generation for user signing
-- Help buttons for guidance
-- Error handling for all edge cases
-- Support for SOL ↔ USDC swaps
-
-**Commands**:
-- `/swap from to amount` - Convert tokens
-
-### ✅ 5. Admin Dashboard API (api/adminRoutes.js)
+### ✅ 3. Admin Dashboard API (api/adminRoutes.js)
 
 **Status**: Complete and secured
 
@@ -93,23 +61,27 @@ November 1, 2025
 - Demo mode support
 - Proper error handling
 
-### ✅ 6. Bot Integration
+### ✅ 4. Bot Integration
 
 **bot.js Updates**:
 - Added `/leaderboard` command
-- Added `/swap` command
 - Updated help message
 - Added button handlers
 
 **bot_smart_contract.js Updates**:
 - Integrated JustTheTipSDK for cleaner code
 - Refactored existing functions to use SDK
-- Added `/swap` command
-- Updated sc-info with Jupiter mention
+- Updated sc-info messaging for the slimmer command surface
 - Improved error handling
 - Database connection support
 
-### ✅ 7. Code Quality & Documentation
+### ℹ️ Retired Feature: Jupiter Swap (2025)
+
+- The Jupiter-powered `/swap` command and `jupiterSwap` helper were removed.
+- The bot now focuses on SOL tipping flows that the team can monitor end-to-end.
+- Documentation and onboarding copy were refreshed so new admins are not promised swap support.
+
+### ✅ 5. Code Quality & Documentation
 
 **Configuration Files**:
 - `.eslintrc.json` - ESLint with security plugin
@@ -163,11 +135,10 @@ November 1, 2025
 
 ## Code Statistics
 
-**New Files Created**: 9
+**New Files Created**: 8
 - contracts/sdk.js (261 lines)
-- src/utils/jupiterSwap.js (143 lines)
+- src/utils/x402Client.js (micropayment helper)
 - src/commands/leaderboardCommand.js (201 lines)
-- src/commands/swapCommand.js (162 lines)
 - api/adminRoutes.js (275 lines)
 - .eslintrc.json
 - .prettierrc.json
@@ -175,8 +146,8 @@ November 1, 2025
 - IMPLEMENTATION_COMPLETE.md
 
 **Files Modified**: 4
-- bot.js (added leaderboard and swap commands)
-- bot_smart_contract.js (integrated SDK, added swap)
+- bot.js (added leaderboard and help polish)
+- bot_smart_contract.js (integrated SDK, refreshed command copy)
 - api/server.js (added admin routes)
 - contracts/example.js (updated to use SDK)
 - .gitignore (added build artifacts)
@@ -193,10 +164,10 @@ November 1, 2025
    - Users sign in their own wallets
    - Bot only generates transaction instructions
 
-2. **Jupiter Swap API integration**: Cross-token tipping ✅
-   - Full Jupiter API integration
-   - Quote generation with slippage
-   - Swap transaction creation
+2. **Mint payment verification**: User-funded NFTs ✅
+   - Coinbase Commerce / Solana payment checks
+   - Health endpoint exposes pricing
+   - Landing flow guides the required payment
 
 3. **Leaderboard**: Rank users by tips ✅
    - Top tippers and recipients
@@ -307,14 +278,14 @@ Before deploying to production:
    - [ ] Set up logging (Winston configured)
    - [ ] Configure error tracking
    - [ ] Monitor RPC usage
-   - [ ] Track Jupiter API rate limits
+   - [ ] Watch mint payment webhooks / balances
    - [ ] Set up uptime monitoring
 
 4. **Testing**
    - [ ] Test in Discord test server
    - [ ] Verify all commands
    - [ ] Test with real transactions (small amounts)
-   - [ ] Verify Jupiter swaps work
+   - [ ] Verify mint fee enforcement works
    - [ ] Test leaderboard with real data
    - [ ] Verify admin API endpoints
 
@@ -323,14 +294,14 @@ Before deploying to production:
 ### Immediate
 1. Deploy to test Discord server
 2. Test all commands with real users
-3. Verify Jupiter integration works
+3. Verify mint payment check works end-to-end
 4. Test leaderboard with database
 
 ### Short-term
-1. Add more token pairs to swap command
-2. Implement persistent wallet registration
-3. Add USD aggregation to leaderboard
-4. Enhance admin dashboard with charts
+1. Implement persistent wallet registration
+2. Add USD aggregation to leaderboard
+3. Enhance admin dashboard with charts
+4. Ship fee analytics to Discord embeds
 
 ### Long-term
 1. Add NFT-based trust scores (mentioned in problem statement)
@@ -343,7 +314,7 @@ Before deploying to production:
 All requirements from the problem statement have been successfully implemented:
 
 ✅ Non-custodial architecture with Solana smart contracts
-✅ Jupiter Swap API integration for cross-token tipping
+✅ Mint fee enforcement for user-funded verification NFTs
 ✅ Leaderboard system with database queries
 ✅ Admin dashboard API for analytics
 ✅ Modular, reusable SDK

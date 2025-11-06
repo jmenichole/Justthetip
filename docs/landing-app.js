@@ -11,7 +11,8 @@ const CONFIG = {
     VERIFIED_NFT_COLLECTION: 'YOUR_COLLECTION_ADDRESS', // TODO: Replace after creating collection
     SOLANA_NETWORK: 'mainnet-beta', // or 'devnet' for testing
     RPC_ENDPOINT: 'https://api.mainnet-beta.solana.com',
-    GUIDE_URL: 'https://jmenichole.github.io/justthetip.app/guide'
+    GUIDE_URL: 'https://jmenichole.github.io/justthetip.app/guide',
+    DEFAULT_MINT_FEE_SOL: '0.02' // fallback price for display when API data is unavailable
 };
 
 // ===== STATE MANAGEMENT =====
@@ -24,8 +25,120 @@ const AppState = {
     walletSignature: null,
     nftMinted: false,
     nftMintAddress: null,
-    currentStep: 'terms' // terms, discord, wallet, nft, bot, complete
+    currentStep: 'terms', // terms, discord, wallet, nft, bot, complete
+    mintFeeEnabled: false,
+    mintFeeSol: null,
+    mintFeeDestination: null,
+    mintFeeLookbackMinutes: null,
+    mintFeeFallback: false
 };
+
+// ===== MINT PRICE HELPERS =====
+function formatMintFee() {
+    if (!AppState.mintFeeEnabled) {
+        return 'FREE';
+    }
+
+    const rawValue = AppState.mintFeeSol ?? CONFIG.DEFAULT_MINT_FEE_SOL;
+    const numeric = parseFloat(rawValue);
+
+    if (Number.isFinite(numeric)) {
+        // Keep three decimals for tiny fees, otherwise show two
+        const decimals = numeric >= 0.1 ? 2 : 3;
+        return `${numeric.toFixed(decimals).replace(/\.0+$/, '')} SOL`;
+    }
+
+    return `${rawValue} SOL`;
+}
+
+function formatMintDestination(short = false) {
+    const address = AppState.mintFeeDestination;
+    if (!address) {
+        return 'your verification wallet';
+    }
+
+    if (!short) {
+        return address;
+    }
+
+    if (address.length <= 10) {
+        return address;
+    }
+
+    return `${address.slice(0, 4)}...${address.slice(-4)}`;
+}
+
+function updateMintPriceUI() {
+    const heroValueEl = document.getElementById('heroMintPriceValue');
+    if (heroValueEl) {
+        heroValueEl.textContent = formatMintFee();
+    }
+
+    const heroLabelEl = document.getElementById('heroMintPriceLabel');
+    if (heroLabelEl) {
+        heroLabelEl.textContent = AppState.mintFeeEnabled ? 'Mint Price (SOL)' : 'Mint Price';
+    }
+
+    const calloutEl = document.getElementById('mintPriceCallout');
+    if (calloutEl) {
+        if (AppState.mintFeeEnabled) {
+            const lookback = AppState.mintFeeLookbackMinutes;
+            const lookbackCopy = lookback ? ` (auto-detects payments from the last ${lookback} minutes)` : '';
+            const fallbackCopy = AppState.mintFeeFallback ? ' (default price shown while API reconnects)' : '';
+            calloutEl.textContent = `Verification badge mint: ${formatMintFee()} — send it to ${formatMintDestination(true)}${lookbackCopy}${fallbackCopy}.`;
+        } else {
+            calloutEl.textContent = 'Verification badge mint is free right now. Claim it before we flip the fee back on.';
+        }
+    }
+}
+
+function applyMintFeeCache(cache) {
+    if (!cache) return;
+
+    AppState.mintFeeEnabled = Boolean(cache.enabled);
+    AppState.mintFeeSol = cache.feeSol ?? AppState.mintFeeSol;
+    AppState.mintFeeDestination = cache.paymentAddress ?? AppState.mintFeeDestination;
+    AppState.mintFeeLookbackMinutes = cache.lookbackMinutes ?? AppState.mintFeeLookbackMinutes;
+    AppState.mintFeeFallback = false;
+}
+
+async function fetchMintPricing() {
+    try {
+        const response = await fetch(`${CONFIG.API_BASE_URL}/api/health`, { cache: 'no-store' });
+        if (!response.ok) {
+            throw new Error(`Mint pricing request failed: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (data && data.mintPayment) {
+            applyMintFeeCache(data.mintPayment);
+            sessionStorage.setItem('mint_fee', JSON.stringify({
+                enabled: data.mintPayment.enabled,
+                feeSol: data.mintPayment.feeSol,
+                paymentAddress: data.mintPayment.paymentAddress,
+                lookbackMinutes: data.mintPayment.lookbackMinutes,
+                fetchedAt: new Date().toISOString()
+            }));
+        }
+    } catch (error) {
+        console.warn('⚠️ Unable to fetch mint pricing, using fallback:', error);
+        // Ensure we still show a helpful default if API is offline
+        if (!AppState.mintFeeSol) {
+            AppState.mintFeeSol = CONFIG.DEFAULT_MINT_FEE_SOL;
+        }
+        AppState.mintFeeFallback = true;
+        if (!AppState.mintFeeEnabled) {
+            AppState.mintFeeEnabled = true;
+        }
+    } finally {
+        updateMintPriceUI();
+
+        const modalVisible = document.getElementById('onboardingModal')?.style.display === 'flex';
+        if (modalVisible) {
+            updateOnboardingStep(AppState.currentStep);
+        }
+    }
+}
 
 // ===== SOLANA WALLET INTEGRATION =====
 let walletAdapter = null;
@@ -317,13 +430,18 @@ function updateOnboardingStep(step) {
             document.getElementById('connectDiscordBtn').addEventListener('click', initiateDiscordUserAuth);
             break;
 
-        case 'wallet':
+        case 'wallet': {
             title.textContent = '🪙 How to Link Your Wallet';
+            const fallbackCopy = AppState.mintFeeFallback ? ' (Showing default price while the API catches up.)' : '';
+            const priceNotice = AppState.mintFeeEnabled
+                ? `<strong>Mint price:</strong> ${formatMintFee()} — send it from your wallet to <code>${formatMintDestination()}</code> before you hit mint. We auto-detect payments from the last ${AppState.mintFeeLookbackMinutes || 30} minutes.${fallbackCopy}`
+                : `<strong>Mint price:</strong> FREE for now — no SOL needed to mint your TrustBadge.`;
+
             content.innerHTML = `
                 <div class="onboarding-step">
                     <p class="step-description" style="margin-bottom: 1.5rem; font-weight: 600;">Follow these 3 quick steps:</p>
                     <div class="user-badge" style="margin-bottom: 1.5rem;">
-                        <img src="https://cdn.discordapp.com/avatars/${AppState.discordUser.id}/${AppState.discordUser.avatar}.png" 
+                        <img src="https://cdn.discordapp.com/avatars/${AppState.discordUser.id}/${AppState.discordUser.avatar}.png"
                              alt="Avatar" class="user-avatar-small">
                         <span>${AppState.discordUser.username}</span>
                     </div>
@@ -340,6 +458,9 @@ function updateOnboardingStep(step) {
                             <strong>3️⃣ Return here — your wallet will show as "Verified ✅".</strong>
                         </p>
                     </div>
+                    <div style="margin: 1.5rem 0; padding: 1rem 1.25rem; border-radius: 12px; border: 1px solid rgba(148, 163, 184, 0.25); background: rgba(15, 23, 42, 0.65); color: #e2e8f0; font-size: 0.95rem; line-height: 1.5;">
+                        ${priceNotice}
+                    </div>
                     <button class="btn btn-primary" id="connectWalletBtn">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <rect x="2" y="5" width="20" height="14" rx="2"/>
@@ -352,6 +473,7 @@ function updateOnboardingStep(step) {
             `;
             document.getElementById('connectWalletBtn').addEventListener('click', handleWalletConnect);
             break;
+        }
 
         case 'sign':
             title.textContent = 'Step 3: Sign Message';
@@ -376,17 +498,28 @@ function updateOnboardingStep(step) {
             document.getElementById('signMessageBtn').addEventListener('click', handleMessageSign);
             break;
 
-        case 'nft':
+        case 'nft': {
             title.textContent = 'Step 4: Mint Verification NFT';
+            const fallbackCopy = AppState.mintFeeFallback ? '<br><span style="display:block; margin-top:0.5rem; font-size:0.85rem; color:#bfdbfe;">Showing the default price while the API reconnects.</span>' : '';
+            const mintFeeCard = AppState.mintFeeEnabled
+                ? `<div style="margin: 1.5rem 0; padding: 1.25rem; border-radius: 12px; border: 1px solid rgba(96, 165, 250, 0.35); background: rgba(30, 64, 175, 0.35); color: #e2e8f0; line-height: 1.6;">
+                        <strong>Mint price:</strong> ${formatMintFee()}<br>
+                        Send from your wallet to <code style="display: inline-block; margin-top: 0.35rem;">${formatMintDestination()}</code> and we will auto-confirm recent payments.${fallbackCopy}
+                    </div>`
+                : `<div style="margin: 1.5rem 0; padding: 1.25rem; border-radius: 12px; border: 1px solid rgba(34, 197, 94, 0.35); background: rgba(22, 101, 52, 0.35); color: #dcfce7; line-height: 1.6;">
+                        <strong>Mint price:</strong> FREE — no payment required.
+                    </div>`;
+
             content.innerHTML = `
                 <div class="onboarding-step">
                     <div class="step-icon">🎫</div>
-                    <p class="step-description">Mint your verification NFT to unlock all features.</p>
+                    <p class="step-description">Mint your verification NFT (${formatMintFee()}) to unlock all features.</p>
                     <div class="verification-summary">
                         <div class="verify-item">✅ Discord: ${AppState.discordUser.username}</div>
                         <div class="verify-item">✅ Wallet: ${AppState.walletAddress.slice(0, 8)}...</div>
                         <div class="verify-item">✅ Signature: Verified</div>
                     </div>
+                    ${mintFeeCard}
                     <button class="btn btn-primary" id="mintNftBtn">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <circle cx="12" cy="12" r="10"/>
@@ -399,6 +532,7 @@ function updateOnboardingStep(step) {
             `;
             document.getElementById('mintNftBtn').addEventListener('click', handleNftMint);
             break;
+        }
 
         case 'bot':
             title.textContent = 'Step 5: Add Bot to Discord';
@@ -576,17 +710,32 @@ function loadSessionData() {
         AppState.nftMinted = true;
         AppState.currentStep = 'bot';
     }
+
+    // Load cached mint fee data for faster UI feedback
+    const storedMintFee = sessionStorage.getItem('mint_fee');
+    if (storedMintFee) {
+        try {
+            const mintFeeCache = JSON.parse(storedMintFee);
+            applyMintFeeCache(mintFeeCache);
+        } catch (error) {
+            console.warn('⚠️ Failed to parse cached mint fee data:', error);
+            sessionStorage.removeItem('mint_fee');
+        }
+    }
 }
 
 function initializeApp() {
     console.log('🚀 JustTheTip Landing App Initialized');
-    
+
     // Load terms acceptance
     loadTermsAcceptance();
     
     // Load session data
     loadSessionData();
-    
+
+    // Ensure mint fee UI has at least cached/default data before network request completes
+    updateMintPriceUI();
+
     // Check for OAuth callback
     if (window.location.hash.includes('access_token')) {
         handleDiscordCallback();
@@ -594,7 +743,10 @@ function initializeApp() {
     
     // Initialize wallet adapter
     initWalletAdapter();
-    
+
+    // Pull fresh mint pricing in the background
+    fetchMintPricing();
+
     // Attach event listeners
     attachEventListeners();
 }

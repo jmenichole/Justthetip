@@ -45,11 +45,11 @@ JustTheTip has successfully completed all core functionality required for produc
   - Multi-recipient airdrop support
   - Address validation utilities
 
-- [x] **Jupiter Swap Integration**
-  - Cross-token swap quotes
-  - Slippage tolerance configuration
-  - Price impact calculation
-  - Transaction generation for user signing
+- [x] **Mint Payment Verification**
+  - User-funded verification NFTs
+  - Health endpoint exposes required SOL amount
+  - Payment lookup + verification helpers
+  - Discord + docs onboarding updated with pricing
 
 - [x] **Leaderboard System**
   - Top tippers and recipients ranking

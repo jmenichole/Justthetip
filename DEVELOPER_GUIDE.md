@@ -22,12 +22,12 @@ JustTheTip is a non-custodial Solana-based Discord tipping bot that enables user
    - `contracts/example.js` - SDK usage examples
 
 4. **Integration Layer** - External services
-   - `src/utils/jupiterSwap.js` - Jupiter Aggregator for token swaps
+   - `src/utils/x402Client.js` - Low-latency micropayment helper
    - `chains/solanaHelper.js` - Solana helper utilities
 
 5. **Command Layer** - Bot command handlers
    - `src/commands/leaderboardCommand.js` - Leaderboard functionality
-   - `src/commands/swapCommand.js` - Token swap commands
+   - `src/commands/tipCommand.js` - Slash + DM tipping flows
    - `src/commands/airdropCommand.js` - Airdrop functionality
 
 6. **API Layer** - RESTful endpoints
@@ -122,17 +122,20 @@ const transaction = sdk.createTipInstruction(sender, recipient, amount);
 // User signs this transaction in their wallet
 ```
 
-### 2. Jupiter Swap Integration
+### 2. Verification NFT Minting
 
-Cross-token tipping via Jupiter Aggregator. Users can send one token and recipients receive another.
+Users pay a configurable SOL fee before the TrustBadge NFT is minted. The backend verifies payment with `/api/checkPayment` and exposes pricing through `/api/health`.
 
-**Commands:**
-- `/swap from to amount` - Convert tokens
+**Key pieces:**
+- `api/server.js` → `verifyMintPayment()` guards minting.
+- `docs/landing-app.js` fetches the live mint fee and guides users through the flow.
+- `USER_PAID_MINTING.md` documents the GitHub Actions secret setup.
 
 **Example:**
 ```javascript
-const jupiter = new JupiterSwap(rpcUrl);
-const quote = await jupiter.getQuote(inputMint, outputMint, amount);
+const response = await fetch(`${API_BASE_URL}/api/health`);
+const { mintPayment } = await response.json();
+console.log(`Mint fee: ${mintPayment.feeSol} SOL`);
 ```
 
 ### 3. Leaderboard System
