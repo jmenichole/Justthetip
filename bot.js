@@ -42,6 +42,7 @@ try {
 const db = require('./db/database');
 const { slashCommands } = require('./src/commands/slashCommands');
 const { handleTipCommand, executeTip, TipError } = require('./src/commands/tipCommand');
+const { handleSwapCommand, handleSwapHelpButton } = require('./src/commands/swapCommand');
 const fs = require('fs');
 const crypto = require('crypto');
 const { isValidSolanaAddress, verifySignature } = require('./src/utils/validation');
@@ -378,6 +379,16 @@ client.on(Events.InteractionCreate, async interaction => {
         
       await interaction.reply({ embeds: [embed], ephemeral: true });
       
+    } else if (commandName === 'swap') {
+      if (rateLimiter.isRateLimited(interaction.user.id, commandName)) {
+        return await interaction.reply({
+          content: '⏳ Rate limit exceeded. Please wait before using this command again.',
+          ephemeral: true
+        });
+      }
+
+      await handleSwapCommand(interaction);
+
     } else if (commandName === 'withdraw') {
       const address = interaction.options.getString('address');
       const amount = interaction.options.getNumber('amount');
@@ -555,19 +566,32 @@ client.on(Events.InteractionCreate, async interaction => {
     try {
       // Refresh balance display with actual data
       const balances = await db.getBalances(interaction.user.id);
-      
+
       const embed = createBalanceEmbed(balances, PRICE_CONFIG, true);
-        
+
       await interaction.update({ embeds: [embed] });
-      
+
     } catch (error) {
       console.error('Refresh balance error:', error);
-      await interaction.reply({ 
-        content: '❌ An error occurred while refreshing your balance.', 
-        ephemeral: true 
+      await interaction.reply({
+        content: '❌ An error occurred while refreshing your balance.',
+        ephemeral: true
       });
     }
-    
+
+  } else if (interaction.customId === 'swap_help') {
+    try {
+      await handleSwapHelpButton(interaction);
+    } catch (error) {
+      console.error('Swap help error:', error);
+      if (!interaction.replied && !interaction.deferred) {
+        await interaction.reply({
+          content: '❌ Unable to show swap instructions right now.',
+          ephemeral: true
+        });
+      }
+    }
+
   }
 });
 

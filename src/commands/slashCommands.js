@@ -87,6 +87,41 @@ const slashCommands = [
         )),
 
   new SlashCommandBuilder()
+    .setName('swap')
+    .setDescription('Get a Jupiter swap quote between supported Solana tokens')
+    .addStringOption(option =>
+      option
+        .setName('from')
+        .setDescription('Token to swap from')
+        .setRequired(true)
+        .addChoices(
+          { name: 'SOL', value: 'SOL' },
+          { name: 'USDC', value: 'USDC' },
+          { name: 'USDT', value: 'USDT' },
+          { name: 'BONK', value: 'BONK' },
+          { name: 'JTO', value: 'JTO' },
+          { name: 'PYTH', value: 'PYTH' }
+        ))
+    .addStringOption(option =>
+      option
+        .setName('to')
+        .setDescription('Token to receive')
+        .setRequired(true)
+        .addChoices(
+          { name: 'SOL', value: 'SOL' },
+          { name: 'USDC', value: 'USDC' },
+          { name: 'USDT', value: 'USDT' },
+          { name: 'BONK', value: 'BONK' },
+          { name: 'JTO', value: 'JTO' },
+          { name: 'PYTH', value: 'PYTH' }
+        ))
+    .addNumberOption(option =>
+      option
+        .setName('amount')
+        .setDescription('Amount to swap (whole units)')
+        .setRequired(true)),
+
+  new SlashCommandBuilder()
     .setName('help')
     .setDescription('Show bot commands and usage guide')
     .addStringOption(option =>
