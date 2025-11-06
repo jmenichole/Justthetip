@@ -1,6 +1,7 @@
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { JupiterSwap, TOKEN_MINTS, TOKEN_DECIMALS, SUPPORTED_TOKENS } = require('../utils/jupiterSwap');
 // Allow a modest 0.5% slippage so quotes are realistic without being risky.
+
 const DEFAULT_SLIPPAGE_BPS = 50;
 
 function formatOutputAmount(amount, decimals) {
@@ -22,6 +23,8 @@ async function handleSwapCommand(interaction, rateLimiter) {
     });
   }
 
+
+async function handleSwapCommand(interaction) {
   const fromToken = interaction.options.getString('from');
   const toToken = interaction.options.getString('to');
   const amount = interaction.options.getNumber('amount');
@@ -55,6 +58,7 @@ async function handleSwapCommand(interaction, rateLimiter) {
     const fromDecimals = TOKEN_DECIMALS[fromToken] ?? 9;
     const toDecimals = TOKEN_DECIMALS[toToken] ?? 9;
     // Convert the whole-unit amount (e.g. 1 SOL) into base units expected by Jupiter.
+
     const inputAmount = Math.floor(amount * Math.pow(10, fromDecimals));
 
     const jupiter = new JupiterSwap(process.env.SOLANA_RPC_URL);

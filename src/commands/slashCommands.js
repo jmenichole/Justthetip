@@ -1,6 +1,10 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { SWAP_TOKEN_CHOICES } = require('../utils/jupiterSwap');
 
+const { SUPPORTED_TOKENS } = require('../utils/jupiterSwap');
+
+const swapTokenChoices = SUPPORTED_TOKENS.map(token => ({ name: token, value: token }));
+
 const slashCommands = [
   new SlashCommandBuilder()
     .setName('balance')
@@ -96,12 +100,16 @@ const slashCommands = [
         .setDescription('Token to swap from')
         .setRequired(true)
         .addChoices(...SWAP_TOKEN_CHOICES))
+
+        .addChoices(...swapTokenChoices))
     .addStringOption(option =>
       option
         .setName('to')
         .setDescription('Token to receive')
         .setRequired(true)
         .addChoices(...SWAP_TOKEN_CHOICES))
+
+        .addChoices(...swapTokenChoices))
     .addNumberOption(option =>
       option
         .setName('amount')

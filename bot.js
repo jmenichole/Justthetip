@@ -289,6 +289,15 @@ client.on(Events.InteractionCreate, async interaction => {
     } else if (commandName === 'swap') {
       await handleSwapCommand(interaction, rateLimiter);
 
+      if (rateLimiter.isRateLimited(interaction.user.id, commandName)) {
+        return await interaction.reply({
+          content: '⏳ Rate limit exceeded. Please wait before using this command again.',
+          ephemeral: true
+        });
+      }
+
+      await handleSwapCommand(interaction);
+
     } else if (commandName === 'help') {
       const section = interaction.options.getString('section');
       

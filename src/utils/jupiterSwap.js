@@ -89,6 +89,7 @@ class JupiterSwap {
 }
 
 // Canonical mint addresses for the tokens we expose through /swap.
+
 const TOKEN_MINTS = {
   SOL: 'So11111111111111111111111111111111111111112',
   USDC: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
@@ -99,6 +100,7 @@ const TOKEN_MINTS = {
 };
 
 // Decimal precision for each supported token (used when converting to base units).
+
 const TOKEN_DECIMALS = {
   SOL: 9,
   USDC: 6,
@@ -116,10 +118,12 @@ const SWAP_TOKEN_CHOICES = Object.freeze(
   SUPPORTED_TOKENS.map(token => ({ name: token, value: token }))
 );
 
+
 module.exports = {
   JupiterSwap,
   TOKEN_MINTS,
   TOKEN_DECIMALS,
   SUPPORTED_TOKENS,
   SWAP_TOKEN_CHOICES,
+
 };
