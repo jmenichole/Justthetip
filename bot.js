@@ -40,7 +40,7 @@ try {
 }
 
 const db = require('./db/database');
-const { handleSwapCommand, handleSwapHelpButton } = require('./src/commands/swapCommand');
+const { slashCommands } = require('./src/commands/slashCommands');
 const { handleTipCommand } = require('./src/commands/tipCommand');
 const fs = require('fs');
 const crypto = require('crypto');
@@ -86,102 +86,7 @@ client.once('ready', async () => {
 });
 
 // Register slash commands
-const commands = [
-  {
-    name: 'balance',
-    description: 'Show your portfolio with crypto amounts and USD values 💎',
-  },
-  {
-    name: 'tip',
-    description: 'Send crypto to another user',
-    options: [
-      { name: 'user', type: 6, description: 'User to tip', required: true },
-      { name: 'amount', type: 10, description: 'Amount to tip', required: true },
-      { name: 'currency', type: 3, description: 'Currency (SOL, USDC)', required: true, choices: [
-          { name: 'SOL', value: 'SOL' },
-          { name: 'USDC', value: 'USDC' }
-        ]
-      }
-    ]
-  },
-  {
-    name: 'airdrop',
-    description: 'Create airdrop with USD amounts (e.g. $5.00 worth of SOL)',
-    options: [
-      { name: 'amount', type: 10, description: 'Amount to airdrop', required: true },
-      { name: 'currency', type: 3, description: 'Currency (SOL, USDC)', required: true, choices: [
-          { name: 'SOL', value: 'SOL' },
-          { name: 'USDC', value: 'USDC' }
-        ]
-      }
-    ]
-  },
-  {
-    name: 'withdraw',
-    description: 'Send crypto to external wallet',
-    options: [
-      { name: 'address', type: 3, description: 'External wallet address', required: true },
-      { name: 'amount', type: 10, description: 'Amount to withdraw', required: true },
-      { name: 'currency', type: 3, description: 'Currency (SOL, USDC)', required: true, choices: [
-          { name: 'SOL', value: 'SOL' },
-          { name: 'USDC', value: 'USDC' }
-        ]
-      }
-    ]
-  },
-  {
-    name: 'deposit',
-    description: 'Get instructions for adding funds',
-  },
-  {
-    name: 'registerwallet',
-    description: 'Link your Solana wallet with one-click signature verification',
-  },
-  {
-    name: 'burn',
-    description: 'Donate to support bot development',
-    options: [
-      { name: 'amount', type: 10, description: 'Amount to burn', required: true },
-      { name: 'currency', type: 3, description: 'Currency (SOL, USDC)', required: true, choices: [
-          { name: 'SOL', value: 'SOL' },
-          { name: 'USDC', value: 'USDC' }
-        ]
-      }
-    ]
-  },
-  {
-    name: 'help',
-    description: 'Show bot commands and usage guide',
-    options: [
-      { 
-        name: 'section', 
-        type: 3, 
-        description: 'Help section to display (leave empty for basic commands)', 
-        required: false,
-        choices: [
-          { name: 'advanced', value: 'advanced' },
-          { name: 'register', value: 'register' }
-        ]
-      }
-    ]
-  },
-
-  {
-    name: 'swap',
-    description: 'Swap tokens using Jupiter aggregator',
-    options: [
-      { name: 'from', type: 3, description: 'Token to swap from', required: true, choices: [
-        { name: 'SOL', value: 'SOL' },
-        { name: 'USDC', value: 'USDC' }
-      ]},
-      { name: 'to', type: 3, description: 'Token to swap to', required: true, choices: [
-        { name: 'SOL', value: 'SOL' },
-        { name: 'USDC', value: 'USDC' }
-      ]},
-      { name: 'amount', type: 10, description: 'Amount to swap', required: true }
-    ]
-  }
-];
+const commands = slashCommands.map(builder => builder.toJSON());
 
 const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_BOT_TOKEN);
 
@@ -220,7 +125,7 @@ const HELP_MESSAGE_BASIC = `## 💰 Basic Commands
 \`/registerwallet\` — Link your Solana wallet
 
 ## ⚙️ More Commands
-Use \`/help advanced\` for swap, airdrop, and burn commands
+Use \`/help advanced\` for airdrop and burn commands
 
 ## 🧩 Supported Tokens
 **SOL**, **USDC** (Solana network)
@@ -269,9 +174,8 @@ const HELP_MESSAGE_ADVANCED = `# 🤖 JustTheTip Bot - Complete Command Referenc
 ## 🎁 Sending & Receiving Tips
 
 **Send a Tip**
-• \`/tip <@user> <amount> <currency>\` — Send crypto to another Discord user
-  _Example: \`/tip @Alice 0.05 SOL\` sends 5 cents worth of SOL_
-  _Example: \`/tip @Bob 1 USDC\` sends $1 in USDC_
+• \`/tip <@user> <amount>\` — Send SOL to another Discord user
+  _Example: \`/tip @Alice 0.05\` sends roughly 5 cents worth of SOL_
 
 **Create an Airdrop**
 • \`/airdrop <amount> <currency>\` — Drop crypto for others to collect
@@ -284,11 +188,6 @@ const HELP_MESSAGE_ADVANCED = `# 🤖 JustTheTip Bot - Complete Command Referenc
 ---
 
 ## 🔄 Advanced Features
-
-**Token Swapping**
-• \`/swap <from> <to> <amount>\` — Exchange between supported tokens
-  _Example: \`/swap SOL USDC 0.1\` converts 0.1 SOL to USDC_
-  _Powered by Jupiter aggregator for best rates_
 
 **Support Development**
 • \`/burn <amount> <currency>\` — Donate to help maintain the bot
@@ -402,12 +301,6 @@ client.on(Events.InteractionCreate, async interaction => {
         .setColor(0x7289da)
         .setDescription(helpMessage);
       await interaction.reply({ embeds: [embed], ephemeral: true });
-      
-    } else if (commandName === 'swap') {
-      // Note: userWallets map would need to be implemented for full functionality
-      // For now, use a Map as a placeholder
-      const userWallets = new Map();
-      await handleSwapCommand(interaction, userWallets);
       
     } else if (commandName === 'airdrop') {
       const amount = interaction.options.getNumber('amount');
@@ -679,8 +572,6 @@ client.on(Events.InteractionCreate, async interaction => {
       });
     }
     
-  } else if (interaction.customId === 'swap_help') {
-    await handleSwapHelpButton(interaction);
   }
 });
 

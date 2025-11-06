@@ -28,6 +28,7 @@
                 <a href="#stack">Stack</a>
                 <a href="#roadmap">Roadmap</a>
                 <a href="#about">About</a>
+                <a href="support.html">Support</a>
                 <a href="https://github.com/jmenichole/Justthetip" target="_blank" rel="noopener">GitHub</a>
             </div>
         </div>
@@ -50,12 +51,12 @@
                     No private keys stored. No middlemen. Just fast, secure, transparent tips.
                 </p>
                 <div class="hero-cta">
-                    <a href="https://discord.com/api/oauth2/authorize?client_id=1419742988128616479&permissions=0&scope=bot%20applications.commands" target="_blank" class="btn btn-primary">
+                    <button class="btn btn-primary get-started-btn">
                         <svg class="btn-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
-                        Add to Discord
-                    </a>
+                        Start Onboarding
+                    </button>
                     <a href="https://github.com/jmenichole/Justthetip" target="_blank" rel="noopener" class="btn btn-secondary">View GitHub</a>
                 </div>
                 <div class="hero-stats">
@@ -343,5 +344,109 @@
             </div>
         </div>
     </footer>
+
+    <!-- Terms of Service Modal -->
+    <div id="termsModal" class="modal" style="display: none;">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2 class="modal-title">Terms of Service</h2>
+                <button class="modal-close" id="termsCloseBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="terms-content">
+                    <h3>Welcome to JustTheTip</h3>
+                    <p>Before proceeding with wallet verification and bot installation, please review and accept our terms:</p>
+
+                    <h4>1. Non-Custodial Service</h4>
+                    <ul>
+                        <li>You maintain full control of your private keys at all times.</li>
+                        <li>Transactions are executed directly from your wallet. We never take custody of funds.</li>
+                        <li>All transactions are recorded on-chain and irreversible.</li>
+                    </ul>
+
+                    <h4>2. Smart Contract Interaction</h4>
+                    <ul>
+                        <li>Tips are executed through Solana programs deployed by JustTheTip.</li>
+                        <li>You are responsible for verifying transaction details before signing.</li>
+                        <li>Gas fees are paid directly from your wallet.</li>
+                    </ul>
+
+                    <h4>3. User Responsibilities</h4>
+                    <ul>
+                        <li>You are solely responsible for securing your private keys.</li>
+                        <li>You must verify all transaction details before signing.</li>
+                        <li>Lost or stolen private keys cannot be recovered.</li>
+                        <li>You are responsible for all transactions you sign.</li>
+                    </ul>
+
+                    <h4>4. Prohibited Uses</h4>
+                    <ul>
+                        <li>Illegal activities or money laundering.</li>
+                        <li>Fraud, scams, or deceptive practices.</li>
+                        <li>Violation of applicable laws or regulations.</li>
+                        <li>Harassment or abuse of other users.</li>
+                    </ul>
+
+                    <h4>5. Disclaimers</h4>
+                    <p><strong>NO WARRANTIES:</strong> Service provided "as is" without warranties of any kind.</p>
+                    <p><strong>RISK DISCLAIMER:</strong> Cryptocurrency transactions are irreversible and carry inherent risks.</p>
+                    <p><strong>NOT FINANCIAL ADVICE:</strong> Nothing in this service constitutes financial, investment, or legal advice.</p>
+
+                    <h4>6. Limitation of Liability</h4>
+                    <p>JustTheTip and its operators are not liable for any losses, damages, or issues arising from your use of the service, including but not limited to: lost funds, failed transactions, wallet compromise, or blockchain errors.</p>
+
+                    <h4>7. Privacy</h4>
+                    <p>We store your Discord ID and Solana wallet address. This data is required for service functionality. See our Privacy Policy for details.</p>
+
+                    <h4>8. Changes to Terms</h4>
+                    <p>We may update these terms at any time. Continued use constitutes acceptance of updated terms.</p>
+
+                    <div class="terms-checkbox">
+                        <input type="checkbox" id="termsCheckbox">
+                        <label for="termsCheckbox">I have read and agree to the Terms of Service</label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="termsCloseBtn2">Cancel</button>
+                <button class="btn btn-primary" id="termsAcceptBtn" disabled>Accept &amp; Continue</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Onboarding Flow Modal -->
+    <div id="onboardingModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="onboardingTitle">Connect Discord</h2>
+                <button class="modal-close" id="onboardingCloseBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="onboardingContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Message -->
+    <div id="errorMessage" class="error-message" style="display: none;"></div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="spinner"></div>
+        <div id="loadingMessage">Loading...</div>
+    </div>
+
+    <script src="landing-app.js"></script>
+    <script>
+        // Terms checkbox enable/disable accept button
+        document.getElementById('termsCheckbox')?.addEventListener('change', function() {
+            document.getElementById('termsAcceptBtn').disabled = !this.checked;
+        });
+
+        // Close buttons
+        document.getElementById('termsCloseBtn2')?.addEventListener('click', () => {
+            document.getElementById('termsModal').style.display = 'none';
+        });
+    </script>
 </body>
 </html>
