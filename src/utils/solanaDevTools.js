@@ -121,12 +121,12 @@ function initialize(options = {}) {
 }
 
 async function getProgramAccounts(programId, options = {}) {
-  const { cluster = DEFAULT_CLUSTER, rpcUrl, config } = options;
+  const { cluster = 'devnet', rpcUrl, config, log = true } = options;
   const connection = getConnection(cluster, rpcUrl);
   const programPublicKey = new PublicKey(programId);
   const accounts = await connection.getProgramAccounts(programPublicKey, config);
 
-  return accounts.map((account) => ({
+  const simplified = accounts.map((account) => ({
     pubkey: account.pubkey.toBase58(),
     lamports: account.account.lamports,
     owner: account.account.owner.toBase58(),
@@ -134,6 +134,15 @@ async function getProgramAccounts(programId, options = {}) {
     rentEpoch: account.account.rentEpoch,
     dataLength: account.account.data.length
   }));
+
+  if (log) {
+    logger.info(`[solana-dev-tools] Program ${programPublicKey.toBase58()} has ${simplified.length} accounts on ${cluster}`);
+    simplified.forEach((accountInfo, index) => {
+      logger.info(`  [${index + 1}] ${accountInfo.pubkey} — ${accountInfo.dataLength} bytes (${accountInfo.lamports} lamports)`);
+    });
+  }
+
+  return simplified;
 }
 
 async function requestAirdrop(walletAddress, lamports, options = {}) {

@@ -100,6 +100,24 @@ class Database {
     }
   }
 
+  async getRecentTips(limit = 20) {
+    return sqlite.getRecentTips(limit);
+  }
+
+  async updateReputation(discordId, delta) {
+    sqlite.updateReputationScore(discordId, delta);
+    return sqlite.getReputationScore(discordId);
+  }
+
+  async getTrustBadge(discordId) {
+    return sqlite.getTrustBadgeByDiscordId(discordId);
+  }
+
+  async saveTrustBadge(discordId, walletAddress, mintAddress, initialScore = 0) {
+    sqlite.upsertTrustBadge(discordId, walletAddress, mintAddress, initialScore);
+    return sqlite.getTrustBadgeByDiscordId(discordId);
+  }
+
   // Graceful shutdown
   async close() {
     // SQLite will close automatically when process exits

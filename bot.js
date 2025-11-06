@@ -41,6 +41,7 @@ try {
 
 const db = require('./db/database');
 const { handleSwapCommand, handleSwapHelpButton } = require('./src/commands/swapCommand');
+const { handleTipCommand } = require('./src/commands/tipCommand');
 const fs = require('fs');
 const crypto = require('crypto');
 const { isValidSolanaAddress, verifySignature } = require('./src/utils/validation');
@@ -441,64 +442,21 @@ client.on(Events.InteractionCreate, async interaction => {
       await interaction.reply({ embeds: [embed], components: [collectButton] });
       
     } else if (commandName === 'tip') {
-      const recipient = interaction.options.getUser('user');
-      const amount = interaction.options.getNumber('amount');
-      const currency = interaction.options.getString('currency');
-      
       if (rateLimiter.isRateLimited(interaction.user.id, commandName)) {
-        return await interaction.reply({ 
-          content: '⏳ Rate limit exceeded. Please wait before using this command again.', 
-          ephemeral: true 
+        return await interaction.reply({
+          content: '⏳ Rate limit exceeded. Please wait before using this command again.',
+          ephemeral: true
         });
       }
-      
-      // Validate tip amount
-      if (amount <= 0) {
-        return await interaction.reply({ 
-          content: '❌ Tip amount must be greater than 0.', 
-          ephemeral: true 
+
+      if (interaction.options.getUser('user').bot) {
+        return await interaction.reply({
+          content: '🤖 Tips are for humans only. Bots work for free!',
+          ephemeral: true
         });
       }
-      
-      // Check if user is trying to tip themselves
-      if (recipient.id === interaction.user.id) {
-        return await interaction.reply({ 
-          content: '❌ You cannot tip yourself!', 
-          ephemeral: true 
-        });
-      }
-      
-      // Check if tipping a bot
-      if (recipient.bot) {
-        return await interaction.reply({ 
-          content: '❌ You cannot tip bots!', 
-          ephemeral: true 
-        });
-      }
-      
-      try {
-        // Process the tip through the database
-        await db.processTip(interaction.user.id, recipient.id, amount, currency);
-        
-        const embed = createTipSuccessEmbed(interaction.user, recipient, amount, currency);
-          
-        await interaction.reply({ embeds: [embed] });
-        
-      } catch (error) {
-        console.error('Tip error:', error);
-        
-        if (error.message === 'Insufficient balance') {
-          return await interaction.reply({ 
-            content: `❌ Insufficient balance. You don't have enough ${currency} to complete this tip.`, 
-            ephemeral: true 
-          });
-        }
-        
-        return await interaction.reply({ 
-          content: '❌ An error occurred while processing your tip. Please try again later.', 
-          ephemeral: true 
-        });
-      }
+
+      await handleTipCommand(interaction);
       
     } else if (commandName === 'deposit') {
       const embed = new EmbedBuilder()

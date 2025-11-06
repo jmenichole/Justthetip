@@ -1,0 +1,77 @@
+'use strict';
+
+const { LAMPORTS_PER_SOL } = require('@solana/web3.js');
+const x402Client = require('../utils/x402Client');
+const trustBadgeService = require('../utils/trustBadge');
+const { createTipSuccessEmbed } = require('../utils/embedBuilders');
+const { isValidAmount } = require('../utils/validation');
+
+const MICROPAYMENT_SIGNER = process.env.X402_PAYER_SECRET;
+
+async function handleTipCommand(interaction, dependencies = {}) {
+  const payments = dependencies.x402Client || x402Client;
+  const badges = dependencies.trustBadgeService || trustBadgeService;
+  const db = dependencies.sqlite || require('../../db/db');
+
+  const recipient = interaction.options.getUser('user');
+  const amount = interaction.options.getNumber('amount');
+  const currency = interaction.options.getString('currency') || 'SOL';
+
+  if (!isValidAmount(amount)) {
+    await interaction.reply({ content: '❌ Amount must be a positive number.', ephemeral: true });
+    return;
+  }
+
+  if (recipient.id === interaction.user.id) {
+    await interaction.reply({ content: '😅 You cannot tip yourself. Try a friend instead!', ephemeral: true });
+    return;
+  }
+
+  if (currency.toUpperCase() !== 'SOL') {
+    await interaction.reply({ content: '⚠️ The x402 micropayment client currently supports SOL tips only.', ephemeral: true });
+    return;
+  }
+
+  if (!MICROPAYMENT_SIGNER) {
+    await interaction.reply({ content: '❌ Payment signer not configured. Set X402_PAYER_SECRET in your environment.', ephemeral: true });
+    return;
+  }
+
+  await interaction.deferReply();
+
+  try {
+    const senderBadge = await badges.requireBadge(interaction.user.id);
+    const recipientBadge = await badges.requireBadge(recipient.id);
+
+    const lamports = Math.round(amount * LAMPORTS_PER_SOL);
+    if (lamports <= 0) {
+      throw new Error('Calculated lamports must be greater than zero.');
+    }
+
+    const paymentResult = await payments.sendPayment({
+      fromSecret: MICROPAYMENT_SIGNER,
+      toAddress: recipientBadge.wallet_address,
+      amountLamports: lamports,
+      reference: `tip:${interaction.user.id}:${recipient.id}`,
+    });
+
+    db.getUser(interaction.user.id);
+    db.getUser(recipient.id);
+    db.recordTip(interaction.user.id, recipient.id, amount, currency, paymentResult.signature);
+
+    const senderScore = await badges.adjustReputation(interaction.user.id, 1);
+    const recipientScore = await badges.adjustReputation(recipient.id, 2);
+
+    const embed = createTipSuccessEmbed(interaction.user, recipient, amount, currency)
+      .setFooter({ text: `Sig: ${paymentResult.signature.slice(0, 8)}… | Sender Rep ${senderScore} | Receiver Rep ${recipientScore}` });
+
+    await interaction.editReply({ embeds: [embed] });
+  } catch (error) {
+    console.error('Tip command failed:', error);
+    await interaction.editReply({ content: `❌ Tip failed: ${error.message}` });
+  }
+}
+
+module.exports = {
+  handleTipCommand,
+};
