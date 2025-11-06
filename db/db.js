@@ -12,8 +12,13 @@ const path = require('path');
 
 // Create or connect to local database
 // For production deployments, consider using process.env.DB_PATH to override location
-const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'justthetip.db');
+const useMemoryDatabase = !process.env.DATABASE_URL;
+const DB_PATH = process.env.DB_PATH || (useMemoryDatabase ? ':memory:' : path.join(__dirname, 'justthetip.db'));
 const db = new Database(DB_PATH);
+
+if (useMemoryDatabase) {
+  console.warn('⚠️  DATABASE_URL missing – using in-memory SQLite database for API fallback');
+}
 
 // Enable Write-Ahead Logging for better performance
 db.pragma('journal_mode = WAL');
@@ -26,7 +31,9 @@ function initDatabase() {
       CREATE TABLE IF NOT EXISTS users (
         id TEXT PRIMARY KEY,
         wallet TEXT,
-        balance REAL DEFAULT 0
+        balance REAL DEFAULT 0,
+        reputation_score INTEGER DEFAULT 0,
+        trust_badge_mint TEXT
       )
     `);
 
@@ -38,9 +45,31 @@ function initDatabase() {
         receiver TEXT NOT NULL,
         amount REAL NOT NULL,
         currency TEXT NOT NULL,
+        signature TEXT,
         created_at TEXT DEFAULT CURRENT_TIMESTAMP
       )
     `);
+
+    try {
+      db.exec('ALTER TABLE tips ADD COLUMN signature TEXT');
+    } catch (error) {
+      if (!String(error.message).includes('duplicate column name')) {
+        throw error;
+      }
+    }
+
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS trust_badges (
+        discord_id TEXT PRIMARY KEY,
+        wallet_address TEXT NOT NULL,
+        mint_address TEXT NOT NULL,
+        reputation_score INTEGER DEFAULT 0,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    db.exec('CREATE INDEX IF NOT EXISTS idx_trust_badges_wallet ON trust_badges(wallet_address)');
 
     console.log('✅ SQLite database ready');
   } catch (error) {
@@ -100,12 +129,12 @@ function updateBalance(id, amount) {
  * @param {number} amount - Tip amount
  * @param {string} currency - Currency type
  */
-function recordTip(sender, receiver, amount, currency) {
+function recordTip(sender, receiver, amount, currency, signature = null) {
   try {
     db.prepare(`
-      INSERT INTO tips (sender, receiver, amount, currency)
-      VALUES (?, ?, ?, ?)
-    `).run(sender, receiver, amount, currency);
+      INSERT INTO tips (sender, receiver, amount, currency, signature)
+      VALUES (?, ?, ?, ?, ?)
+    `).run(sender, receiver, amount, currency, signature);
   } catch (error) {
     console.error('Error recording tip:', error);
     throw error;
@@ -134,12 +163,101 @@ function getUserTransactions(id, limit = 10) {
   }
 }
 
+function getRecentTips(limit = 20) {
+  try {
+    return db.prepare(`
+      SELECT sender, receiver, amount, currency, created_at as timestamp, signature
+      FROM tips
+      ORDER BY created_at DESC
+      LIMIT ?
+    `).all(limit);
+  } catch (error) {
+    console.error('Error fetching recent tips:', error);
+    return [];
+  }
+}
+
+function upsertTrustBadge(discordId, walletAddress, mintAddress, reputationScore = 0) {
+  try {
+    db.prepare(`
+      INSERT INTO trust_badges (discord_id, wallet_address, mint_address, reputation_score)
+      VALUES (?, ?, ?, ?)
+      ON CONFLICT(discord_id) DO UPDATE SET
+        wallet_address = excluded.wallet_address,
+        mint_address = excluded.mint_address,
+        updated_at = CURRENT_TIMESTAMP
+    `).run(discordId, walletAddress, mintAddress, reputationScore);
+
+    db.prepare(`
+      UPDATE users
+      SET wallet = ?, trust_badge_mint = ?, reputation_score = COALESCE(reputation_score, 0)
+      WHERE id = ?
+    `).run(walletAddress, mintAddress, discordId);
+  } catch (error) {
+    console.error('Error upserting trust badge:', error);
+    throw error;
+  }
+}
+
+function getTrustBadgeByDiscordId(discordId) {
+  try {
+    return db.prepare('SELECT * FROM trust_badges WHERE discord_id = ?').get(discordId) || null;
+  } catch (error) {
+    console.error('Error fetching trust badge by discord id:', error);
+    return null;
+  }
+}
+
+function getTrustBadgeByWallet(walletAddress) {
+  try {
+    return db.prepare('SELECT * FROM trust_badges WHERE wallet_address = ?').get(walletAddress) || null;
+  } catch (error) {
+    console.error('Error fetching trust badge by wallet:', error);
+    return null;
+  }
+}
+
+function updateReputationScore(discordId, delta) {
+  try {
+    db.prepare(`
+      UPDATE trust_badges
+      SET reputation_score = MAX(reputation_score + ?, 0), updated_at = CURRENT_TIMESTAMP
+      WHERE discord_id = ?
+    `).run(delta, discordId);
+
+    db.prepare(`
+      UPDATE users
+      SET reputation_score = MAX(COALESCE(reputation_score, 0) + ?, 0)
+      WHERE id = ?
+    `).run(delta, discordId);
+  } catch (error) {
+    console.error('Error updating reputation score:', error);
+    throw error;
+  }
+}
+
+function getReputationScore(discordId) {
+  try {
+    const row = db.prepare('SELECT reputation_score FROM trust_badges WHERE discord_id = ?').get(discordId);
+    return row ? row.reputation_score : 0;
+  } catch (error) {
+    console.error('Error reading reputation score:', error);
+    return 0;
+  }
+}
+
 // Export functions
 module.exports = {
   getUser,
   updateBalance,
   recordTip,
   getUserTransactions,
+  getRecentTips,
+  upsertTrustBadge,
+  getTrustBadgeByDiscordId,
+  getTrustBadgeByWallet,
+  updateReputationScore,
+  getReputationScore,
   db, // Export for testing
 };
 

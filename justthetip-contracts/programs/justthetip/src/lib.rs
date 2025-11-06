@@ -1,6 +1,8 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{self, Token, TokenAccount, Transfer};
 
+pub mod trust_badge;
+
 // IMPORTANT: Update this program ID after deployment
 // This is a placeholder - run `anchor keys list` after building to get your actual program ID
 // For production, use different program IDs for devnet and mainnet

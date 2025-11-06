@@ -25,6 +25,7 @@
             </div>
             <div class="nav-links">
                 <a href="#features">Features</a>
+                <a href="#stack">Stack</a>
                 <a href="#roadmap">Roadmap</a>
                 <a href="#about">About</a>
                 <a href="https://github.com/jmenichole/Justthetip" target="_blank" rel="noopener">GitHub</a>
@@ -38,14 +39,14 @@
             <div class="hero-content">
                 <div class="hero-badge">
                     <span class="badge-dot"></span>
-                    Non-Custodial • Secure • Fast
+                    Trustless • Badge-Gated • Instant
                 </div>
                 <h1 class="hero-title">
-                    The Smarter Way to<br>
+                    The Trustless Way to<br>
                     <span class="gradient-text">Tip on Discord</span>
                 </h1>
                 <p class="hero-description">
-                    JustTheTip is a non-custodial Solana tipping bot that puts you in control.
+                    JustTheTip now pairs on-chain micropayments with TrustBadge reputation checks so tips only flow between verified wallets.
                     No private keys stored. No middlemen. Just fast, secure, transparent tips.
                 </p>
                 <div class="hero-cta">
@@ -55,7 +56,7 @@
                         </svg>
                         Add to Discord
                     </a>
-                    <a href="#features" class="btn btn-secondary">Learn More</a>
+                    <a href="https://github.com/jmenichole/Justthetip" target="_blank" rel="noopener" class="btn btn-secondary">View GitHub</a>
                 </div>
                 <div class="hero-stats">
                     <div class="stat-item">
@@ -64,11 +65,11 @@
                     </div>
                     <div class="stat-item">
                         <div class="stat-value">&lt;1s</div>
-                        <div class="stat-label">Transaction Time</div>
+                        <div class="stat-label">x402 Payments</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-value">$0.0001</div>
-                        <div class="stat-label">Avg. Fee</div>
+                        <div class="stat-value">NFT</div>
+                        <div class="stat-label">TrustBadge Gated</div>
                     </div>
                 </div>
             </div>
@@ -161,36 +162,65 @@
         </div>
     </section>
 
+    <!-- Trustless Stack Section -->
+    <section id="stack" class="stack">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">What’s New on GitHub?</h2>
+                <p class="section-subtitle">Fresh commits powering the GitHub Pages landing experience.</p>
+            </div>
+            <div class="stack-grid">
+                <article class="stack-card">
+                    <h3 class="stack-title">x402 Micropayments</h3>
+                    <p class="stack-body">Async Solana transfers with status polling and friendly error handling keep every tip lightning fast and traceable.</p>
+                    <span class="stack-footnote">Devs: <code>src/utils/x402Client.js</code></span>
+                </article>
+                <article class="stack-card">
+                    <h3 class="stack-title">TrustBadge Reputation</h3>
+                    <p class="stack-body">Anchor-powered NFT badges gate transfers and auto-level reputation scores so only verified wallets share the love.</p>
+                    <span class="stack-footnote">On-chain: <code>justthetip-contracts/programs/justthetip/src/trust_badge.rs</code></span>
+                </article>
+                <article class="stack-card">
+                    <h3 class="stack-title">Tip History Dashboard</h3>
+                    <p class="stack-body">React + Tailwind table pulls /api/tips every 15 seconds so teams can monitor action in real time.</p>
+                    <span class="stack-footnote">UI: <code>src/components/TipHistory.jsx</code></span>
+                </article>
+                <article class="stack-card">
+                    <h3 class="stack-title">Verify &amp; Go API</h3>
+                    <p class="stack-body">/api/verifyWallet mints badges on demand while SQLite fallback keeps dev environments zero-config.</p>
+                    <span class="stack-footnote">Backend: <code>api/server.js</code></span>
+                </article>
+            </div>
+        </div>
+    </section>
+
     <!-- How It Works -->
     <section class="how-it-works">
         <div class="container">
             <div class="section-header">
                 <h2 class="section-title">Get Started in 60 Seconds</h2>
-                <p class="section-subtitle">Simple setup. No complex configuration.</p>
+                <p class="section-subtitle">Simple setup. Transparent trust signals.</p>
             </div>
             <div class="steps">
                 <div class="step">
                     <div class="step-number">1</div>
                     <h3 class="step-title">Add Bot</h3>
-                    <p class="step-description">Invite to your Discord server</p>
+                    <p class="step-description">Invite JustTheTip to your Discord server</p>
                 </div>
-                <div class="step-arrow">→</div>
                 <div class="step">
                     <div class="step-number">2</div>
-                    <h3 class="step-title">Register Wallet</h3>
-                    <p class="step-description">Link your Solana address</p>
+                    <h3 class="step-title">Verify Wallet</h3>
+                    <p class="step-description">Hit <code>/verifyWallet</code> &amp; mint your TrustBadge NFT</p>
                 </div>
-                <div class="step-arrow">→</div>
                 <div class="step">
                     <div class="step-number">3</div>
-                    <h3 class="step-title">Start Tipping</h3>
-                    <p class="step-description">Send SOL, USDC, and more</p>
+                    <h3 class="step-title">Tip with /tip</h3>
+                    <p class="step-description">TrustBadge-only transfers via the x402 client</p>
                 </div>
-                <div class="step-arrow">→</div>
                 <div class="step">
                     <div class="step-number">4</div>
-                    <h3 class="step-title">Claim Anytime</h3>
-                    <p class="step-description">Auto-escrow for unregistered users</p>
+                    <h3 class="step-title">Track Reputation</h3>
+                    <p class="step-description">Scores auto-sync and TipHistory keeps receipts</p>
                 </div>
             </div>
         </div>

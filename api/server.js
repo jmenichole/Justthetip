@@ -12,6 +12,8 @@ const adminRoutes = require('./adminRoutes');
 const solanaDevTools = require('../src/utils/solanaDevTools');
 const coinbaseClient = require('../src/utils/coinbaseClient');
 const { verifySignature } = require('../src/utils/validation');
+const sqlite = require('../db/db');
+const database = require('../db/database');
 require('dotenv').config();
 
 const app = express();
@@ -65,11 +67,14 @@ const walletRegistrationLimiter = rateLimit({
 let db;
 let connection;
 let metaplex;
+const useSQLiteFallback = !process.env.DATABASE_URL;
 
 async function initializeDatabase() {
     try {
         if (!CONFIG.MONGODB_URI) {
-            console.warn('⚠️  No MongoDB URI - using in-memory storage');
+            if (useSQLiteFallback) {
+                console.warn('⚠️  No MongoDB URI or DATABASE_URL - using in-memory SQLite storage');
+            }
             return;
         }
 
@@ -87,6 +92,8 @@ async function initializeDatabase() {
         await db.collection('wallet_registrations').createIndex({ walletAddress: 1 });
         await db.collection('registration_nonces').createIndex({ nonce: 1 }, { unique: true });
         await db.collection('registration_nonces').createIndex({ createdAt: 1 }, { expireAfterSeconds: 600 }); // Auto-expire after 10 minutes
+        await db.collection('trust_badges').createIndex({ discordId: 1 }, { unique: true });
+        await db.collection('trust_badges').createIndex({ walletAddress: 1 });
         
         console.log('✅ MongoDB connected');
     } catch (error) {
@@ -184,6 +191,132 @@ async function createNFTMetadata(discordId, discordUsername, walletAddress, term
     };
 
     return metadata;
+}
+
+async function storeTipRecord({ senderId, receiverId, amount, currency, signature, timestamp = new Date() }) {
+    try {
+        if (db) {
+            await db.collection('tips').insertOne({
+                sender: String(senderId),
+                receiver: String(receiverId),
+                amount,
+                currency,
+                signature: signature || null,
+                createdAt: new Date(timestamp),
+            });
+            return;
+        }
+
+        sqlite.recordTip(String(senderId), String(receiverId), amount, currency, signature || null);
+    } catch (error) {
+        console.error('Failed to store tip record:', error);
+    }
+}
+
+async function fetchTipHistory(limit = 20) {
+    const safeLimit = Math.min(Math.max(limit, 1), 100);
+
+    if (db) {
+        const tips = await db.collection('tips')
+            .find({})
+            .sort({ createdAt: -1 })
+            .limit(safeLimit)
+            .toArray();
+
+        return tips.map((tip) => ({
+            sender: tip.sender,
+            receiver: tip.receiver,
+            amount: tip.amount,
+            currency: tip.currency,
+            timestamp: tip.createdAt,
+            signature: tip.signature || null,
+        }));
+    }
+
+    return sqlite.getRecentTips(safeLimit).map((tip) => ({
+        sender: tip.sender,
+        receiver: tip.receiver,
+        amount: tip.amount,
+        currency: tip.currency,
+        timestamp: tip.timestamp,
+        signature: tip.signature || null,
+    }));
+}
+
+async function findTrustBadgeByDiscordId(discordId) {
+    if (db) {
+        const record = await db.collection('trust_badges').findOne({ discordId: String(discordId) });
+        if (record) {
+            return {
+                discord_id: record.discordId,
+                wallet_address: record.walletAddress,
+                mint_address: record.mintAddress,
+                reputation_score: record.reputationScore || 0,
+            };
+        }
+    }
+
+    return sqlite.getTrustBadgeByDiscordId(String(discordId));
+}
+
+async function upsertTrustBadgeRecord(discordId, walletAddress, mintAddress, discordUsername, reputationScore = 0) {
+    if (db) {
+        await db.collection('trust_badges').updateOne(
+            { discordId: String(discordId) },
+            {
+                $set: {
+                    discordId: String(discordId),
+                    walletAddress: walletAddress,
+                    mintAddress,
+                    reputationScore,
+                    discordUsername: discordUsername || null,
+                    updatedAt: new Date(),
+                },
+            },
+            { upsert: true },
+        );
+    }
+
+    await database.saveTrustBadge(String(discordId), walletAddress, mintAddress, reputationScore);
+}
+
+async function adjustReputation(discordId, delta) {
+    if (db) {
+        await db.collection('trust_badges').updateOne(
+            { discordId: String(discordId) },
+            {
+                $inc: { reputationScore: delta },
+                $set: { updatedAt: new Date() },
+            },
+        );
+    }
+
+    return database.updateReputation(String(discordId), delta);
+}
+
+async function mintTrustBadgeNft({ discordUserId, discordUsername, walletAddress }) {
+    if (!metaplex) {
+        throw new Error('Metaplex client is not initialized. NFT minting is unavailable.');
+    }
+
+    const metadataInput = await createNFTMetadata(
+        discordUserId,
+        discordUsername || 'Anonymous Tipper',
+        walletAddress,
+        '1.0',
+    );
+
+    const metadata = await metaplex.nfts().uploadMetadata(metadataInput);
+    const { mintAddress } = await metaplex.nfts().create({
+        uri: metadata.uri,
+        name: metadataInput.name,
+        symbol: metadataInput.symbol,
+        sellerFeeBasisPoints: 0,
+        tokenOwner: new PublicKey(walletAddress),
+        decimals: 0,
+    });
+
+    return mintAddress.toBase58();
 }
 
 // ===== WALLET REGISTRATION STORAGE =====
@@ -286,6 +419,65 @@ async function markNonceAsUsed(nonce) {
 }
 
 // ===== API ENDPOINTS =====
+
+app.get('/api/tips', async (req, res) => {
+    try {
+        const limit = req.query.limit ? Number.parseInt(req.query.limit, 10) : 20;
+        const tips = await fetchTipHistory(Number.isNaN(limit) ? 20 : limit);
+        res.json({ success: true, tips });
+    } catch (error) {
+        console.error('Failed to fetch tip history:', error);
+        res.status(500).json({ success: false, error: 'Unable to load tip history' });
+    }
+});
+
+app.post('/api/verifyWallet', async (req, res) => {
+    try {
+        const { discordUserId, discordUsername, walletAddress, message, signature } = req.body;
+
+        if (!discordUserId || !walletAddress || !message || !signature) {
+            return res.status(400).json({ success: false, error: 'discordUserId, walletAddress, message and signature are required.' });
+        }
+
+        if (!/^\d+$/.test(String(discordUserId))) {
+            return res.status(400).json({ success: false, error: 'Invalid Discord user id' });
+        }
+
+        const signatureValid = verifySignature(message, signature, walletAddress);
+        if (!signatureValid) {
+            return res.status(401).json({ success: false, error: 'Invalid wallet signature' });
+        }
+
+        const existing = await findTrustBadgeByDiscordId(discordUserId);
+        if (existing && existing.wallet_address === walletAddress) {
+            return res.json({
+                success: true,
+                alreadyVerified: true,
+                mintAddress: existing.mint_address,
+                reputationScore: existing.reputation_score || 0,
+            });
+        }
+
+        const mintAddress = await mintTrustBadgeNft({
+            discordUserId,
+            discordUsername,
+            walletAddress,
+        });
+
+        const previousScore = existing ? existing.reputation_score || 0 : 0;
+        await upsertTrustBadgeRecord(discordUserId, walletAddress, mintAddress, discordUsername, previousScore);
+
+        res.json({
+            success: true,
+            mintAddress,
+            reputationScore: previousScore,
+            alreadyVerified: Boolean(existing),
+        });
+    } catch (error) {
+        console.error('Wallet verification failed:', error);
+        res.status(500).json({ success: false, error: error.message || 'Wallet verification failed' });
+    }
+});
 
 // Verify wallet signature and register wallet
 app.post('/api/registerwallet/verify', walletRegistrationLimiter, async (req, res) => {
