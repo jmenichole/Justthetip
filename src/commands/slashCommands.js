@@ -1,4 +1,8 @@
 const { SlashCommandBuilder } = require('discord.js');
+const { SUPPORTED_TOKENS } = require('../utils/jupiterSwap');
+
+// Mirror the handler's supported list so Discord auto-complete stays perfectly aligned.
+const swapTokenChoices = SUPPORTED_TOKENS.map(token => ({ name: token, value: token }));
 
 const slashCommands = [
   new SlashCommandBuilder()
@@ -85,6 +89,27 @@ const slashCommands = [
           { name: 'SOL', value: 'SOL' },
           { name: 'USDC', value: 'USDC' }
         )),
+
+  new SlashCommandBuilder()
+    .setName('swap')
+    .setDescription('Get a Jupiter swap quote between supported Solana tokens')
+    .addStringOption(option =>
+      option
+        .setName('from')
+        .setDescription('Token to swap from')
+        .setRequired(true)
+        .addChoices(...swapTokenChoices))
+    .addStringOption(option =>
+      option
+        .setName('to')
+        .setDescription('Token to receive')
+        .setRequired(true)
+        .addChoices(...swapTokenChoices))
+    .addNumberOption(option =>
+      option
+        .setName('amount')
+        .setDescription('Amount to swap (whole units)')
+        .setRequired(true)),
 
   new SlashCommandBuilder()
     .setName('help')

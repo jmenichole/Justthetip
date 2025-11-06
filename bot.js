@@ -42,6 +42,7 @@ try {
 const db = require('./db/database');
 const { slashCommands } = require('./src/commands/slashCommands');
 const { handleTipCommand, executeTip, TipError } = require('./src/commands/tipCommand');
+const { handleSwapCommand, handleSwapHelpButton } = require('./src/commands/swapCommand');
 const fs = require('fs');
 const crypto = require('crypto');
 const { isValidSolanaAddress, verifySignature } = require('./src/utils/validation');
@@ -258,7 +259,7 @@ _🔒 Your security is our priority. Never share your private keys or seed phras
 client.on(Events.InteractionCreate, async interaction => {
   if (!interaction.isChatInputCommand()) return;
   const { commandName } = interaction;
-  
+
   try {
     if (commandName === 'balance') {
       try {
@@ -285,6 +286,9 @@ client.on(Events.InteractionCreate, async interaction => {
         });
       }
       
+    } else if (commandName === 'swap') {
+      await handleSwapCommand(interaction, rateLimiter);
+
     } else if (commandName === 'help') {
       const section = interaction.options.getString('section');
       
@@ -377,7 +381,6 @@ client.on(Events.InteractionCreate, async interaction => {
         .setFooter({ text: 'Need help? Use /help register for wallet setup guide' });
         
       await interaction.reply({ embeds: [embed], ephemeral: true });
-      
     } else if (commandName === 'withdraw') {
       const address = interaction.options.getString('address');
       const amount = interaction.options.getNumber('amount');
@@ -531,8 +534,20 @@ client.on(Events.InteractionCreate, async interaction => {
 // Handle button interactions
 client.on(Events.InteractionCreate, async interaction => {
   if (!interaction.isButton()) return;
-  
-  if (interaction.customId === 'collect_airdrop') {
+
+  if (interaction.customId === 'swap_help') {
+    try {
+      await handleSwapHelpButton(interaction);
+    } catch (error) {
+      console.error('Swap help error:', error);
+      if (!interaction.replied && !interaction.deferred) {
+        await interaction.reply({
+          content: '❌ Unable to show swap instructions right now.',
+          ephemeral: true
+        });
+      }
+    }
+  } else if (interaction.customId === 'collect_airdrop') {
     const userId = interaction.user.id;
     
     // Find unclaimed airdrop for collection
@@ -555,19 +570,19 @@ client.on(Events.InteractionCreate, async interaction => {
     try {
       // Refresh balance display with actual data
       const balances = await db.getBalances(interaction.user.id);
-      
+
       const embed = createBalanceEmbed(balances, PRICE_CONFIG, true);
-        
+
       await interaction.update({ embeds: [embed] });
-      
+
     } catch (error) {
       console.error('Refresh balance error:', error);
-      await interaction.reply({ 
-        content: '❌ An error occurred while refreshing your balance.', 
-        ephemeral: true 
+      await interaction.reply({
+        content: '❌ An error occurred while refreshing your balance.',
+        ephemeral: true
       });
     }
-    
+
   }
 });
 
