@@ -1241,14 +1241,29 @@ try {
     console.warn('⚠️  x402 Payment Handler initialization failed:', error.message);
 }
 
+// Helper function to create x402 payment middleware or fallback
+function requireX402Payment(options) {
+    if (x402Handler) {
+        return x402Handler.requirePayment(options);
+    }
+    // Fallback if x402 not configured
+    return (req, res) => {
+        res.status(503).json({
+            error: 'x402 Payment Not Configured',
+            message: 'x402 payment protocol is not available. Configure X402_TREASURY_WALLET environment variable.',
+            documentation: 'https://github.com/jmenichole/Justthetip/blob/main/docs/X402_INTEGRATION.md'
+        });
+    };
+}
+
 // x402 Premium API Example - Analytics Dashboard Access
 // Note: Rate limiting is inherently provided by the payment requirement
 // Each request requires a separate USDC payment, naturally limiting abuse
-app.get('/api/x402/premium/analytics', x402Handler?.requirePayment({
+app.get('/api/x402/premium/analytics', requireX402Payment({
     amount: "1000000", // $1 USDC
     description: "Premium Analytics Dashboard Access",
     resource: "analytics-dashboard"
-}) || ((req, res) => res.status(503).json({ error: 'x402 not configured' })), async (req, res) => {
+}), async (req, res) => {
     try {
         // This route requires x402 payment to access
         // Payment verification is handled by the middleware
@@ -1282,11 +1297,11 @@ app.get('/api/x402/premium/analytics', x402Handler?.requirePayment({
 
 // x402 Premium API Example - NFT Minting with Priority
 // Note: Payment-per-use naturally rate limits this expensive operation
-app.post('/api/x402/premium/mint-priority', x402Handler?.requirePayment({
+app.post('/api/x402/premium/mint-priority', requireX402Payment({
     amount: "2500000", // $2.50 USDC
     description: "Priority NFT Minting",
     resource: "priority-nft-minting"
-}) || ((req, res) => res.status(503).json({ error: 'x402 not configured' })), async (req, res) => {
+}), async (req, res) => {
     try {
         // This route requires payment for priority NFT minting
         const { discordId, walletAddress } = req.body;
@@ -1313,11 +1328,11 @@ app.post('/api/x402/premium/mint-priority', x402Handler?.requirePayment({
 
 // x402 Premium API Example - Advanced Bot Commands
 // Note: Micropayment requirement provides economic rate limiting
-app.post('/api/x402/premium/bot-commands', x402Handler?.requirePayment({
+app.post('/api/x402/premium/bot-commands', requireX402Payment({
     amount: "500000", // $0.50 USDC
     description: "Premium Bot Command Access",
     resource: "premium-commands"
-}) || ((req, res) => res.status(503).json({ error: 'x402 not configured' })), async (req, res) => {
+}), async (req, res) => {
     try {
         // Premium commands that require payment
         const premiumCommands = [
