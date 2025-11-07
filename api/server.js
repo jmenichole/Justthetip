@@ -1242,6 +1242,8 @@ try {
 }
 
 // x402 Premium API Example - Analytics Dashboard Access
+// Note: Rate limiting is inherently provided by the payment requirement
+// Each request requires a separate USDC payment, naturally limiting abuse
 app.get('/api/x402/premium/analytics', x402Handler?.requirePayment({
     amount: "1000000", // $1 USDC
     description: "Premium Analytics Dashboard Access",
@@ -1279,6 +1281,7 @@ app.get('/api/x402/premium/analytics', x402Handler?.requirePayment({
 });
 
 // x402 Premium API Example - NFT Minting with Priority
+// Note: Payment-per-use naturally rate limits this expensive operation
 app.post('/api/x402/premium/mint-priority', x402Handler?.requirePayment({
     amount: "2500000", // $2.50 USDC
     description: "Priority NFT Minting",
@@ -1309,6 +1312,7 @@ app.post('/api/x402/premium/mint-priority', x402Handler?.requirePayment({
 });
 
 // x402 Premium API Example - Advanced Bot Commands
+// Note: Micropayment requirement provides economic rate limiting
 app.post('/api/x402/premium/bot-commands', x402Handler?.requirePayment({
     amount: "500000", // $0.50 USDC
     description: "Premium Bot Command Access",
