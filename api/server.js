@@ -10,6 +10,7 @@ const nacl = require('tweetnacl');
 const adminRoutes = require('./adminRoutes');
 const solanaDevTools = require('../src/utils/solanaDevTools');
 const coinbaseClient = require('../src/utils/coinbaseClient');
+const X402PaymentHandler = require('../src/utils/x402PaymentHandler');
 const { verifySignature } = require('../src/utils/validation');
 const sqlite = require('../db/db');
 const database = require('../db/database');
@@ -39,7 +40,8 @@ const CONFIG = {
     VERIFIED_COLLECTION_ADDRESS: process.env.VERIFIED_COLLECTION_ADDRESS,
     NFT_STORAGE_API_KEY: process.env.NFT_STORAGE_API_KEY,
     COINBASE_COMMERCE_API_KEY: process.env.COINBASE_COMMERCE_API_KEY,
-    COINBASE_COMMERCE_WEBHOOK_SECRET: process.env.COINBASE_COMMERCE_WEBHOOK_SECRET
+    COINBASE_COMMERCE_WEBHOOK_SECRET: process.env.COINBASE_COMMERCE_WEBHOOK_SECRET,
+    X402_TREASURY_WALLET: process.env.X402_TREASURY_WALLET
 };
 
 // ===== MIDDLEWARE =====
@@ -717,6 +719,11 @@ app.get('/api/health', (req, res) => {
             apiKeyConfigured: Boolean(CONFIG.COINBASE_COMMERCE_API_KEY),
             webhookConfigured: Boolean(CONFIG.COINBASE_COMMERCE_WEBHOOK_SECRET)
         },
+        x402Payments: {
+            enabled: Boolean(x402Handler),
+            treasuryConfigured: Boolean(CONFIG.X402_TREASURY_WALLET),
+            network: CONFIG.SOLANA_CLUSTER
+        },
         devTools: {
             defaultCluster: devStatus.defaultCluster,
             connections: devStatus.connections.length,
@@ -726,7 +733,7 @@ app.get('/api/health', (req, res) => {
         hasMintKey: Boolean(CONFIG.MINT_AUTHORITY_KEYPAIR),
         mintKeyLength: CONFIG.MINT_AUTHORITY_KEYPAIR ? CONFIG.MINT_AUTHORITY_KEYPAIR.length : 0,
         metaplexInitialized: Boolean(metaplex),
-        version: '2025-10-30T09:28Z'
+        version: '2025-11-07-x402'
     });
 });
 
@@ -1218,6 +1225,198 @@ app.get('/api/tickets/:discordId', async (req, res) => {
         console.error('Tickets fetch error:', error);
         res.status(500).json({ error: error.message });
     }
+});
+
+// ===== X402 PAYMENT PROTOCOL ROUTES =====
+// Initialize x402 payment handler
+let x402Handler;
+try {
+    x402Handler = new X402PaymentHandler({
+        network: CONFIG.SOLANA_CLUSTER,
+        rpcUrl: CONFIG.SOLANA_RPC_URL,
+        treasuryAddress: CONFIG.X402_TREASURY_WALLET
+    });
+    console.log('✅ x402 Payment Handler initialized');
+} catch (error) {
+    console.warn('⚠️  x402 Payment Handler initialization failed:', error.message);
+}
+
+// Helper function to create x402 payment middleware or fallback
+function requireX402Payment(options) {
+    if (x402Handler) {
+        return x402Handler.requirePayment(options);
+    }
+    // Fallback if x402 not configured
+    return (req, res) => {
+        res.status(503).json({
+            error: 'x402 Payment Not Configured',
+            message: 'x402 payment protocol is not available. Configure X402_TREASURY_WALLET environment variable.',
+            documentation: 'https://github.com/jmenichole/Justthetip/blob/main/docs/X402_INTEGRATION.md'
+        });
+    };
+}
+
+// x402 Premium API Example - Analytics Dashboard Access
+// Note: Rate limiting is inherently provided by the payment requirement
+// Each request requires a separate USDC payment, naturally limiting abuse
+app.get('/api/x402/premium/analytics', requireX402Payment({
+    amount: "1000000", // $1 USDC
+    description: "Premium Analytics Dashboard Access",
+    resource: "analytics-dashboard"
+}), async (req, res) => {
+    try {
+        // This route requires x402 payment to access
+        // Payment verification is handled by the middleware
+        
+        // Return premium analytics data
+        const analytics = {
+            totalTips: 12500,
+            totalVolume: "1,234 SOL",
+            activeUsers: 450,
+            topTippers: [
+                { user: "User123", amount: "125 SOL" },
+                { user: "User456", amount: "98 SOL" },
+                { user: "User789", amount: "87 SOL" }
+            ],
+            recentActivity: [
+                { timestamp: Date.now() - 3600000, type: "tip", amount: "5 SOL" },
+                { timestamp: Date.now() - 7200000, type: "airdrop", amount: "50 SOL" }
+            ],
+            payment: req.payment // Include payment proof
+        };
+
+        res.json({
+            success: true,
+            data: analytics,
+            message: "Premium analytics data (paid with x402)"
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// x402 Premium API Example - NFT Minting with Priority
+// Note: Payment-per-use naturally rate limits this expensive operation
+app.post('/api/x402/premium/mint-priority', requireX402Payment({
+    amount: "2500000", // $2.50 USDC
+    description: "Priority NFT Minting",
+    resource: "priority-nft-minting"
+}), async (req, res) => {
+    try {
+        // This route requires payment for priority NFT minting
+        const { discordId, walletAddress } = req.body;
+
+        if (!discordId || !walletAddress) {
+            return res.status(400).json({
+                error: 'Missing required fields',
+                required: ['discordId', 'walletAddress']
+            });
+        }
+
+        // In a real implementation, this would queue a priority mint
+        res.json({
+            success: true,
+            message: "Priority NFT mint queued (paid with x402)",
+            queuePosition: 1,
+            estimatedTime: "30 seconds",
+            payment: req.payment
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// x402 Premium API Example - Advanced Bot Commands
+// Note: Micropayment requirement provides economic rate limiting
+app.post('/api/x402/premium/bot-commands', requireX402Payment({
+    amount: "500000", // $0.50 USDC
+    description: "Premium Bot Command Access",
+    resource: "premium-commands"
+}), async (req, res) => {
+    try {
+        // Premium commands that require payment
+        const premiumCommands = [
+            '/leaderboard-advanced',
+            '/analytics-export',
+            '/custom-airdrop',
+            '/scheduled-tips'
+        ];
+
+        res.json({
+            success: true,
+            message: "Premium command access granted (paid with x402)",
+            availableCommands: premiumCommands,
+            payment: req.payment
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Get x402 payment status
+app.get('/api/x402/payment/:signature', async (req, res) => {
+    try {
+        if (!x402Handler) {
+            return res.status(503).json({ error: 'x402 not configured' });
+        }
+
+        const { signature } = req.params;
+        const status = await x402Handler.getPaymentStatus(signature);
+
+        res.json({
+            success: true,
+            signature,
+            status
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// x402 info endpoint - shows available paid endpoints
+app.get('/api/x402/info', (req, res) => {
+    const endpoints = [
+        {
+            path: '/api/x402/premium/analytics',
+            method: 'GET',
+            price: '$1.00 USDC',
+            description: 'Access premium analytics dashboard with detailed statistics'
+        },
+        {
+            path: '/api/x402/premium/mint-priority',
+            method: 'POST',
+            price: '$2.50 USDC',
+            description: 'Priority NFT minting queue with faster processing'
+        },
+        {
+            path: '/api/x402/premium/bot-commands',
+            method: 'POST',
+            price: '$0.50 USDC',
+            description: 'Unlock advanced bot commands and features'
+        }
+    ];
+
+    res.json({
+        protocol: 'x402',
+        version: '1.0',
+        network: CONFIG.SOLANA_CLUSTER,
+        treasuryAddress: CONFIG.X402_TREASURY_WALLET,
+        usdcMint: CONFIG.SOLANA_CLUSTER === 'mainnet-beta' 
+            ? 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
+            : '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU',
+        endpoints,
+        instructions: {
+            message: 'To access paid endpoints:',
+            steps: [
+                '1. Make a request to the paid endpoint',
+                '2. Receive 402 Payment Required response with payment details',
+                '3. Send USDC payment to the specified treasury address',
+                '4. Retry request with X-Payment header containing transaction signature',
+                '5. Receive the paid resource'
+            ]
+        },
+        documentation: 'https://github.com/jmenichole/Justthetip/blob/main/docs/X402_INTEGRATION.md'
+    });
 });
 
 // ===== MOUNT ROUTES =====

@@ -30,6 +30,7 @@ JustTheTip delivers a production-ready experience for communities that need prov
 ## Key Capabilities
 - **Solana Program Suite** – Anchor-based programs inside `justthetip-contracts` provide deterministic PDAs and state tracking for Discord users.
 - **Smart Contract Discord Bot** – `bot_smart_contract.js` exposes slash commands for wallet registration, on-chain tipping, and PDA inspection.
+- **x402 Payment Protocol** – HTTP 402-based instant USDC micropayments for premium API features (NEW for Solana x402 Hackathon).
 - **Verification NFT Minting** – The Express API mints verification NFTs via Metaplex when Discord users prove wallet ownership.
 - **Developer Diagnostics** – `src/utils/solanaDevTools.js` supplies reusable helpers for RPC health, program accounts, devnet airdrops, and metadata inspection.
 - **Fiat On-Ramp** – `src/utils/coinbaseClient.js` and `/api/payments/coinbase/*` endpoints integrate Coinbase Commerce for charge creation, polling, and webhook verification.
