@@ -40,7 +40,6 @@ try {
 }
 
 const db = require('./db/database');
-const { handleSwapCommand, handleSwapHelpButton } = require('./src/commands/swapCommand');
 const { handleTipCommand } = require('./src/commands/tipCommand');
 const fs = require('fs');
 const crypto = require('crypto');
@@ -117,23 +116,6 @@ const commands = [
     ]
   },
   {
-    name: 'withdraw',
-    description: 'Send crypto to external wallet',
-    options: [
-      { name: 'address', type: 3, description: 'External wallet address', required: true },
-      { name: 'amount', type: 10, description: 'Amount to withdraw', required: true },
-      { name: 'currency', type: 3, description: 'Currency (SOL, USDC)', required: true, choices: [
-          { name: 'SOL', value: 'SOL' },
-          { name: 'USDC', value: 'USDC' }
-        ]
-      }
-    ]
-  },
-  {
-    name: 'deposit',
-    description: 'Get instructions for adding funds',
-  },
-  {
     name: 'registerwallet',
     description: 'Link your Solana wallet with one-click signature verification',
   },
@@ -163,22 +145,6 @@ const commands = [
           { name: 'register', value: 'register' }
         ]
       }
-    ]
-  },
-
-  {
-    name: 'swap',
-    description: 'Swap tokens using Jupiter aggregator',
-    options: [
-      { name: 'from', type: 3, description: 'Token to swap from', required: true, choices: [
-        { name: 'SOL', value: 'SOL' },
-        { name: 'USDC', value: 'USDC' }
-      ]},
-      { name: 'to', type: 3, description: 'Token to swap to', required: true, choices: [
-        { name: 'SOL', value: 'SOL' },
-        { name: 'USDC', value: 'USDC' }
-      ]},
-      { name: 'amount', type: 10, description: 'Amount to swap', required: true }
     ]
   }
 ];
@@ -214,13 +180,11 @@ const airdrops = loadAirdrops();
 const HELP_MESSAGE_BASIC = `## 💰 Basic Commands
 
 \`/balance\` — Check your funds
-\`/deposit\` — Get deposit instructions
 \`/tip @user <amount> <token>\` — Send a tip
-\`/withdraw <address> <amount> <token>\` — Withdraw funds
 \`/registerwallet\` — Link your Solana wallet
 
 ## ⚙️ More Commands
-Use \`/help advanced\` for swap, airdrop, and burn commands
+Use \`/help advanced\` for airdrop and burn commands
 
 ## 🧩 Supported Tokens
 **SOL**, **USDC** (Solana network)
@@ -403,12 +367,6 @@ client.on(Events.InteractionCreate, async interaction => {
         .setDescription(helpMessage);
       await interaction.reply({ embeds: [embed], ephemeral: true });
       
-    } else if (commandName === 'swap') {
-      // Note: userWallets map would need to be implemented for full functionality
-      // For now, use a Map as a placeholder
-      const userWallets = new Map();
-      await handleSwapCommand(interaction, userWallets);
-      
     } else if (commandName === 'airdrop') {
       const amount = interaction.options.getNumber('amount');
       const currency = interaction.options.getString('currency');
@@ -457,82 +415,6 @@ client.on(Events.InteractionCreate, async interaction => {
       }
 
       await handleTipCommand(interaction);
-      
-    } else if (commandName === 'deposit') {
-      const embed = new EmbedBuilder()
-        .setTitle('💰 How to Deposit Funds')
-        .setColor(0x3498db)
-        .setDescription('To add funds to your JustTheTip account, follow these instructions:')
-        .addFields(
-          { 
-            name: '1️⃣ Register Your Wallet', 
-            value: 'First, use `/registerwallet` to link your Solana wallet with one-click verification', 
-            inline: false 
-          },
-          { 
-            name: '2️⃣ Send Crypto', 
-            value: 'Send SOL or USDC from your external wallet to your registered address', 
-            inline: false 
-          },
-          { 
-            name: '3️⃣ Credits Applied', 
-            value: 'Your balance will be credited automatically once the transaction confirms', 
-            inline: false 
-          },
-          { 
-            name: '⚠️ Important Notes', 
-            value: '• Only send supported cryptocurrencies (SOL, USDC)\n• Double-check addresses before sending\n• Minimum deposit: 0.01 SOL or 1 USDC\n• Network fees may apply', 
-            inline: false 
-          }
-        )
-        .setFooter({ text: 'Need help? Use /help register for wallet setup guide' });
-        
-      await interaction.reply({ embeds: [embed], ephemeral: true });
-      
-    } else if (commandName === 'withdraw') {
-      const address = interaction.options.getString('address');
-      const amount = interaction.options.getNumber('amount');
-      const currency = interaction.options.getString('currency');
-      
-      if (rateLimiter.isRateLimited(interaction.user.id, commandName)) {
-        return await interaction.reply({ 
-          content: '⏳ Rate limit exceeded. Please wait before using this command again.', 
-          ephemeral: true 
-        });
-      }
-      
-      // Validate withdrawal amount
-      if (amount <= 0) {
-        return await interaction.reply({ 
-          content: '❌ Withdrawal amount must be greater than 0.', 
-          ephemeral: true 
-        });
-      }
-      
-      // Validate Solana address
-      if (!isValidSolanaAddress(address)) {
-        return await interaction.reply({ 
-          content: '❌ Invalid Solana wallet address. Please provide a valid base58 encoded address.', 
-          ephemeral: true 
-        });
-      }
-      
-      const embed = new EmbedBuilder()
-        .setTitle('🏦 Withdrawal Request Submitted')
-        .setColor(0xf39c12)
-        .setDescription(`Your withdrawal request has been queued for processing.`)
-        .addFields(
-          { name: 'Amount', value: `${amount} ${currency}`, inline: true },
-          { name: 'Destination', value: `\`${address.substring(0, 8)}...${address.substring(address.length - 8)}\``, inline: true },
-          { name: 'Status', value: '⏳ Pending', inline: false },
-          { name: 'Estimated Time', value: '5-15 minutes', inline: false }
-        )
-        .setFooter({ text: 'You will be notified once the transaction completes' });
-        
-      await interaction.reply({ embeds: [embed], ephemeral: true });
-      
-      // In a production environment, this would queue the withdrawal for processing
-      console.log(`Withdrawal request: ${interaction.user.id} -> ${address}: ${amount} ${currency}`);
       
     } else if (commandName === 'registerwallet') {
       try {
@@ -679,8 +561,6 @@ client.on(Events.InteractionCreate, async interaction => {
       });
     }
     
-  } else if (interaction.customId === 'swap_help') {
-    await handleSwapHelpButton(interaction);
   }
 });
 
