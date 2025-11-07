@@ -32,6 +32,42 @@ JustTheTip leverages Solana's speed and low fees to create a fully non-custodial
 
 ## Technical Architecture
 
+### x402 Payment Protocol Integration ⭐
+**NEW for Solana x402 Hackathon!**
+
+JustTheTip now integrates the x402 payment protocol for instant, micropayment-based API monetization:
+
+- **HTTP 402 Implementation**: Uses standard HTTP status codes for payment challenges
+- **USDC Micropayments**: Support for payments as low as $0.01
+- **Instant Settlement**: Sub-second payment verification on Solana
+- **Premium API Access**: Monetize advanced features without subscriptions
+- **Pay-Per-Use Model**: Users pay only for what they access
+
+**x402 Paid Endpoints:**
+- `/api/x402/premium/analytics` - $1.00 USDC for advanced analytics
+- `/api/x402/premium/mint-priority` - $2.50 USDC for priority NFT minting
+- `/api/x402/premium/bot-commands` - $0.50 USDC for premium Discord commands
+
+**Technical Details:**
+```javascript
+// Example: Accessing paid endpoint
+const response = await fetch('/api/x402/premium/analytics');
+if (response.status === 402) {
+  // Payment required - extract payment details
+  const { payment } = await response.json();
+  
+  // Send USDC to treasury address
+  const signature = await sendUSDCPayment(payment);
+  
+  // Retry with payment proof
+  const paidResponse = await fetch('/api/x402/premium/analytics', {
+    headers: { 'X-Payment': signature }
+  });
+}
+```
+
+See [docs/X402_INTEGRATION.md](./docs/X402_INTEGRATION.md) for complete integration guide.
+
 ### Smart Contracts (Anchor)
 Located in `justthetip-contracts/`, our Anchor programs provide:
 
@@ -112,10 +148,12 @@ await program.methods
 
 ### Novel Contributions
 1. **First Non-Custodial Discord Tipping Bot on Solana**: Eliminates trust requirements
-2. **PDA-Based User Management**: Discord ID → Solana PDA mapping pattern
-3. **Verification NFT System**: Cryptographic proof of wallet ownership
-4. **Developer SDK**: Reusable patterns for social-to-blockchain bridges
-5. **Fiat Integration**: Seamless on-ramp for non-crypto users
+2. **x402 Payment Protocol Integration**: Instant USDC micropayments for API monetization ⭐
+3. **PDA-Based User Management**: Discord ID → Solana PDA mapping pattern
+4. **Verification NFT System**: Cryptographic proof of wallet ownership
+5. **Developer SDK**: Reusable patterns for social-to-blockchain bridges
+6. **Fiat Integration**: Seamless on-ramp for non-crypto users
+7. **Pay-Per-Use API Model**: No subscriptions, pay only for what you use
 
 ### Real-World Impact
 - **Security**: Users never expose private keys to third parties
@@ -158,6 +196,9 @@ await program.methods
 - [x] REST API with Discord OAuth
 - [x] Metaplex NFT minting for verification
 - [x] Coinbase Commerce integration
+- [x] **x402 payment protocol integration** ⭐ NEW
+- [x] **Premium API monetization with USDC** ⭐ NEW
+- [x] **HTTP 402 payment challenges** ⭐ NEW
 - [x] Developer documentation
 - [x] GitHub Pages landing site
 - [x] Deployment guides (Railway, Docker)

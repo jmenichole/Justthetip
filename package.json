@@ -28,6 +28,7 @@
   "dependencies": {
     "@bitcoinerlab/secp256k1": "^1.2.0",
     "@metaplex-foundation/js": "^0.20.1",
+    "@payai/x402-solana": "^0.1.0",
     "@solana/spl-token": "^0.1.8",
     "@solana/web3.js": "^1.98.4",
     "@sqds/sdk": "^2.0.4",
