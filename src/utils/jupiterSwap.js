@@ -138,16 +138,44 @@ class JupiterSwap {
 /**
  * Common token mint addresses on Solana
  */
-const TOKEN_MINTS = {
-  SOL: 'So11111111111111111111111111111111111111112', // Wrapped SOL
-  USDC: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
-  USDT: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB',
-  BONK: 'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263',
-  JTO: 'jtojtomepa8beP8AuQc6eXt5FriJwfFMwQx2v2f9mCL',
-  PYTH: 'HZ1JovNiVvGrGNiiYvEozEVgZ58xaU3RKwX8eACQBCt3',
+const TOKEN_METADATA = {
+  SOL: {
+    mint: 'So11111111111111111111111111111111111111112',
+    decimals: 9,
+  },
+  USDC: {
+    mint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
+    decimals: 6,
+  },
+  USDT: {
+    mint: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB',
+    decimals: 6,
+  },
+  BONK: {
+    mint: 'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263',
+    decimals: 5,
+  },
+  JTO: {
+    mint: 'jtojtomepa8beP8AuQc6eXt5FriJwfFMwQx2v2f9mCL',
+    decimals: 9,
+  },
+  PYTH: {
+    mint: 'HZ1JovNiVvGrGNiiYvEozEVgZ58xaU3RKwX8eACQBCt3',
+    decimals: 6,
+  },
 };
+
+const TOKEN_MINTS = Object.fromEntries(
+  Object.entries(TOKEN_METADATA).map(([symbol, { mint }]) => [symbol, mint])
+);
+
+const TOKEN_DECIMALS = Object.fromEntries(
+  Object.entries(TOKEN_METADATA).map(([symbol, { decimals }]) => [symbol, decimals])
+);
 
 module.exports = {
   JupiterSwap,
   TOKEN_MINTS,
+  TOKEN_DECIMALS,
+  TOKEN_METADATA,
 };

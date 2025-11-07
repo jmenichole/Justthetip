@@ -10,7 +10,7 @@
  */
 
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { JupiterSwap, TOKEN_MINTS } = require('../utils/jupiterSwap');
+const { JupiterSwap, TOKEN_METADATA } = require('../utils/jupiterSwap');
 
 /**
  * Handle swap command
@@ -57,19 +57,20 @@ async function handleSwapCommand(interaction, userWallets) {
     // Get Jupiter swap quote
     const jupiter = new JupiterSwap(process.env.SOLANA_RPC_URL);
     
-    const fromMint = TOKEN_MINTS[fromToken];
-    const toMint = TOKEN_MINTS[toToken];
+    const fromTokenInfo = TOKEN_METADATA[fromToken];
+    const toTokenInfo = TOKEN_METADATA[toToken];
 
-    if (!fromMint || !toMint) {
+    if (!fromTokenInfo || !toTokenInfo) {
       return await interaction.editReply({
         content: '❌ Unsupported token pair.',
       });
     }
 
+    const fromMint = fromTokenInfo.mint;
+    const toMint = toTokenInfo.mint;
+
     // Calculate input amount in smallest unit
-    // Note: This is a simplified approach. For production, fetch actual decimals from token mint
-    const decimals = fromToken === 'SOL' ? 9 : 6; // SOL: 9 decimals, USDC: 6 decimals
-    const inputAmount = Math.floor(amount * Math.pow(10, decimals));
+    const inputAmount = Math.floor(amount * Math.pow(10, fromTokenInfo.decimals));
 
     const quote = await jupiter.getQuote(fromMint, toMint, inputAmount, 50);
 
@@ -80,9 +81,9 @@ async function handleSwapCommand(interaction, userWallets) {
     }
 
     // Calculate output amount
-    // Note: This is a simplified approach. For production, fetch actual decimals from token mint
-    const outputDecimals = toToken === 'SOL' ? 9 : 6; // SOL: 9 decimals, USDC: 6 decimals
-    const outputAmount = (parseInt(quote.outAmount) / Math.pow(10, outputDecimals)).toFixed(6);
+    const rawOutputAmount = parseInt(quote.outAmount, 10) / Math.pow(10, toTokenInfo.decimals);
+    const displayPrecision = Math.min(toTokenInfo.decimals, 6);
+    const outputAmount = rawOutputAmount.toFixed(displayPrecision);
 
     // Create embed with swap details
     const embed = new EmbedBuilder()
