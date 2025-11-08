@@ -87,65 +87,42 @@ client.once('ready', async () => {
 // Register slash commands
 const commands = [
   {
+    name: 'register-wallet',
+    description: 'Register your wallet using web-based verification link',
+  },
+  {
+    name: 'connect-wallet',
+    description: 'Connect your wallet address for smart contract flows',
+    options: [
+      { name: 'address', type: 3, description: 'Your Solana wallet address', required: true }
+    ]
+  },
+  {
     name: 'balance',
     description: 'Show your portfolio with crypto amounts and USD values 💎',
   },
   {
     name: 'tip',
-    description: 'Send crypto to another user',
+    description: 'Send SOL to another user',
     options: [
       { name: 'user', type: 6, description: 'User to tip', required: true },
-      { name: 'amount', type: 10, description: 'Amount to tip', required: true },
-      { name: 'currency', type: 3, description: 'Currency (SOL, USDC)', required: true, choices: [
-          { name: 'SOL', value: 'SOL' },
-          { name: 'USDC', value: 'USDC' }
-        ]
-      }
-    ]
-  },
-  {
-    name: 'airdrop',
-    description: 'Create airdrop with USD amounts (e.g. $5.00 worth of SOL)',
-    options: [
-      { name: 'amount', type: 10, description: 'Amount to airdrop', required: true },
-      { name: 'currency', type: 3, description: 'Currency (SOL, USDC)', required: true, choices: [
-          { name: 'SOL', value: 'SOL' },
-          { name: 'USDC', value: 'USDC' }
-        ]
-      }
-    ]
-  },
-  {
-    name: 'registerwallet',
-    description: 'Link your Solana wallet with one-click signature verification',
-  },
-  {
-    name: 'burn',
-    description: 'Donate to support bot development',
-    options: [
-      { name: 'amount', type: 10, description: 'Amount to burn', required: true },
-      { name: 'currency', type: 3, description: 'Currency (SOL, USDC)', required: true, choices: [
-          { name: 'SOL', value: 'SOL' },
-          { name: 'USDC', value: 'USDC' }
-        ]
-      }
+      { name: 'amount', type: 10, description: 'Amount in SOL to tip', required: true }
     ]
   },
   {
     name: 'help',
     description: 'Show bot commands and usage guide',
+  },
+  {
+    name: 'support',
+    description: 'Get help or report an issue',
     options: [
-      { 
-        name: 'section', 
-        type: 3, 
-        description: 'Help section to display (leave empty for basic commands)', 
-        required: false,
-        choices: [
-          { name: 'advanced', value: 'advanced' },
-          { name: 'register', value: 'register' }
-        ]
-      }
+      { name: 'issue', type: 3, description: 'Describe your problem or question', required: true }
     ]
+  },
+  {
+    name: 'verify',
+    description: 'Complete verification and get your verification badge',
   }
 ];
 
@@ -180,111 +157,70 @@ const airdrops = loadAirdrops();
 const HELP_MESSAGE_BASIC = `## 💰 Basic Commands
 
 \`/balance\` — Check your funds
-\`/tip @user <amount> <token>\` — Send a tip
-\`/registerwallet\` — Link your Solana wallet
-
-## ⚙️ More Commands
-Use \`/help advanced\` for airdrop and burn commands
-
-## 🧩 Supported Tokens
-**SOL**, **USDC** (Solana network)
+\`/tip @user <amount>\` — Send SOL to a user
+\`/register-wallet\` — Link your Solana wallet (web-based verification)
+\`/connect-wallet <address>\` — Connect wallet for smart contract flows
+\`/verify\` — Complete verification
 
 ## 🔒 Pro Tips
 • Start small, double-check addresses
 • Never share private keys
-• Use \`/help register\` for wallet setup guide`;
+• Use \`/support\` to get help`;
 
-// Advanced help message with full command list
+// Advanced help message with full command list - kept for backwards compatibility
 const HELP_MESSAGE_ADVANCED = `# 🤖 JustTheTip Bot - Complete Command Reference
 
 ⚠️ **IMPORTANT:** This bot handles real cryptocurrency. Always start with small test amounts!
 
 ## 🚀 Quick Start Guide
 
-**New to JustTheTip?** Here's how to get started in 3 easy steps:
+**New to JustTheTip?** Here's how to get started:
 
-1. **Check your balance**: Use \`/balance\` to see your current portfolio
-2. **Add funds**: Use \`/deposit\` to learn how to add crypto to your account
-3. **Send your first tip**: Try \`/tip @friend 0.01 SOL\` to send a small tip!
+1. **Register your wallet**: Use \`/register-wallet\` for web-based verification or \`/connect-wallet\` for smart contract flows
+2. **Check your balance**: Use \`/balance\` to see your current portfolio
+3. **Send your first tip**: Try \`/tip @friend 0.01\` to send a small tip in SOL!
 
 ---
 
-## 💰 Managing Your Funds
+## 💰 Available Commands
+
+**Wallet Management**
+• \`/register-wallet\` — Link your wallet using web-based verification
+• \`/connect-wallet <address>\` — Connect wallet for smart contract operations
+• \`/verify\` — Complete verification and get your verification badge
 
 **View Your Portfolio**
 • \`/balance\` — See your crypto balances with USD values 💎
   _Example: Shows "0.5 SOL (~$10.00)" and total portfolio value_
 
-**Adding Funds**
-• \`/deposit\` — Get step-by-step instructions for depositing crypto
-  _Supports: SOL and USDC on Solana network_
-
-**Withdrawing Funds**
-• \`/withdraw <address> <amount> <currency>\` — Send crypto to your external wallet
-  _Example: \`/withdraw YourWalletAddress123... 0.1 SOL\`_
-  _⏱️ Processing time: 5-15 minutes_
-
-**Register External Wallet**
-• \`/registerwallet\` — Link your Solana wallet with one-click verification
-  _Use \`/help register\` for detailed wallet registration guide_
-
----
-
-## 🎁 Sending & Receiving Tips
-
-**Send a Tip**
-• \`/tip <@user> <amount> <currency>\` — Send crypto to another Discord user
-  _Example: \`/tip @Alice 0.05 SOL\` sends 5 cents worth of SOL_
-  _Example: \`/tip @Bob 1 USDC\` sends $1 in USDC_
-
-**Create an Airdrop**
-• \`/airdrop <amount> <currency>\` — Drop crypto for others to collect
-  _Example: \`/airdrop 0.1 SOL\` creates a 🎁 button anyone can click to claim_
-  _Great for giveaways and community engagement!_
-
-**Collect from Airdrops**
-• 🎁 **Click the Collect button** on airdrop messages to claim your share
-
----
-
-## 🔄 Advanced Features
-
-**Token Swapping**
-• \`/swap <from> <to> <amount>\` — Exchange between supported tokens
-  _Example: \`/swap SOL USDC 0.1\` converts 0.1 SOL to USDC_
-  _Powered by Jupiter aggregator for best rates_
-
-**Support Development**
-• \`/burn <amount> <currency>\` — Donate to help maintain the bot
-  _Example: \`/burn 0.01 SOL\` — Every contribution helps!_
+**Send Tips**
+• \`/tip <@user> <amount>\` — Send SOL to another Discord user
+  _Example: \`/tip @Alice 0.05\` sends 0.05 SOL_
 
 **Get Help**
 • \`/help\` — Display concise command guide
-• \`/help advanced\` — Display this complete reference
-• \`/help register\` — Wallet registration instructions
+• \`/support <issue>\` — Get help or report an issue
 
 ---
 
-## 💱 Supported Cryptocurrencies
+## 💱 Supported Cryptocurrency
 
 ☀️ **SOL** (Solana) — Fast, low-fee native token
-💚 **USDC** — Stablecoin pegged to US Dollar ($1.00)
 
-_Both run on the Solana blockchain for instant transactions_
+_All transactions run on the Solana blockchain for instant processing_
 
 ---
 
 ## 💡 Pro Tips
 
 ✅ **Start small** — Test with tiny amounts (0.01 SOL) before larger transactions
-✅ **Double-check addresses** — Always verify wallet addresses before withdrawing
+✅ **Double-check addresses** — Always verify wallet addresses carefully
 ✅ **Use the refresh button** — Click 🔄 on your balance to update prices
-✅ **Save gas fees** — Tip within Discord to avoid blockchain transaction fees
 ✅ **Stay secure** — Never share your wallet's private keys or seed phrases
 
 ---
 
-**Need more help?** Use \`/help\` anytime or contact server administrators.
+**Need more help?** Use \`/support\` or contact server administrators.
 
 _Powered by Solana blockchain • Non-custodial • Secure_`;
 
@@ -292,14 +228,17 @@ _Powered by Solana blockchain • Non-custodial • Secure_`;
 const HELP_MESSAGE_REGISTER = `## 🔐 Wallet Registration Guide
 
 **Why register your wallet?**
-Wallet registration allows you to deposit and withdraw funds securely using signature verification.
+Wallet registration allows you to securely link your Solana wallet to your Discord account.
 
 **How it works:**
-1. Run the \`/registerwallet\` command
+1. Run the \`/register-wallet\` command for web-based verification
 2. Click the provided link to open the registration page
 3. Connect your Phantom or Solflare wallet
 4. Sign the verification message (non-custodial - no keys stored!)
 5. Your wallet is instantly registered and verified ✅
+
+**Alternative: Smart Contract Registration**
+Use \`/connect-wallet <address>\` to register your wallet address directly for on-chain operations.
 
 **Supported Wallets:**
 • Phantom (recommended)
@@ -313,7 +252,7 @@ Wallet registration allows you to deposit and withdraw funds securely using sign
 • ✅ No storage: Signatures are never stored permanently
 
 **Need help?**
-Use \`/help\` for general commands or contact server administrators.
+Use \`/support <issue>\` to get assistance or contact server administrators.
 
 _🔒 Your security is our priority. Never share your private keys or seed phrases!_`;
 

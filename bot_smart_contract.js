@@ -57,7 +57,7 @@ const client = new Client({
 const smartContractCommands = [
   {
     name: 'register-wallet',
-    description: 'Register your Solana wallet for smart contracts',
+    description: 'Register your Solana wallet for on-chain operations',
     options: [
       { name: 'address', type: 3, description: 'Your Solana wallet address', required: true }
     ]
@@ -80,22 +80,15 @@ const smartContractCommands = [
   },
   {
     name: 'sc-info',
-    description: 'View smart contract bot information'
+    description: 'View smart contract bot information and program details'
   },
   {
-    name: 'swap',
-    description: 'Swap tokens using Jupiter aggregator',
-    options: [
-      { name: 'from', type: 3, description: 'Token to swap from', required: true, choices: [
-        { name: 'SOL', value: 'SOL' },
-        { name: 'USDC', value: 'USDC' }
-      ]},
-      { name: 'to', type: 3, description: 'Token to swap to', required: true, choices: [
-        { name: 'SOL', value: 'SOL' },
-        { name: 'USDC', value: 'USDC' }
-      ]},
-      { name: 'amount', type: 10, description: 'Amount to swap', required: true }
-    ]
+    name: 'balance',
+    description: 'Check your wallet balance'
+  },
+  {
+    name: 'help',
+    description: 'Show smart contract bot commands and usage guide'
   }
 ];
 
