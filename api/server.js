@@ -1423,6 +1423,22 @@ app.get('/api/x402/info', (req, res) => {
 // Admin dashboard routes
 app.use('/api/admin', adminRoutes);
 
+// ===== 404 HANDLER =====
+// Catch-all for undefined routes
+app.use((req, res) => {
+    res.status(404).json({
+        success: false,
+        error: 'Endpoint not found',
+        path: req.path,
+        message: 'The requested endpoint does not exist',
+        availableEndpoints: {
+            api: '/api/health, /api/tips, /api/verifyWallet',
+            static: '/sign.html (for wallet registration)',
+            documentation: 'https://github.com/jmenichole/Justthetip'
+        }
+    });
+});
+
 // ===== INITIALIZATION =====
 async function startServer() {
     try {
