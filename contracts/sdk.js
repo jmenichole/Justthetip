@@ -4,9 +4,19 @@
  * Provides reusable functions for building non-custodial Discord bots on Solana.
  * No private keys are ever handled by this SDK - users sign transactions in their own wallets.
  * 
+ * Copyright (c) 2025 JustTheTip Bot
+ * 
+ * This file is part of JustTheTip.
+ * 
+ * Licensed under the JustTheTip Custom License (Based on MIT).
+ * See LICENSE file in the project root for full license information.
+ * 
+ * SPDX-License-Identifier: MIT
+ * 
+ * This software may not be sold commercially without permission.
+ * 
  * @module JustTheTipSDK
  * @author JustTheTip Bot Team
- * @license Custom MIT-based License
  */
 
 const { Connection, PublicKey, SystemProgram, Transaction, LAMPORTS_PER_SOL } = require('@solana/web3.js');

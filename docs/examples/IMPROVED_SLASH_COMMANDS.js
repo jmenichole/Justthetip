@@ -3,6 +3,17 @@
  * User-friendly, clear, and relevant to bot functions
  * 
  * Replace the commands array in bot.js with this configuration
+ * 
+ * Copyright (c) 2025 JustTheTip Bot
+ * 
+ * This file is part of JustTheTip.
+ * 
+ * Licensed under the JustTheTip Custom License (Based on MIT).
+ * See LICENSE file in the project root for full license information.
+ * 
+ * SPDX-License-Identifier: MIT
+ * 
+ * This software may not be sold commercially without permission.
  */
 
 const improvedCommands = [

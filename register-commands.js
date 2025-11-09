@@ -2,6 +2,17 @@
  * Clear Old Slash Commands and Register New User-Friendly Commands
  * Run this script to update your Discord bot's slash commands
  * 
+ * Copyright (c) 2025 JustTheTip Bot
+ * 
+ * This file is part of JustTheTip.
+ * 
+ * Licensed under the JustTheTip Custom License (Based on MIT).
+ * See LICENSE file in the project root for full license information.
+ * 
+ * SPDX-License-Identifier: MIT
+ * 
+ * This software may not be sold commercially without permission.
+ * 
  * Usage: node register-commands.js
  */
 

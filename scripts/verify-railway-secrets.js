@@ -6,6 +6,17 @@
  * Validates that all required environment variables are present for the Discord bot
  * to run successfully on Railway. This script should be run as part of the Railway
  * startup process to catch configuration issues early.
+ * 
+ * Copyright (c) 2025 JustTheTip Bot
+ * 
+ * This file is part of JustTheTip.
+ * 
+ * Licensed under the JustTheTip Custom License (Based on MIT).
+ * See LICENSE file in the project root for full license information.
+ * 
+ * SPDX-License-Identifier: MIT
+ * 
+ * This software may not be sold commercially without permission.
  */
 
 const {
