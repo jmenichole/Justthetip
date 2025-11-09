@@ -246,10 +246,29 @@ function getReputationScore(discordId) {
   }
 }
 
+/**
+ * Update wallet address for a user
+ * @param {string} id - User ID
+ * @param {string} walletAddress - Solana wallet address
+ */
+function updateWallet(id, walletAddress) {
+  try {
+    // Ensure user exists
+    getUser(id);
+    
+    // Update wallet
+    db.prepare('UPDATE users SET wallet = ? WHERE id = ?').run(walletAddress, id);
+  } catch (error) {
+    console.error(`Error updating wallet for ${id}:`, error);
+    throw error;
+  }
+}
+
 // Export functions
 module.exports = {
   getUser,
   updateBalance,
+  updateWallet,
   recordTip,
   getUserTransactions,
   getRecentTips,

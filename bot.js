@@ -156,16 +156,23 @@ const airdrops = loadAirdrops();
 // Concise help message for default /help command
 const HELP_MESSAGE_BASIC = `## 💰 Basic Commands
 
+**🚀 Getting Started (choose one):**
+1️⃣ \`/connect-wallet <address>\` — Quick wallet connection for on-chain operations
+   **OR**
+1️⃣ \`/register-wallet\` — Full verification with cryptographic signature (recommended)
+
+2️⃣ \`/verify\` — Check your wallet connection and verification status
+
+**💸 Using the Bot:**
 \`/balance\` — Check your funds
 \`/tip @user <amount>\` — Send SOL to a user
-\`/register-wallet\` — Link your Solana wallet (web-based verification)
-\`/connect-wallet <address>\` — Connect wallet for smart contract flows
-\`/verify\` — Complete verification
+\`/support <issue>\` — Get help or report an issue
 
 ## 🔒 Pro Tips
+• Start with \`/connect-wallet\` for quick setup OR \`/register-wallet\` for full verification
+• Use \`/verify\` anytime to check your status
 • Start small, double-check addresses
-• Never share private keys
-• Use \`/support\` to get help`;
+• Never share private keys`;
 
 // Advanced help message with full command list - kept for backwards compatibility
 const HELP_MESSAGE_ADVANCED = `# 🤖 JustTheTip Bot - Complete Command Reference
@@ -176,18 +183,25 @@ const HELP_MESSAGE_ADVANCED = `# 🤖 JustTheTip Bot - Complete Command Referenc
 
 **New to JustTheTip?** Here's how to get started:
 
-1. **Register your wallet**: Use \`/register-wallet\` for web-based verification or \`/connect-wallet\` for smart contract flows
-2. **Check your balance**: Use \`/balance\` to see your current portfolio
-3. **Send your first tip**: Try \`/tip @friend 0.01\` to send a small tip in SOL!
+**Step 1 - Connect Your Wallet (choose one method):**
+• **Option A:** Use \`/connect-wallet <address>\` to quickly link your Solana wallet address for on-chain operations
+• **Option B:** Use \`/register-wallet\` for full verification with cryptographic signature proof (recommended for enhanced security)
+
+**Step 2 - Verify Your Setup:**
+• Use \`/verify\` to check your wallet connection status and verification level
+
+**Step 3 - Start Using the Bot:**
+• Use \`/balance\` to see your current portfolio
+• Try \`/tip @friend 0.01\` to send a small tip in SOL!
 
 ---
 
 ## 💰 Available Commands
 
 **Wallet Management**
-• \`/register-wallet\` — Link your wallet using web-based verification
-• \`/connect-wallet <address>\` — Connect wallet for smart contract operations
-• \`/verify\` — Complete verification and get your verification badge
+• \`/connect-wallet <address>\` — Quick wallet connection for on-chain operations
+• \`/register-wallet\` — Full verification with cryptographic signature (recommended)
+• \`/verify\` — Check wallet connection status and verification level
 
 **View Your Portfolio**
 • \`/balance\` — See your crypto balances with USD values 💎
@@ -355,7 +369,7 @@ client.on(Events.InteractionCreate, async interaction => {
 
       await handleTipCommand(interaction);
       
-    } else if (commandName === 'registerwallet') {
+    } else if (commandName === 'register-wallet') {
       try {
         // Generate a unique nonce for this registration attempt
         const nonce = crypto.randomUUID();
@@ -441,6 +455,190 @@ client.on(Events.InteractionCreate, async interaction => {
       
       // In a production environment, this would process the burn/donation
       console.log(`Burn/donation: ${interaction.user.id} - ${amount} ${currency}`);
+      
+    } else if (commandName === 'connect-wallet') {
+      const address = interaction.options.getString('address');
+      
+      // Validate the address
+      if (!isValidSolanaAddress(address)) {
+        return await interaction.reply({
+          content: '❌ Invalid Solana wallet address. Please check the address and try again.',
+          ephemeral: true
+        });
+      }
+      
+      try {
+        // Get the SQLite database module directly
+        const sqlite = require('./db/db.js');
+        
+        // Update the wallet address in database
+        sqlite.updateWallet(interaction.user.id, address);
+        
+        const embed = new EmbedBuilder()
+          .setTitle('✅ Wallet Connected Successfully')
+          .setColor(0x00ff00)
+          .setDescription('Your Solana wallet has been connected to your Discord account.')
+          .addFields(
+            { 
+              name: '📍 Wallet Address', 
+              value: `\`${address}\``,
+              inline: false 
+            },
+            { 
+              name: '✨ What\'s Next?', 
+              value: '• Use `/balance` to check your portfolio\n• Use `/tip` to send SOL to other users\n• Use `/verify` to check your verification status',
+              inline: false 
+            },
+            { 
+              name: '🔐 Security Note', 
+              value: 'Your wallet is linked but not verified. For full verification, use `/register-wallet` to sign a verification message.',
+              inline: false 
+            }
+          )
+          .setFooter({ text: 'Your wallet is now ready for on-chain operations!' });
+        
+        await interaction.reply({ embeds: [embed], ephemeral: true });
+        console.log(`Wallet connected: ${interaction.user.id} - ${address}`);
+        
+      } catch (error) {
+        console.error('Connect wallet error:', error);
+        await interaction.reply({
+          content: '❌ Error connecting wallet. Please try again later.',
+          ephemeral: true
+        });
+      }
+      
+    } else if (commandName === 'verify') {
+      try {
+        // Check if user has a wallet registered
+        const sqlite = require('./db/db.js');
+        const dbUser = sqlite.getUser(interaction.user.id);
+        
+        const hasWallet = dbUser && dbUser.wallet;
+        const trustBadge = await db.getTrustBadge(interaction.user.id);
+        
+        if (!hasWallet && !trustBadge) {
+          const embed = new EmbedBuilder()
+            .setTitle('❌ No Wallet Connected')
+            .setColor(0xff0000)
+            .setDescription('You need to connect a wallet before you can verify.')
+            .addFields(
+              { 
+                name: '🚀 Getting Started', 
+                value: '**Step 1:** Use `/connect-wallet <address>` to link your wallet\n**OR**\n**Step 1:** Use `/register-wallet` for web-based verification with signature\n\n**Step 2:** Use `/verify` to check your verification status',
+                inline: false 
+              },
+              { 
+                name: '🤔 Which method should I use?', 
+                value: '• **`/connect-wallet`** - Quick setup for smart contract operations\n• **`/register-wallet`** - Full verification with cryptographic proof',
+                inline: false 
+              }
+            )
+            .setFooter({ text: 'Choose the method that best fits your needs!' });
+          
+          return await interaction.reply({ embeds: [embed], ephemeral: true });
+        }
+        
+        // User has a wallet, show verification status
+        const isVerified = trustBadge !== null;
+        const reputationScore = trustBadge ? trustBadge.reputation_score : (dbUser.reputation_score || 0);
+        
+        const embed = new EmbedBuilder()
+          .setTitle(isVerified ? '✅ Verification Status: Verified' : '⚠️ Verification Status: Connected')
+          .setColor(isVerified ? 0x00ff00 : 0xffa500)
+          .setDescription(
+            isVerified 
+              ? 'Your wallet is fully verified with cryptographic proof!' 
+              : 'Your wallet is connected but not fully verified.'
+          )
+          .addFields(
+            { 
+              name: '📍 Wallet Address', 
+              value: trustBadge ? `\`${trustBadge.wallet_address}\`` : `\`${dbUser.wallet}\``,
+              inline: false 
+            },
+            { 
+              name: '⭐ Reputation Score', 
+              value: `${reputationScore} points`,
+              inline: true 
+            },
+            { 
+              name: '🎖️ Verification Badge', 
+              value: isVerified ? '✅ Verified' : '❌ Not Verified',
+              inline: true 
+            }
+          );
+        
+        if (!isVerified) {
+          embed.addFields({
+            name: '🔐 Get Fully Verified',
+            value: 'Use `/register-wallet` to complete verification with signature proof. This provides additional security and trust benefits.',
+            inline: false
+          });
+        }
+        
+        embed.setFooter({ text: isVerified ? 'Keep up the good work!' : 'Full verification recommended for enhanced trust' });
+        
+        await interaction.reply({ embeds: [embed], ephemeral: true });
+        
+      } catch (error) {
+        console.error('Verify command error:', error);
+        await interaction.reply({
+          content: '❌ Error checking verification status. Please try again later.',
+          ephemeral: true
+        });
+      }
+      
+    } else if (commandName === 'support') {
+      const issue = interaction.options.getString('issue');
+      
+      if (!issue || issue.trim().length === 0) {
+        return await interaction.reply({
+          content: '❌ Please describe your issue or question.',
+          ephemeral: true
+        });
+      }
+      
+      try {
+        // Create support ticket embed
+        const embed = new EmbedBuilder()
+          .setTitle('🎫 Support Request Submitted')
+          .setColor(0x7289da)
+          .setDescription('Your support request has been received. Our team will review it shortly.')
+          .addFields(
+            { 
+              name: '📝 Your Issue', 
+              value: issue.slice(0, 1000), // Limit to 1000 chars
+              inline: false 
+            },
+            { 
+              name: '⏱️ Expected Response Time', 
+              value: 'We typically respond within 24-48 hours.',
+              inline: false 
+            },
+            { 
+              name: '💡 Quick Help', 
+              value: '• Check `/help` for command documentation\n• Use `/balance` to view your portfolio\n• Use `/verify` to check wallet status',
+              inline: false 
+            }
+          )
+          .setFooter({ text: `Ticket from: ${interaction.user.tag}` })
+          .setTimestamp();
+        
+        await interaction.reply({ embeds: [embed], ephemeral: true });
+        
+        // Log support request for admin review
+        console.log(`Support request from ${interaction.user.id} (${interaction.user.tag}): ${issue}`);
+        
+        // TODO: In production, send this to a support channel or ticket system
+        
+      } catch (error) {
+        console.error('Support command error:', error);
+        await interaction.reply({
+          content: '❌ Error submitting support request. Please try contacting server administrators directly.',
+          ephemeral: true
+        });
+      }
       
     } else {
       // Fallback for any unimplemented commands
