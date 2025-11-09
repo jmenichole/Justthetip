@@ -189,7 +189,8 @@ CI/CD pipelines should run linting, unit tests, and contract tests before deploy
 - **Fix Guide**: [FIX_SUMMARY.md](./FIX_SUMMARY.md) documents common issues and solutions
 
 ### API Server Deployment
-- The API can be hosted on services like Railway or Heroku; see `RAILWAY_*.md` and `DEPLOY_BACKEND.md` for environment-specific steps.
+- The API can be hosted on services like Railway, Vercel, or Heroku; see `RAILWAY_*.md` and `DEPLOY_BACKEND.md` for environment-specific steps.
+- For Vercel deployment, the repository includes a `vercel.json` configuration file that handles API routing and static file serving.
 - Front-end assets are published via GitHub Pages (see `DOCUMENTATION_INDEX.md`).
 
 ### Smart Contracts
