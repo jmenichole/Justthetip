@@ -264,6 +264,111 @@ function updateWallet(id, walletAddress) {
   }
 }
 
+/**
+ * Get tip statistics for a user
+ * @param {string} userId - Discord user ID
+ * @returns {Object} Statistics object with sent, received, and totals
+ */
+function getUserTipStats(userId) {
+  try {
+    // Get tips sent
+    const sentStats = db.prepare(`
+      SELECT COUNT(*) as count, COALESCE(SUM(amount), 0) as total, currency
+      FROM tips
+      WHERE sender = ?
+      GROUP BY currency
+    `).all(userId);
+
+    // Get tips received
+    const receivedStats = db.prepare(`
+      SELECT COUNT(*) as count, COALESCE(SUM(amount), 0) as total, currency
+      FROM tips
+      WHERE receiver = ?
+      GROUP BY currency
+    `).all(userId);
+
+    // Get top recipients (users this user has tipped the most)
+    const topRecipients = db.prepare(`
+      SELECT receiver, COUNT(*) as tip_count, SUM(amount) as total_amount
+      FROM tips
+      WHERE sender = ?
+      GROUP BY receiver
+      ORDER BY total_amount DESC
+      LIMIT 5
+    `).all(userId);
+
+    // Get top senders (users who have tipped this user the most)
+    const topSenders = db.prepare(`
+      SELECT sender, COUNT(*) as tip_count, SUM(amount) as total_amount
+      FROM tips
+      WHERE receiver = ?
+      GROUP BY sender
+      ORDER BY total_amount DESC
+      LIMIT 5
+    `).all(userId);
+
+    return {
+      sent: sentStats,
+      received: receivedStats,
+      topRecipients,
+      topSenders
+    };
+  } catch (error) {
+    console.error('Error getting user tip stats:', error);
+    return { sent: [], received: [], topRecipients: [], topSenders: [] };
+  }
+}
+
+/**
+ * Get global tip statistics
+ * @returns {Object} Global statistics
+ */
+function getGlobalTipStats() {
+  try {
+    // Total tips and volume
+    const totals = db.prepare(`
+      SELECT COUNT(*) as total_tips, COALESCE(SUM(amount), 0) as total_volume, currency
+      FROM tips
+      GROUP BY currency
+    `).all();
+
+    // Top tippers (by amount sent)
+    const topTippers = db.prepare(`
+      SELECT sender, COUNT(*) as tip_count, SUM(amount) as total_sent
+      FROM tips
+      GROUP BY sender
+      ORDER BY total_sent DESC
+      LIMIT 10
+    `).all();
+
+    // Top receivers (by amount received)
+    const topReceivers = db.prepare(`
+      SELECT receiver, COUNT(*) as tip_count, SUM(amount) as total_received
+      FROM tips
+      GROUP BY receiver
+      ORDER BY total_received DESC
+      LIMIT 10
+    `).all();
+
+    // Recent activity (last 24 hours)
+    const recentActivity = db.prepare(`
+      SELECT COUNT(*) as count, COALESCE(SUM(amount), 0) as volume
+      FROM tips
+      WHERE created_at > datetime('now', '-24 hours')
+    `).get();
+
+    return {
+      totals,
+      topTippers,
+      topReceivers,
+      recentActivity
+    };
+  } catch (error) {
+    console.error('Error getting global tip stats:', error);
+    return { totals: [], topTippers: [], topReceivers: [], recentActivity: { count: 0, volume: 0 } };
+  }
+}
+
 // Export functions
 module.exports = {
   getUser,
@@ -277,6 +382,8 @@ module.exports = {
   getTrustBadgeByWallet,
   updateReputationScore,
   getReputationScore,
+  getUserTipStats,
+  getGlobalTipStats,
   db, // Export for testing
 };
 

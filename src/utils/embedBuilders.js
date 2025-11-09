@@ -32,19 +32,35 @@ function createBalanceEmbed(balances, priceConfig, isRefresh = false) {
   const usdcUsdValue = usdcBalance * (priceConfig.USDC || 1);
   const totalValue = solUsdValue + usdcUsdValue;
   
-  const footerText = isRefresh 
-    ? 'Balance updated with current prices'
-    : 'Click refresh to update with current prices';
-  
-  return new EmbedBuilder()
-    .setTitle('💎 Your Portfolio Balance')
-    .setColor(0x3498db)
+  // Create formatted balance display with better visual hierarchy
+  const embed = new EmbedBuilder()
+    .setTitle('💎 Your Portfolio')
+    .setColor(0x14F195) // Solana green color
     .setDescription(
-      `**Total Portfolio Value:** $${totalValue.toFixed(2)}\n\n` +
-      `☀️ **SOL:** ${solBalance.toFixed(6)} (~$${solUsdValue.toFixed(2)})\n` +
-      `💚 **USDC:** ${usdcBalance.toFixed(6)} (~$${usdcUsdValue.toFixed(2)})`
+      `**Total Value:** \`$${totalValue.toFixed(2)} USD\`\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━`
     )
-    .setFooter({ text: footerText });
+    .addFields(
+      {
+        name: '☀️ Solana (SOL)',
+        value: `\`\`\`\n${solBalance.toFixed(6)} SOL\n\`\`\`\n**USD Value:** $${solUsdValue.toFixed(2)}`,
+        inline: true
+      },
+      {
+        name: '💵 USD Coin (USDC)',
+        value: `\`\`\`\n${usdcBalance.toFixed(6)} USDC\n\`\`\`\n**USD Value:** $${usdcUsdValue.toFixed(2)}`,
+        inline: true
+      }
+    )
+    .setTimestamp();
+  
+  if (isRefresh) {
+    embed.setFooter({ text: '✅ Balance refreshed • Prices updated from market data' });
+  } else {
+    embed.setFooter({ text: '💡 Tip: Click refresh to update with current prices' });
+  }
+  
+  return embed;
 }
 
 /**

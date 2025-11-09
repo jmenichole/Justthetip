@@ -16,6 +16,7 @@
 
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const { PublicKey } = require('@solana/web3.js');
 const nacl = require('tweetnacl');
 const adminRoutes = require('./adminRoutes');
@@ -71,7 +72,8 @@ app.use(express.json({
 }));
 
 // Serve static files from public directory
-app.use(express.static('api/public'));
+// Use path.join with __dirname to ensure the path works regardless of where node is executed from
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Rate limiting for wallet registration
 const rateLimit = require('express-rate-limit');

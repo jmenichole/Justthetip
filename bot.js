@@ -88,14 +88,7 @@ client.once('ready', async () => {
 const commands = [
   {
     name: 'register-wallet',
-    description: 'Register your wallet using web-based verification link',
-  },
-  {
-    name: 'connect-wallet',
-    description: 'Connect your wallet address for smart contract flows',
-    options: [
-      { name: 'address', type: 3, description: 'Your Solana wallet address', required: true }
-    ]
+    description: 'Register your wallet with signature verification (trustless)',
   },
   {
     name: 'balance',
@@ -107,6 +100,16 @@ const commands = [
     options: [
       { name: 'user', type: 6, description: 'User to tip', required: true },
       { name: 'amount', type: 10, description: 'Amount in SOL to tip', required: true }
+    ]
+  },
+  {
+    name: 'tipstats',
+    description: 'View tipping statistics for yourself or the server 📊',
+    options: [
+      { name: 'type', type: 3, description: 'Stats type: personal or global', required: false, choices: [
+        { name: 'Personal Stats', value: 'personal' },
+        { name: 'Global Stats', value: 'global' }
+      ]}
     ]
   },
   {
@@ -156,12 +159,10 @@ const airdrops = loadAirdrops();
 // Concise help message for default /help command
 const HELP_MESSAGE_BASIC = `## 💰 Basic Commands
 
-**🚀 Getting Started (choose one):**
-1️⃣ \`/connect-wallet <address>\` — Quick wallet connection for on-chain operations
-   **OR**
-1️⃣ \`/register-wallet\` — Full verification with cryptographic signature (recommended)
+**🚀 Getting Started:**
+1️⃣ \`/register-wallet\` — Register your wallet with signature verification (trustless & secure)
 
-2️⃣ \`/verify\` — Check your wallet connection and verification status
+2️⃣ \`/verify\` — Check your wallet registration and verification status
 
 **💸 Using the Bot:**
 \`/balance\` — Check your funds
@@ -169,7 +170,7 @@ const HELP_MESSAGE_BASIC = `## 💰 Basic Commands
 \`/support <issue>\` — Get help or report an issue
 
 ## 🔒 Pro Tips
-• Start with \`/connect-wallet\` for quick setup OR \`/register-wallet\` for full verification
+• Use \`/register-wallet\` for cryptographic proof of ownership (trustless)
 • Use \`/verify\` anytime to check your status
 • Start small, double-check addresses
 • Never share private keys`;
@@ -183,12 +184,12 @@ const HELP_MESSAGE_ADVANCED = `# 🤖 JustTheTip Bot - Complete Command Referenc
 
 **New to JustTheTip?** Here's how to get started:
 
-**Step 1 - Connect Your Wallet (choose one method):**
-• **Option A:** Use \`/connect-wallet <address>\` to quickly link your Solana wallet address for on-chain operations
-• **Option B:** Use \`/register-wallet\` for full verification with cryptographic signature proof (recommended for enhanced security)
+**Step 1 - Register Your Wallet:**
+• Use \`/register-wallet\` for trustless verification with cryptographic signature proof
+• Your keys never leave your wallet - fully non-custodial
 
 **Step 2 - Verify Your Setup:**
-• Use \`/verify\` to check your wallet connection status and verification level
+• Use \`/verify\` to check your wallet registration status and verification level
 
 **Step 3 - Start Using the Bot:**
 • Use \`/balance\` to see your current portfolio
@@ -199,13 +200,12 @@ const HELP_MESSAGE_ADVANCED = `# 🤖 JustTheTip Bot - Complete Command Referenc
 ## 💰 Available Commands
 
 **Wallet Management**
-• \`/connect-wallet <address>\` — Quick wallet connection for on-chain operations
-• \`/register-wallet\` — Full verification with cryptographic signature (recommended)
-• \`/verify\` — Check wallet connection status and verification level
+• \`/register-wallet\` — Trustless registration with cryptographic signature (secure & recommended)
+• \`/verify\` — Check wallet registration status and verification level
 
 **View Your Portfolio**
 • \`/balance\` — See your crypto balances with USD values 💎
-  _Example: Shows "0.5 SOL (~$10.00)" and total portfolio value_
+  _Example: Shows "0.5 SOL (~$75.00)" and total portfolio value_
 
 **Send Tips**
 • \`/tip <@user> <amount>\` — Send SOL to another Discord user
@@ -231,12 +231,13 @@ _All transactions run on the Solana blockchain for instant processing_
 ✅ **Double-check addresses** — Always verify wallet addresses carefully
 ✅ **Use the refresh button** — Click 🔄 on your balance to update prices
 ✅ **Stay secure** — Never share your wallet's private keys or seed phrases
+✅ **Trustless** — This bot never has access to your private keys
 
 ---
 
 **Need more help?** Use \`/support\` or contact server administrators.
 
-_Powered by Solana blockchain • Non-custodial • Secure_`;
+_Powered by Solana blockchain • Non-custodial • Trustless • Secure_`;
 
 // Wallet registration help message
 const HELP_MESSAGE_REGISTER = `## 🔐 Wallet Registration Guide
@@ -369,6 +370,126 @@ client.on(Events.InteractionCreate, async interaction => {
 
       await handleTipCommand(interaction);
       
+    } else if (commandName === 'tipstats') {
+      try {
+        const statsType = interaction.options.getString('type') || 'personal';
+        const sqlite = require('./db/db.js');
+        
+        if (statsType === 'global') {
+          // Show global statistics
+          const stats = sqlite.getGlobalTipStats();
+          
+          // Build description with global stats
+          let description = '📊 **Server-Wide Tipping Statistics**\n\n';
+          
+          // Total volume by currency
+          if (stats.totals.length > 0) {
+            description += '**💰 Total Volume:**\n';
+            stats.totals.forEach(t => {
+              description += `• ${t.currency}: ${t.total_volume.toFixed(6)} (${t.total_tips} tips)\n`;
+            });
+            description += '\n';
+          }
+          
+          // Recent activity
+          if (stats.recentActivity) {
+            description += `**📈 Last 24 Hours:**\n`;
+            description += `• ${stats.recentActivity.count} tips sent\n`;
+            description += `• ${stats.recentActivity.volume.toFixed(6)} total volume\n\n`;
+          }
+          
+          const embed = new EmbedBuilder()
+            .setTitle('🌐 Global Tip Statistics')
+            .setColor(0x14F195)
+            .setDescription(description)
+            .setTimestamp()
+            .setFooter({ text: 'Statistics are updated in real-time' });
+          
+          // Add top tippers field
+          if (stats.topTippers.length > 0) {
+            const topTippersText = stats.topTippers.slice(0, 5).map((t, i) => 
+              `${i + 1}. <@${t.sender}>: ${t.total_sent.toFixed(4)} SOL (${t.tip_count} tips)`
+            ).join('\n');
+            embed.addFields({ name: '🏆 Top Tippers', value: topTippersText, inline: false });
+          }
+          
+          // Add top receivers field
+          if (stats.topReceivers.length > 0) {
+            const topReceiversText = stats.topReceivers.slice(0, 5).map((t, i) => 
+              `${i + 1}. <@${t.receiver}>: ${t.total_received.toFixed(4)} SOL (${t.tip_count} tips)`
+            ).join('\n');
+            embed.addFields({ name: '💝 Top Receivers', value: topReceiversText, inline: false });
+          }
+          
+          await interaction.reply({ embeds: [embed], ephemeral: false });
+          
+        } else {
+          // Show personal statistics
+          const stats = sqlite.getUserTipStats(interaction.user.id);
+          
+          // Calculate totals
+          let totalSent = 0;
+          let totalReceived = 0;
+          let sentCount = 0;
+          let receivedCount = 0;
+          
+          stats.sent.forEach(s => {
+            totalSent += s.total;
+            sentCount += s.count;
+          });
+          
+          stats.received.forEach(r => {
+            totalReceived += r.total;
+            receivedCount += r.count;
+          });
+          
+          const netBalance = totalReceived - totalSent;
+          const netSymbol = netBalance >= 0 ? '+' : '';
+          
+          let description = `**Your Tipping Activity**\n\n`;
+          description += `📤 **Sent:** ${totalSent.toFixed(6)} SOL (${sentCount} tips)\n`;
+          description += `📥 **Received:** ${totalReceived.toFixed(6)} SOL (${receivedCount} tips)\n`;
+          description += `💹 **Net:** ${netSymbol}${netBalance.toFixed(6)} SOL\n`;
+          
+          const embed = new EmbedBuilder()
+            .setTitle(`📊 ${interaction.user.username}'s Tip Statistics`)
+            .setColor(0x14F195)
+            .setDescription(description)
+            .setTimestamp()
+            .setFooter({ text: 'Keep spreading the love! 💝' });
+          
+          // Add top recipients if any
+          if (stats.topRecipients.length > 0) {
+            const topRecipientsText = stats.topRecipients.slice(0, 5).map((t, i) => 
+              `${i + 1}. <@${t.receiver}>: ${t.total_amount.toFixed(4)} SOL (${t.tip_count} tips)`
+            ).join('\n');
+            embed.addFields({ name: '💸 You Tip Most', value: topRecipientsText, inline: true });
+          }
+          
+          // Add top senders if any
+          if (stats.topSenders.length > 0) {
+            const topSendersText = stats.topSenders.slice(0, 5).map((t, i) => 
+              `${i + 1}. <@${t.sender}>: ${t.total_amount.toFixed(4)} SOL (${t.tip_count} tips)`
+            ).join('\n');
+            embed.addFields({ name: '💝 Tips You Most', value: topSendersText, inline: true });
+          }
+          
+          // If no activity, show helpful message
+          if (sentCount === 0 && receivedCount === 0) {
+            embed.setDescription('You haven\'t sent or received any tips yet!\n\n💡 Use `/tip @user <amount>` to send your first tip!');
+          }
+          
+          await interaction.reply({ embeds: [embed], ephemeral: true });
+        }
+        
+      } catch (error) {
+        console.error('Tipstats error:', error);
+        await interaction.reply({
+          content: '❌ Error fetching tip statistics. Please try again later.',
+          ephemeral: true
+        });
+      }
+      
     } else if (commandName === 'register-wallet') {
       try {
         // Generate a unique nonce for this registration attempt
@@ -456,58 +577,6 @@ client.on(Events.InteractionCreate, async interaction => {
       // In a production environment, this would process the burn/donation
       console.log(`Burn/donation: ${interaction.user.id} - ${amount} ${currency}`);
       
-    } else if (commandName === 'connect-wallet') {
-      const address = interaction.options.getString('address');
-      
-      // Validate the address
-      if (!isValidSolanaAddress(address)) {
-        return await interaction.reply({
-          content: '❌ Invalid Solana wallet address. Please check the address and try again.',
-          ephemeral: true
-        });
-      }
-      
-      try {
-        // Get the SQLite database module directly
-        const sqlite = require('./db/db.js');
-        
-        // Update the wallet address in database
-        sqlite.updateWallet(interaction.user.id, address);
-        
-        const embed = new EmbedBuilder()
-          .setTitle('✅ Wallet Connected Successfully')
-          .setColor(0x00ff00)
-          .setDescription('Your Solana wallet has been connected to your Discord account.')
-          .addFields(
-            { 
-              name: '📍 Wallet Address', 
-              value: `\`${address}\``,
-              inline: false 
-            },
-            { 
-              name: '✨ What\'s Next?', 
-              value: '• Use `/balance` to check your portfolio\n• Use `/tip` to send SOL to other users\n• Use `/verify` to check your verification status',
-              inline: false 
-            },
-            { 
-              name: '🔐 Security Note', 
-              value: 'Your wallet is linked but not verified. For full verification, use `/register-wallet` to sign a verification message.',
-              inline: false 
-            }
-          )
-          .setFooter({ text: 'Your wallet is now ready for on-chain operations!' });
-        
-        await interaction.reply({ embeds: [embed], ephemeral: true });
-        console.log(`Wallet connected: ${interaction.user.id} - ${address}`);
-        
-      } catch (error) {
-        console.error('Connect wallet error:', error);
-        await interaction.reply({
-          content: '❌ Error connecting wallet. Please try again later.',
-          ephemeral: true
-        });
-      }
-      
     } else if (commandName === 'verify') {
       try {
         // Check if user has a wallet registered
@@ -519,22 +588,22 @@ client.on(Events.InteractionCreate, async interaction => {
         
         if (!hasWallet && !trustBadge) {
           const embed = new EmbedBuilder()
-            .setTitle('❌ No Wallet Connected')
+            .setTitle('❌ No Wallet Registered')
             .setColor(0xff0000)
-            .setDescription('You need to connect a wallet before you can verify.')
+            .setDescription('You need to register your wallet for trustless verification.')
             .addFields(
               { 
                 name: '🚀 Getting Started', 
-                value: '**Step 1:** Use `/connect-wallet <address>` to link your wallet\n**OR**\n**Step 1:** Use `/register-wallet` for web-based verification with signature\n\n**Step 2:** Use `/verify` to check your verification status',
+                value: '**Step 1:** Use `/register-wallet` to register with signature verification\n\n**Step 2:** Use `/verify` to check your verification status',
                 inline: false 
               },
               { 
-                name: '🤔 Which method should I use?', 
-                value: '• **`/connect-wallet`** - Quick setup for smart contract operations\n• **`/register-wallet`** - Full verification with cryptographic proof',
+                name: '🔐 Why Signature Verification?', 
+                value: '• **Trustless** - Cryptographic proof of wallet ownership\n• **Secure** - Your keys never leave your wallet\n• **Non-custodial** - You maintain full control',
                 inline: false 
               }
             )
-            .setFooter({ text: 'Choose the method that best fits your needs!' });
+            .setFooter({ text: 'JustTheTip: A trustless Solana agent for Discord' });
           
           return await interaction.reply({ embeds: [embed], ephemeral: true });
         }
