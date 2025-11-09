@@ -103,6 +103,16 @@ const commands = [
     ]
   },
   {
+    name: 'tipstats',
+    description: 'View tipping statistics for yourself or the server 📊',
+    options: [
+      { name: 'type', type: 3, description: 'Stats type: personal or global', required: false, choices: [
+        { name: 'Personal Stats', value: 'personal' },
+        { name: 'Global Stats', value: 'global' }
+      ]}
+    ]
+  },
+  {
     name: 'help',
     description: 'Show bot commands and usage guide',
   },
@@ -359,6 +369,126 @@ client.on(Events.InteractionCreate, async interaction => {
       }
 
       await handleTipCommand(interaction);
+      
+    } else if (commandName === 'tipstats') {
+      try {
+        const statsType = interaction.options.getString('type') || 'personal';
+        const sqlite = require('./db/db.js');
+        
+        if (statsType === 'global') {
+          // Show global statistics
+          const stats = sqlite.getGlobalTipStats();
+          
+          // Build description with global stats
+          let description = '📊 **Server-Wide Tipping Statistics**\n\n';
+          
+          // Total volume by currency
+          if (stats.totals.length > 0) {
+            description += '**💰 Total Volume:**\n';
+            stats.totals.forEach(t => {
+              description += `• ${t.currency}: ${t.total_volume.toFixed(6)} (${t.total_tips} tips)\n`;
+            });
+            description += '\n';
+          }
+          
+          // Recent activity
+          if (stats.recentActivity) {
+            description += `**📈 Last 24 Hours:**\n`;
+            description += `• ${stats.recentActivity.count} tips sent\n`;
+            description += `• ${stats.recentActivity.volume.toFixed(6)} total volume\n\n`;
+          }
+          
+          const embed = new EmbedBuilder()
+            .setTitle('🌐 Global Tip Statistics')
+            .setColor(0x14F195)
+            .setDescription(description)
+            .setTimestamp()
+            .setFooter({ text: 'Statistics are updated in real-time' });
+          
+          // Add top tippers field
+          if (stats.topTippers.length > 0) {
+            const topTippersText = stats.topTippers.slice(0, 5).map((t, i) => 
+              `${i + 1}. <@${t.sender}>: ${t.total_sent.toFixed(4)} SOL (${t.tip_count} tips)`
+            ).join('\n');
+            embed.addFields({ name: '🏆 Top Tippers', value: topTippersText, inline: false });
+          }
+          
+          // Add top receivers field
+          if (stats.topReceivers.length > 0) {
+            const topReceiversText = stats.topReceivers.slice(0, 5).map((t, i) => 
+              `${i + 1}. <@${t.receiver}>: ${t.total_received.toFixed(4)} SOL (${t.tip_count} tips)`
+            ).join('\n');
+            embed.addFields({ name: '💝 Top Receivers', value: topReceiversText, inline: false });
+          }
+          
+          await interaction.reply({ embeds: [embed], ephemeral: false });
+          
+        } else {
+          // Show personal statistics
+          const stats = sqlite.getUserTipStats(interaction.user.id);
+          
+          // Calculate totals
+          let totalSent = 0;
+          let totalReceived = 0;
+          let sentCount = 0;
+          let receivedCount = 0;
+          
+          stats.sent.forEach(s => {
+            totalSent += s.total;
+            sentCount += s.count;
+          });
+          
+          stats.received.forEach(r => {
+            totalReceived += r.total;
+            receivedCount += r.count;
+          });
+          
+          const netBalance = totalReceived - totalSent;
+          const netSymbol = netBalance >= 0 ? '+' : '';
+          
+          let description = `**Your Tipping Activity**\n\n`;
+          description += `📤 **Sent:** ${totalSent.toFixed(6)} SOL (${sentCount} tips)\n`;
+          description += `📥 **Received:** ${totalReceived.toFixed(6)} SOL (${receivedCount} tips)\n`;
+          description += `💹 **Net:** ${netSymbol}${netBalance.toFixed(6)} SOL\n`;
+          
+          const embed = new EmbedBuilder()
+            .setTitle(`📊 ${interaction.user.username}'s Tip Statistics`)
+            .setColor(0x14F195)
+            .setDescription(description)
+            .setTimestamp()
+            .setFooter({ text: 'Keep spreading the love! 💝' });
+          
+          // Add top recipients if any
+          if (stats.topRecipients.length > 0) {
+            const topRecipientsText = stats.topRecipients.slice(0, 5).map((t, i) => 
+              `${i + 1}. <@${t.receiver}>: ${t.total_amount.toFixed(4)} SOL (${t.tip_count} tips)`
+            ).join('\n');
+            embed.addFields({ name: '💸 You Tip Most', value: topRecipientsText, inline: true });
+          }
+          
+          // Add top senders if any
+          if (stats.topSenders.length > 0) {
+            const topSendersText = stats.topSenders.slice(0, 5).map((t, i) => 
+              `${i + 1}. <@${t.sender}>: ${t.total_amount.toFixed(4)} SOL (${t.tip_count} tips)`
+            ).join('\n');
+            embed.addFields({ name: '💝 Tips You Most', value: topSendersText, inline: true });
+          }
+          
+          // If no activity, show helpful message
+          if (sentCount === 0 && receivedCount === 0) {
+            embed.setDescription('You haven\'t sent or received any tips yet!\n\n💡 Use `/tip @user <amount>` to send your first tip!');
+          }
+          
+          await interaction.reply({ embeds: [embed], ephemeral: true });
+        }
+        
+      } catch (error) {
+        console.error('Tipstats error:', error);
+        await interaction.reply({
+          content: '❌ Error fetching tip statistics. Please try again later.',
+          ephemeral: true
+        });
+      }
       
     } else if (commandName === 'register-wallet') {
       try {
