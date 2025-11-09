@@ -40,20 +40,24 @@ jobs:
           node-version: '18.x'
 
       - name: Install Railway CLI
-        run: npm install -g @railway/cli
+        run: |
+          echo "Installing Railway CLI..."
+          npm install -g @railway/cli
+          railway --version
 
-      - name: Deploy to Railway
+      - name: Link to Railway Project
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
         run: |
+          echo "Linking to Railway project..."
           railway link ${{ secrets.RAILWAY_PROJECT_ID }}
-          railway up --service ${{ secrets.RAILWAY_BOT_SERVICE_ID }}
+          echo "✅ Successfully linked to Railway project"
 
       - name: Set Environment Variables
-        if: success()
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
         run: |
+          echo "Setting environment variables..."
           railway variables set DISCORD_BOT_TOKEN="${{ secrets.DISCORD_BOT_TOKEN }}" --service ${{ secrets.RAILWAY_BOT_SERVICE_ID }}
           railway variables set DISCORD_CLIENT_ID="${{ secrets.DISCORD_CLIENT_ID }}" --service ${{ secrets.RAILWAY_BOT_SERVICE_ID }}
           railway variables set GUILD_ID="${{ secrets.GUILD_ID }}" --service ${{ secrets.RAILWAY_BOT_SERVICE_ID }}
@@ -67,11 +71,21 @@ jobs:
           railway variables set ADMIN_USER_IDS="${{ secrets.ADMIN_USER_IDS }}" --service ${{ secrets.RAILWAY_BOT_SERVICE_ID }}
           railway variables set SUPER_ADMIN_SECRET="${{ secrets.SUPER_ADMIN_SECRET }}" --service ${{ secrets.RAILWAY_BOT_SERVICE_ID }}
           railway variables set EMERGENCY_ADMIN_SECRET="${{ secrets.EMERGENCY_ADMIN_SECRET }}" --service ${{ secrets.RAILWAY_BOT_SERVICE_ID }}
+          echo "✅ Environment variables configured successfully"
+
+      - name: Deploy to Railway
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          echo "Deploying bot service..."
+          railway up --service ${{ secrets.RAILWAY_BOT_SERVICE_ID }}
+          echo "✅ Bot service deployed"
 
       - name: Verify Deployment
-        if: success()
         run: |
           echo "✅ Bot deployed successfully to Railway!"
+          echo "Service: ${{ secrets.RAILWAY_BOT_SERVICE_ID }}"
+          echo "Railway will complete deployment after GitHub Actions finish"
           echo "Check Railway dashboard for deployment status"
 
   deploy-api:
@@ -91,20 +105,24 @@ jobs:
           node-version: '18.x'
 
       - name: Install Railway CLI
-        run: npm install -g @railway/cli
+        run: |
+          echo "Installing Railway CLI..."
+          npm install -g @railway/cli
+          railway --version
 
-      - name: Deploy to Railway
+      - name: Link to Railway Project
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
         run: |
+          echo "Linking to Railway project..."
           railway link ${{ secrets.RAILWAY_PROJECT_ID }}
-          railway up --service ${{ secrets.RAILWAY_API_SERVICE_ID }}
+          echo "✅ Successfully linked to Railway project"
 
       - name: Set Environment Variables
-        if: success()
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
         run: |
+          echo "Setting environment variables..."
           railway variables set DISCORD_CLIENT_ID="${{ secrets.DISCORD_CLIENT_ID }}" --service ${{ secrets.RAILWAY_API_SERVICE_ID }}
           railway variables set DISCORD_CLIENT_SECRET="${{ secrets.DISCORD_CLIENT_SECRET }}" --service ${{ secrets.RAILWAY_API_SERVICE_ID }}
           railway variables set DISCORD_REDIRECT_URI="${{ secrets.DISCORD_REDIRECT_URI }}" --service ${{ secrets.RAILWAY_API_SERVICE_ID }}
@@ -114,9 +132,19 @@ jobs:
           railway variables set PORT="3000" --service ${{ secrets.RAILWAY_API_SERVICE_ID }}
           railway variables set NODE_ENV="production" --service ${{ secrets.RAILWAY_API_SERVICE_ID }}
           railway variables set CORS_ORIGIN="${{ secrets.CORS_ORIGIN }}" --service ${{ secrets.RAILWAY_API_SERVICE_ID }}
+          echo "✅ Environment variables configured successfully"
+
+      - name: Deploy to Railway
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          echo "Deploying API service..."
+          railway up --service ${{ secrets.RAILWAY_API_SERVICE_ID }}
+          echo "✅ API service deployed"
 
       - name: Verify Deployment
-        if: success()
         run: |
           echo "✅ API deployed successfully to Railway!"
+          echo "Service: ${{ secrets.RAILWAY_API_SERVICE_ID }}"
+          echo "Railway will complete deployment after GitHub Actions finish"
           echo "Check Railway dashboard for deployment status"
