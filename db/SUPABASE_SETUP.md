@@ -49,7 +49,13 @@ This guide will help you set up the JustTheTip database on Supabase.
 
 ### Step 5: Configure Environment Variables
 
-Add to your `.env` file:
+First, install the PostgreSQL client (if not already installed):
+
+```bash
+npm install pg
+```
+
+Then add to your `.env` file:
 
 ```env
 # Supabase Database Connection
@@ -65,7 +71,21 @@ NODE_ENV=production
 
 ### Step 6: Test the Connection
 
-Run this command to test your connection:
+Run the database validation script to test everything:
+
+```bash
+node db/validate-database.js
+```
+
+This will:
+- ✅ Test database connection
+- ✅ Verify all tables exist
+- ✅ Check indexes and triggers
+- ✅ Test basic operations (INSERT/SELECT/DELETE)
+
+You should see "✅ Database validation completed successfully!"
+
+Alternative manual test:
 
 ```bash
 node -e "const { Pool } = require('pg'); const pool = new Pool({ connectionString: process.env.DATABASE_URL }); pool.query('SELECT NOW()', (err, res) => { console.log(err ? '❌ Error: ' + err.message : '✅ Connected! Server time: ' + res.rows[0].now); pool.end(); });"

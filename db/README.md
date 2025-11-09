@@ -26,7 +26,8 @@ No setup required! The database is automatically created and initialized when th
 
 1. Follow the **[Supabase Setup Guide](./SUPABASE_SETUP.md)** (5 minutes)
 2. Set `DATABASE_URL` environment variable
-3. The bot automatically uses PostgreSQL when `DATABASE_URL` is set
+3. Validate setup: `node db/validate-database.js`
+4. The bot automatically uses PostgreSQL when `DATABASE_URL` is set
 
 ```javascript
 const db = require('./db/database');
