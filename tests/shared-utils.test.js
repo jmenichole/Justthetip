@@ -178,8 +178,8 @@ describe('Embed Builders', () => {
 
       const embed = createBalanceEmbed(balances, priceConfig);
 
-      expect(embed.data.title).toBe('💎 Your Portfolio Balance');
-      expect(embed.data.color).toBe(0x3498db);
+      expect(embed.data.title).toBe('💎 Your Portfolio');
+      expect(embed.data.color).toBe(0x14F195);
       expect(embed.data.description).toContain('$130.00'); // 1.5 * 20 + 100 * 1
     });
 
