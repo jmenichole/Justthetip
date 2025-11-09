@@ -2,17 +2,31 @@
 
 ## Overview
 
-This directory contains the database connection and operations for JustTheTip bot. The project uses **SQLite** with better-sqlite3 for zero-config local storage.
+This directory contains the database connection and operations for JustTheTip bot. 
+
+**Default Mode**: The project uses **SQLite** with better-sqlite3 for zero-config local storage.
+
+**Production Mode**: For production deployments, the project supports **PostgreSQL** (including **Supabase**) with full ACID compliance for financial transactions.
 
 ## Files
 
 - **`db.js`** - Core SQLite database module with helper functions
 - **`database.js`** - Compatibility wrapper maintaining the original API
 - **`justthetip.db`** - SQLite database file (auto-created, git-ignored)
+- **`schema.sql`** - PostgreSQL/Supabase database schema with all tables
+- **`SUPABASE_SETUP.md`** - **⭐ START HERE** for production setup guide
 
 ## Quick Start
 
+### Development (SQLite - Zero Config)
+
 No setup required! The database is automatically created and initialized when the bot starts.
+
+### Production (PostgreSQL/Supabase)
+
+1. Follow the **[Supabase Setup Guide](./SUPABASE_SETUP.md)** (5 minutes)
+2. Set `DATABASE_URL` environment variable
+3. The bot automatically uses PostgreSQL when `DATABASE_URL` is set
 
 ```javascript
 const db = require('./db/database');
@@ -87,15 +101,34 @@ All database functions include try/catch error handling with safe defaults:
 
 The database uses Write-Ahead Logging (WAL) mode for better performance and concurrency.
 
-## Migration Notes
+## Database Options
 
-This database was migrated from PostgreSQL to SQLite for:
-- Zero configuration setup
-- Local file-based storage
-- Simplified deployment
-- No external database dependencies
+### SQLite (Default)
+- ✅ Zero configuration
+- ✅ Local file-based storage
+- ✅ Perfect for development
+- ⚠️ In-memory mode for API fallback when DATABASE_URL is not set
 
-Previous PostgreSQL schema can be found in `schema.sql` (kept for reference).
+### PostgreSQL/Supabase (Production)
+- ✅ ACID compliance for financial transactions
+- ✅ Full transaction safety
+- ✅ Scalable for production
+- ✅ Connection pooling support
+- ✅ Automatic backups (Supabase)
+- 📝 Requires setup - see [SUPABASE_SETUP.md](./SUPABASE_SETUP.md)
+
+## Schema
+
+The PostgreSQL schema in `schema.sql` includes all tables:
+- `users` - Discord user records
+- `balances` - User cryptocurrency balances
+- `transactions` - Transaction audit trail
+- `tips` - Tip transaction records
+- `trust_badges` - NFT trust badges and reputation
+- `wallet_registrations` - Verified wallet addresses
+- `registration_nonces` - Temporary verification nonces
+- `verifications` - NFT verification records
+- `tickets` - Support ticket system
 
 ## Documentation
 
