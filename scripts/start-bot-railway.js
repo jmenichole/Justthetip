@@ -6,6 +6,18 @@
  * This script:
  * 1. Verifies all required secrets are present
  * 2. Performs health checks
+ * 
+ * Copyright (c) 2025 JustTheTip Bot
+ * 
+ * This file is part of JustTheTip.
+ * 
+ * Licensed under the JustTheTip Custom License (Based on MIT).
+ * See LICENSE file in the project root for full license information.
+ * 
+ * SPDX-License-Identifier: MIT
+ * 
+ * This software may not be sold commercially without permission.
+ */
  * 3. Starts the Discord bot
  * 4. Monitors for startup issues
  */

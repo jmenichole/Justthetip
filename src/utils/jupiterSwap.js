@@ -4,6 +4,17 @@
  * Provides cross-token tipping functionality via Jupiter Aggregator API.
  * Users can send one token and recipient receives another (e.g., send USDC, receive BONK).
  * 
+ * Copyright (c) 2025 JustTheTip Bot
+ * 
+ * This file is part of JustTheTip.
+ * 
+ * Licensed under the JustTheTip Custom License (Based on MIT).
+ * See LICENSE file in the project root for full license information.
+ * 
+ * SPDX-License-Identifier: MIT
+ * 
+ * This software may not be sold commercially without permission.
+ * 
  * @module JupiterSwap
  * @author JustTheTip Bot Team
  * @license Custom MIT-based License

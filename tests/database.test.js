@@ -1,6 +1,17 @@
 /**
  * Database Tests
  * Tests for SQLite database functions
+ * 
+ * Copyright (c) 2025 JustTheTip Bot
+ * 
+ * This file is part of JustTheTip.
+ * 
+ * Licensed under the JustTheTip Custom License (Based on MIT).
+ * See LICENSE file in the project root for full license information.
+ * 
+ * SPDX-License-Identifier: MIT
+ * 
+ * This software may not be sold commercially without permission.
  */
 
 const Database = require('../db/database.js');
