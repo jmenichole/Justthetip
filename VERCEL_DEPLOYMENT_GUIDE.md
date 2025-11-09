@@ -42,7 +42,10 @@ vercel --prod
 
 Configure these environment variables in the Vercel dashboard (Project Settings → Environment Variables):
 
-### Required
+### Required for Bot Operation
+- `API_BASE_URL` - **CRITICAL**: Base URL of your deployed API server (e.g., `https://your-project.vercel.app`). This is used by the Discord bot's `/registerwallet` command to generate wallet registration links. If not set, the bot will default to `http://localhost:3000` which will cause 404 errors in production.
+
+### Required for API Server
 - `DISCORD_CLIENT_SECRET` - Discord OAuth client secret
 - `DISCORD_CLIENT_ID` - Discord application client ID
 - `DISCORD_REDIRECT_URI` - OAuth redirect URI
@@ -109,6 +112,7 @@ Example endpoints:
 - `https://your-project.vercel.app/api/health` - Health check
 - `https://your-project.vercel.app/api/tips` - Tips listing
 - `https://your-project.vercel.app/landing.html` - Landing page
+- `https://your-project.vercel.app/sign.html` - Wallet registration page (used by `/registerwallet` command)
 
 ## Testing Locally
 
@@ -149,6 +153,15 @@ This error occurs when Vercel cannot find a valid entrypoint. The `vercel.json` 
 - First request after inactivity may be slower (cold start)
 - Consider using Vercel Pro for better performance
 - Database connection pooling can help reduce cold start impact
+
+### Wallet Registration Links Show 404
+
+If users clicking the wallet registration link from Discord's `/registerwallet` command see a 404 error:
+
+1. **Check API_BASE_URL**: Ensure the `API_BASE_URL` environment variable is set to your Vercel deployment URL (e.g., `https://your-project.vercel.app`)
+2. **Verify sign.html exists**: The file `docs/sign.html` must exist in your repository
+3. **Redeploy**: After adding the environment variable, redeploy the bot (not just the API server)
+4. **Check Discord bot logs**: Verify the bot is using the correct URL when generating registration links
 
 ## Differences from Railway/Heroku Deployment
 
