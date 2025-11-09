@@ -18,7 +18,6 @@
  * 
  * This software may not be sold commercially without permission.
  */
- */
 
 const {
   log,

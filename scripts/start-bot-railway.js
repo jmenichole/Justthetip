@@ -6,6 +6,8 @@
  * This script:
  * 1. Verifies all required secrets are present
  * 2. Performs health checks
+ * 3. Starts the Discord bot
+ * 4. Monitors for startup issues
  * 
  * Copyright (c) 2025 JustTheTip Bot
  * 
@@ -17,9 +19,6 @@
  * SPDX-License-Identifier: MIT
  * 
  * This software may not be sold commercially without permission.
- */
- * 3. Starts the Discord bot
- * 4. Monitors for startup issues
  */
 
 const { spawn } = require('child_process');
