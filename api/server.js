@@ -1497,6 +1497,21 @@ process.on('SIGTERM', async () => {
 // Start the server
 if (require.main === module) {
     startServer();
+} else {
+    // For serverless environments (e.g., Vercel), initialize without starting the server
+    let initialized = false;
+    (async () => {
+        if (!initialized) {
+            initialized = true;
+            try {
+                await initializeDatabase();
+                await initializeSolana();
+                app.locals.db = { pool: null };
+            } catch (error) {
+                console.error('❌ Serverless initialization failed:', error);
+            }
+        }
+    })();
 }
 
 module.exports = app;
