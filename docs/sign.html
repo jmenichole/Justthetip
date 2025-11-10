@@ -244,6 +244,13 @@
     </div>
 
     <script>
+        // API Configuration - Backend URL for wallet registration
+        // When running locally with npm start, the API is at the same origin
+        // When deployed, the API backend should be on Vercel and frontend on GitHub Pages
+        const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? window.location.origin  // Local development
+            : (window.JUSTTHETIP_API_URL || 'https://justthetip.vercel.app'); // Production - can be overridden
+        
         // Parse URL parameters
         const urlParams = new URLSearchParams(window.location.search);
         const discordUserId = urlParams.get('user');
@@ -313,8 +320,7 @@
                 showStatus('pending', '<span class="loading"></span>Verifying signature...');
 
                 // Send to backend for verification
-                const apiBaseUrl = window.location.origin;
-                const response = await fetch(`${apiBaseUrl}/api/registerwallet/verify`, {
+                const response = await fetch(`${API_BASE_URL}/api/registerwallet/verify`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'

@@ -60,6 +60,7 @@ jobs:
           echo "Setting environment variables..."
           railway variables set DISCORD_BOT_TOKEN="${{ secrets.DISCORD_BOT_TOKEN }}" --serviceId=${{ secrets.RAILWAY_BOT_SERVICE_ID }}
           railway variables set DISCORD_CLIENT_ID="${{ secrets.DISCORD_CLIENT_ID }}" --serviceId=${{ secrets.RAILWAY_BOT_SERVICE_ID }}
+          railway variables set FRONTEND_URL="${{ secrets.FRONTEND_URL }}" --serviceId=${{ secrets.RAILWAY_BOT_SERVICE_ID }}
           railway variables set GUILD_ID="${{ secrets.GUILD_ID }}" --serviceId=${{ secrets.RAILWAY_BOT_SERVICE_ID }}
           railway variables set HELIUS_API_KEY="${{ secrets.HELIUS_API_KEY }}" --serviceId=${{ secrets.RAILWAY_BOT_SERVICE_ID }}
           railway variables set SOLANA_RPC_URL="${{ secrets.SOLANA_RPC_URL }}" --serviceId=${{ secrets.RAILWAY_BOT_SERVICE_ID }}

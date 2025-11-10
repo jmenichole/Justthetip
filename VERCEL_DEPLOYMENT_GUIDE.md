@@ -43,7 +43,7 @@ vercel --prod
 Configure these environment variables in the Vercel dashboard (Project Settings → Environment Variables):
 
 ### Required for Bot Operation
-- `API_BASE_URL` - **CRITICAL**: Base URL of your deployed API server (e.g., `https://your-project.vercel.app`). This is used by the Discord bot's `/registerwallet` command to generate wallet registration links. If not set, the bot will default to `http://localhost:3000` which will cause 404 errors in production.
+- `FRONTEND_URL` - **CRITICAL**: Frontend URL where wallet registration page is hosted (default: `https://jmenichole.github.io/Justthetip`). This is used by the Discord bot's `/register-wallet` command to generate wallet registration links. The sign.html page is hosted on GitHub Pages and makes API calls to the Vercel backend.
 
 ### Required for API Server
 - `DISCORD_CLIENT_SECRET` - Discord OAuth client secret

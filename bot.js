@@ -497,9 +497,10 @@ client.on(Events.InteractionCreate, async interaction => {
         const discordUserId = interaction.user.id;
         const discordUsername = interaction.user.username;
         
-        // Create registration URL (will point to our web-based signing page)
-        const apiBaseUrl = process.env.API_BASE_URL || 'http://localhost:3000';
-        const registrationUrl = `${apiBaseUrl}/sign.html?user=${encodeURIComponent(discordUserId)}&username=${encodeURIComponent(discordUsername)}&nonce=${nonce}`;
+        // Create registration URL - points to GitHub Pages for the sign.html frontend
+        // The sign.html page will make API calls to the Vercel backend
+        const frontendBaseUrl = process.env.FRONTEND_URL || 'https://jmenichole.github.io/Justthetip';
+        const registrationUrl = `${frontendBaseUrl}/sign.html?user=${encodeURIComponent(discordUserId)}&username=${encodeURIComponent(discordUsername)}&nonce=${nonce}`;
         
         const embed = new EmbedBuilder()
           .setTitle('🔐 Register Your Solana Wallet')
