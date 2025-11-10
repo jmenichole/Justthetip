@@ -96,10 +96,22 @@ const commands = [
   },
   {
     name: 'tip',
-    description: 'Send SOL to another user',
+    description: 'Send crypto to another user (SOL, USDC, BONK, USDT)',
     options: [
       { name: 'user', type: 6, description: 'User to tip', required: true },
-      { name: 'amount', type: 10, description: 'Amount in SOL to tip', required: true }
+      { name: 'amount', type: 10, description: 'Amount to tip', required: true },
+      { 
+        name: 'currency', 
+        type: 3, 
+        description: 'Token to send (default: SOL)', 
+        required: false,
+        choices: [
+          { name: 'SOL - Solana', value: 'SOL' },
+          { name: 'USDC - USD Coin', value: 'USDC' },
+          { name: 'BONK - Bonk', value: 'BONK' },
+          { name: 'USDT - Tether USD', value: 'USDT' }
+        ]
+      }
     ]
   },
   {
