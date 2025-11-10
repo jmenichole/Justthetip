@@ -26,7 +26,14 @@ const { EmbedBuilder } = require('discord.js');
 function createBalanceEmbed(balances, priceConfig, isRefresh = false) {
   const solBalance = balances.SOL || 0;
   
-  // Calculate approximate USD value
+  // Calculate total USD value including all tokens
+  let totalUsdValue = 0;
+  for (const [token, balance] of Object.entries(balances)) {
+    const price = priceConfig[token] || 0;
+    totalUsdValue += (balance || 0) * price;
+  }
+  
+  // Calculate individual token USD values
   const solUsdValue = solBalance * (priceConfig.SOL || 20);
   
   // Create formatted balance display with better visual hierarchy
@@ -34,7 +41,7 @@ function createBalanceEmbed(balances, priceConfig, isRefresh = false) {
     .setTitle('💎 Your Portfolio')
     .setColor(0x14F195) // Solana green color
     .setDescription(
-      `**Total Value:** \`$${solUsdValue.toFixed(2)} USD\`\n` +
+      `**Total Value:** \`$${totalUsdValue.toFixed(2)} USD\`\n` +
       `━━━━━━━━━━━━━━━━━━━━━━`
     )
     .addFields(
@@ -128,16 +135,27 @@ function createWalletRegisteredEmbed(currency, address, isVerified = false) {
  */
 function createTipSuccessEmbed(sender, recipient, amount, currency, fee = 0, netAmount = null) {
   const actualNetAmount = netAmount !== null ? netAmount : amount;
+  
+  // Format amount intelligently - use fewer decimals for whole numbers
+  const formatAmount = (amt) => {
+    // If it's a whole number, show no decimals
+    if (Number.isInteger(amt)) {
+      return amt.toString();
+    }
+    // Otherwise, show up to 6 decimals but remove trailing zeros
+    return parseFloat(amt.toFixed(6)).toString();
+  };
+  
   const embed = new EmbedBuilder()
     .setTitle('💸 Tip Sent Successfully!')
-    .setDescription(`${sender} tipped ${recipient} **${actualNetAmount.toFixed(6)} ${currency}**! 🎉`)
+    .setDescription(`${sender} tipped ${recipient} **${formatAmount(actualNetAmount)} ${currency}**! 🎉`)
     .setColor(0x2ecc71);
   
   if (fee > 0) {
     embed.addFields(
-      { name: '💰 Gross Amount', value: `${amount.toFixed(6)} ${currency}`, inline: true },
-      { name: '📊 Fee (0.5%)', value: `${fee.toFixed(6)} ${currency}`, inline: true },
-      { name: '✅ Net Amount', value: `${actualNetAmount.toFixed(6)} ${currency}`, inline: true }
+      { name: '💰 Gross Amount', value: `${formatAmount(amount)} ${currency}`, inline: true },
+      { name: '📊 Fee (0.5%)', value: `${formatAmount(fee)} ${currency}`, inline: true },
+      { name: '✅ Net Amount', value: `${formatAmount(actualNetAmount)} ${currency}`, inline: true }
     );
   }
   
