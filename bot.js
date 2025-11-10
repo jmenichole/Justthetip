@@ -173,21 +173,26 @@ Register once with \`/register-wallet\` to tip with SOL, USDC, BONK, and more!
 **Essential Commands:**
 • \`/register-wallet\` — Connect your wallet (sign once, use forever)
 • \`/balance\` — Check your token balances
-• \`/tip @user <amount> [token]\` — Send tokens (default: SOL)
+• \`/tip @user <amount>\` — Send tokens (use \`all\` to send full balance, \`$10\` for USD)
+• \`/airdrop <currency> <amount> <recipients>\` — Create community airdrops (default: 1 hour)
 • \`/verify\` — Check your wallet status
+• \`/support <issue>\` — Get help or report problems
 
 **💡 How It Works:**
 Your single signature proves wallet ownership for ALL tokens. No repeated signing needed!
 
 **🚀 Quick Start:**
 1. Run \`/register-wallet\` and sign the message
-2. Use \`/tip @friend 10 USDC\` or \`/tip @friend 0.1 SOL\`
-3. That's it! Fully non-custodial and secure.
+2. Use \`/tip @friend 0.1 SOL\` or \`/tip @friend $5\`
+3. Create airdrops with \`/airdrop SOL 1.0 5\` for community engagement
+4. That's it! Fully non-custodial and secure.
 =======
 **💸 Using the Bot:**
 \`/balance\` — Check your funds
-\`/tip @user <amount>\` — Send SOL to a user (use $ for USD, e.g., $10 or 0.5 for SOL)
+\`/tip @user <amount>\` — Send SOL (use $ for USD, \`all\` for full balance)
   _Note: A 0.5% fee is applied to all tips_
+\`/airdrop <currency> <amount> <recipients>\` — Create community airdrops
+  _Default: 1 hour expiration, unclaimed funds returned to creator_
 \`/support <issue>\` — Get help or report an issue
 
 Need help? Use \`/support <your issue>\``;
@@ -214,10 +219,11 @@ JustTheTip uses **Solana Trustless Agent** technology. One wallet signature enab
 **Step 2 - Verify Your Setup:**
 • Use \`/verify\` to check your wallet registration status
 
-**Step 3 - Start Tipping:**
+**Step 3 - Start Tipping & Airdrops:**
 • \`/tip @friend 0.5 SOL\` — Send Solana
-• \`/tip @friend 10 USDC\` — Send USD Coin (coming soon)
-• \`/tip @friend 1000 BONK\` — Send Bonk (coming soon)
+• \`/tip @friend $10\` — Send $10 worth of SOL
+• \`/tip @friend all\` — Send your entire balance
+• \`/airdrop SOL 1.0 5\` — Airdrop to 5 people (expires in 1 hour)
 
 ---
 
@@ -231,20 +237,29 @@ JustTheTip uses **Solana Trustless Agent** technology. One wallet signature enab
 • \`/balance\` — See all your token balances (SOL, USDC, BONK, USDT)
 
 **Send Tips**
-• \`/tip @user <amount> [token]\` — Send tokens to any Discord user
+• \`/tip @user <amount>\` — Send SOL to any Discord user
   Examples:
-  • \`/tip @Alice 0.5 SOL\` — Send half a SOL
-  • \`/tip @Bob 10 USDC\` — Send 10 USD Coin (coming soon)
-  • \`/tip @Charlie 1000 BONK\` — Send Bonk tokens (coming soon)
+  • \`/tip @Alice 0.5\` — Send 0.5 SOL
+  • \`/tip @Bob $5\` — Send $5 worth of SOL
+  • \`/tip @Charlie all\` — Send your entire balance
 =======
-• \`/tip <@user> <amount>\` — Send SOL to another Discord user (use $ for USD, e.g., $10 or 0.5 for SOL)
+• \`/tip @user <amount>\` — Send SOL to another Discord user
   _Example: \`/tip @Alice 0.05\` sends 0.05 SOL_
   _Example: \`/tip @Bob $5\` sends $5 worth of SOL_
+  _Example: \`/tip @Charlie all\` sends your entire balance_
   _Note: A 0.5% fee is applied to all tips for bot maintenance_
+
+**Create Airdrops**
+• \`/airdrop <currency> <amount> <recipients> [duration]\` — Create community airdrops
+  _Default duration: 1 hour. Unclaimed funds returned to creator._
+  _Users without wallets have 24 hours to register and claim._
+  Examples:
+  • \`/airdrop SOL 1.0 5\` — Airdrop 1 SOL to 5 people (1 hour)
+  • \`/airdrop SOL 2.0 10 24h\` — Airdrop 2 SOL to 10 people (24 hours)
 
 **Get Help**
 • \`/help\` — Quick command guide
-• \`/support <issue>\` — Report problems or get assistance
+• \`/support <issue>\` — Report problems (sends to admin team)
 
 ---
 

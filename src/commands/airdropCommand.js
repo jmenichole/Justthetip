@@ -49,10 +49,10 @@ class AirdropCommand {
           .setMaxValue(100))
       .addStringOption(option =>
         option.setName('duration')
-          .setDescription('How long the airdrop lasts')
-          .setRequired(true)
+          .setDescription('How long the airdrop lasts (default: 1 hour)')
+          .setRequired(false)
           .addChoices(
-            { name: '1 Hour', value: '1h' },
+            { name: '1 Hour (Default)', value: '1h' },
             { name: '6 Hours', value: '6h' },
             { name: '12 Hours', value: '12h' },
             { name: '24 Hours (1 Day)', value: '24h' },
@@ -105,7 +105,7 @@ class AirdropCommand {
       const currency = interaction.options.getString('currency');
       const totalAmount = interaction.options.getNumber('amount');
       const numRecipients = interaction.options.getInteger('recipients');
-      const duration = interaction.options.getString('duration');
+      const duration = interaction.options.getString('duration') || '1h'; // Default to 1 hour
       const message = interaction.options.getString('message') || `${totalAmount} ${currency} Airdrop!`;
 
       const userId = interaction.user.id;
@@ -114,7 +114,7 @@ class AirdropCommand {
       // Calculate per-recipient amount
       const amountPerUser = totalAmount / numRecipients;
 
-      // Calculate expiration time
+      // Calculate expiration time (default 1 hour)
       const durationMs = this.parseDuration(duration);
       const expiresAt = Date.now() + durationMs;
       const durationText = this.formatDuration(duration);
@@ -365,17 +365,39 @@ class AirdropCommand {
         const airdrop = await this.db.getAirdrop(airdropId);
         if (!airdrop || !airdrop.active) return;
 
+        // Calculate unclaimed amount
+        const claimedCount = airdrop.claimedUsers ? airdrop.claimedUsers.length : 0;
+        const unclaimedCount = airdrop.maxRecipients - claimedCount;
+        const unclaimedAmount = unclaimedCount * airdrop.amountPerUser;
+
         // Mark as expired
         await this.db.updateAirdrop(airdropId, { active: false });
+
+        // Return unclaimed funds to creator if any
+        if (unclaimedAmount > 0) {
+          try {
+            await this.db.creditBalance(airdrop.creator_id, unclaimedAmount, airdrop.currency);
+            console.log(`Returned ${unclaimedAmount} ${airdrop.currency} from expired airdrop ${airdropId} to creator ${airdrop.creator_id}`);
+          } catch (creditError) {
+            console.error('Error returning unclaimed funds:', creditError);
+          }
+        }
 
         // Update message if possible
         if (airdrop.messageId) {
           try {
             const message = await channel.messages.fetch(airdrop.messageId);
             
+            let description = `**${airdrop.creatorName}**'s airdrop has expired.`;
+            if (unclaimedAmount > 0) {
+              description += `\n\n💰 **${unclaimedAmount.toFixed(4)} ${airdrop.currency}** returned to creator (${unclaimedCount} unclaimed slots).`;
+            } else {
+              description += '\n\n🎉 All slots were claimed!';
+            }
+
             const expiredEmbed = EmbedBuilder.from(message.embeds[0])
-              .setColor('#95a5a6')
-              .setDescription(`**${airdrop.creatorName}**'s airdrop has expired.`);
+              .setColor(unclaimedAmount > 0 ? '#95a5a6' : '#00ff88')
+              .setDescription(description);
 
             const disabledButton = new ButtonBuilder()
               .setCustomId(`claim_airdrop_${airdropId}`)
