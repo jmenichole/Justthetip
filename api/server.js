@@ -16,6 +16,7 @@
 
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 const path = require('path');
 const { PublicKey } = require('@solana/web3.js');
 const nacl = require('tweetnacl');
@@ -57,6 +58,32 @@ const CONFIG = {
 };
 
 // ===== MIDDLEWARE =====
+// Security headers with CSP
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'"], // Allow inline styles for the HTML pages
+            imgSrc: ["'self'", "data:", "https:", "https://tan-glamorous-porcupine-751.mypinata.cloud"],
+            connectSrc: [
+                "'self'",
+                "https://jmenichole.github.io",
+                "https://justthetip.vercel.app",
+                "https://api.mainnet-beta.solana.com",
+                "https://api.devnet.solana.com",
+                "https://phantom.app",
+                "https://solflare.com"
+            ],
+            fontSrc: ["'self'", "data:"],
+            objectSrc: ["'none'"],
+            mediaSrc: ["'self'"],
+            frameSrc: ["'none'"],
+        },
+    },
+    crossOriginEmbedderPolicy: false, // Required for some wallet extensions
+}));
+
 app.use(cors({
     origin: [
         'https://jmenichole.github.io',

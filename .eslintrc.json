@@ -40,7 +40,7 @@
       }
     },
     {
-      "files": ["docs/**/*.js"],
+      "files": ["docs/**/*.js", "api/public/**/*.js"],
       "env": {
         "browser": true
       }
