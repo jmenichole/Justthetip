@@ -135,14 +135,27 @@ function startBot() {
   log(`Starting bot from: ${botPath}`, 'cyan');
   log('', 'reset');
   
-  // Start the bot process
+  // Start the bot process with explicit error capture
   const bot = spawn('node', [botPath], {
-    stdio: 'inherit',
+    stdio: ['inherit', 'pipe', 'pipe'], // Capture stdout and stderr
     env: process.env,
+  });
+  
+  // Log stdout from bot
+  bot.stdout.on('data', (data) => {
+    process.stdout.write(data);
+  });
+  
+  // Log stderr from bot with proper formatting
+  bot.stderr.on('data', (data) => {
+    process.stderr.write(data);
   });
   
   bot.on('error', (error) => {
     log(`\n❌ Failed to start bot: ${error.message}`, 'red');
+    log(`Stack trace: ${error.stack}`, 'red');
+    // Log to Railway's error stream
+    console.error('Bot spawn error:', error);
     process.exit(1);
   });
   
@@ -152,7 +165,11 @@ function startBot() {
       if (signal) {
         log(`Signal: ${signal}`, 'yellow');
       }
+      // Log to Railway's error stream
+      console.error(`Bot process exited with code ${code}, signal: ${signal}`);
       process.exit(code || 1);
+    } else {
+      log(`\n✅ Bot exited gracefully`, 'green');
     }
   });
   
@@ -196,6 +213,26 @@ async function main() {
     process.exit(1);
   }
 }
+
+// Global error handlers
+process.on('unhandledRejection', (reason, promise) => {
+  log('\n❌ Unhandled Rejection detected:', 'red');
+  console.error('Promise:', promise);
+  console.error('Reason:', reason);
+  if (reason && reason.stack) {
+    console.error('Stack trace:', reason.stack);
+  }
+});
+
+process.on('uncaughtException', (error) => {
+  log('\n❌ Uncaught Exception detected:', 'red');
+  console.error('Error:', error);
+  console.error('Stack trace:', error.stack);
+  // Exit to allow Railway to restart the service
+  setTimeout(() => {
+    process.exit(1);
+  }, 1000);
+});
 
 // Run the startup sequence
 main().catch((error) => {

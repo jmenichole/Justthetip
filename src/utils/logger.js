@@ -17,7 +17,7 @@
 const winston = require('winston');
 
 const logger = winston.createLogger({
-  level: 'info',
+  level: process.env.LOG_LEVEL || 'info',
   format: winston.format.combine(
     winston.format.timestamp(),
     winston.format.errors({ stack: true }),
@@ -25,15 +25,38 @@ const logger = winston.createLogger({
   ),
   defaultMeta: { service: 'justthetip-bot' },
   transports: [
-    new winston.transports.File({ filename: 'logs/error.log', level: 'error' }),
-    new winston.transports.File({ filename: 'logs/combined.log' }),
+    // Always log to console for Railway (Railway captures stdout/stderr)
+    new winston.transports.Console({
+      format: winston.format.combine(
+        winston.format.colorize(),
+        winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+        winston.format.printf(({ timestamp, level, message, service, stack }) => {
+          const baseMessage = `[${timestamp}] [${service}] ${level}: ${message}`;
+          return stack ? `${baseMessage}\n${stack}` : baseMessage;
+        })
+      )
+    }),
   ],
 });
 
-if (process.env.NODE_ENV !== 'production') {
-  logger.add(new winston.transports.Console({
-    format: winston.format.simple()
-  }));
+// Add file logging only in non-production or when explicitly enabled
+if (process.env.NODE_ENV !== 'production' || process.env.ENABLE_FILE_LOGGING === 'true') {
+  try {
+    const fs = require('fs');
+    const path = require('path');
+    const logsDir = path.join(process.cwd(), 'logs');
+    
+    // Create logs directory if it doesn't exist
+    if (!fs.existsSync(logsDir)) {
+      fs.mkdirSync(logsDir, { recursive: true });
+    }
+    
+    logger.add(new winston.transports.File({ filename: 'logs/error.log', level: 'error' }));
+    logger.add(new winston.transports.File({ filename: 'logs/combined.log' }));
+  } catch (error) {
+    // If file logging fails, just continue with console logging
+    console.warn('⚠️  File logging disabled:', error.message);
+  }
 }
 
 module.exports = logger;

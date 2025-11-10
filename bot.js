@@ -966,4 +966,40 @@ client.once('ready', async () => {
   }
 });
 
-client.login(process.env.DISCORD_BOT_TOKEN);
+// Global error handlers for production stability
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('❌ Unhandled Rejection at:', promise);
+  console.error('❌ Reason:', reason);
+  // Log stack trace if available
+  if (reason && reason.stack) {
+    console.error('Stack trace:', reason.stack);
+  }
+});
+
+process.on('uncaughtException', (error) => {
+  console.error('❌ Uncaught Exception:', error);
+  console.error('Stack trace:', error.stack);
+  // Exit gracefully to allow Railway to restart the service
+  setTimeout(() => {
+    console.error('⚠️  Exiting due to uncaught exception...');
+    process.exit(1);
+  }, 1000);
+});
+
+// Handle Discord client errors
+client.on('error', (error) => {
+  console.error('❌ Discord Client Error:', error);
+  console.error('Stack trace:', error.stack);
+});
+
+client.on('warn', (info) => {
+  console.warn('⚠️  Discord Client Warning:', info);
+});
+
+// Login with error handling
+client.login(process.env.DISCORD_BOT_TOKEN).catch((error) => {
+  console.error('❌ Failed to login to Discord:', error);
+  console.error('Stack trace:', error.stack);
+  console.error('Please check your DISCORD_BOT_TOKEN environment variable');
+  process.exit(1);
+});

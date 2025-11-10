@@ -1569,4 +1569,24 @@ if (require.main === module) {
     })();
 }
 
+// Global error handlers for production stability
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('❌ Unhandled Rejection at:', promise);
+    console.error('❌ Reason:', reason);
+    // Log stack trace if available
+    if (reason && reason.stack) {
+        console.error('Stack trace:', reason.stack);
+    }
+});
+
+process.on('uncaughtException', (error) => {
+    console.error('❌ Uncaught Exception:', error);
+    console.error('Stack trace:', error.stack);
+    // Exit gracefully to allow Railway to restart the service
+    setTimeout(() => {
+        console.error('⚠️  Exiting due to uncaught exception...');
+        process.exit(1);
+    }, 1000);
+});
+
 module.exports = app;
