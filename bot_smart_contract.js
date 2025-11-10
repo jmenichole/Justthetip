@@ -47,7 +47,6 @@ const db = require('./db/database');
 const crypto = require('crypto');
 const {
   createOnChainBalanceEmbed,
-  createWalletRegisteredEmbed,
 } = require('./src/utils/embedBuilders');
 
 const { commands: improvedCommands, helpMessages: HELP_MESSAGES } = require('./IMPROVED_SLASH_COMMANDS');
@@ -370,27 +369,6 @@ client.on(Events.InteractionCreate, async interaction => {
           `**Wallet:** ${walletAddress ? `\`${walletAddress}\`` : 'Not connected'}`
         )
         .setColor(0xef4444);
-        
-      await interaction.reply({ embeds: [embed], ephemeral: true });
-      
-    } else if (commandName === 'register-wallet') {
-      // Keep backward compatibility with old command
-      const address = interaction.options.getString('address');
-      const userId = interaction.user.id;
-      
-      // Validate Solana address
-      try {
-        new PublicKey(address);
-      } catch (error) {
-        return interaction.reply({ 
-          content: '❌ Invalid Solana wallet address', 
-          ephemeral: true 
-        });
-      }
-      
-      userWallets.set(userId, address);
-      
-      const embed = createWalletRegisteredEmbed('SOL', address, false);
         
       await interaction.reply({ embeds: [embed], ephemeral: true });
       
