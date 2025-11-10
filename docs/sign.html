@@ -4,7 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JustTheTip - Register Wallet</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="icon" href="logo.png" type="image/png">
     <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --dark-bg: #0a0a0f;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --text-muted: rgba(255, 255, 255, 0.5);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --info: #3b82f6;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -12,72 +32,363 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 30%, rgba(102, 126, 234, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 70%, rgba(118, 75, 162, 0.15) 0%, transparent 50%);
+            pointer-events: none;
         }
 
         .container {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            max-width: 600px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            max-width: 650px;
             width: 100%;
             padding: 40px;
+            position: relative;
+            z-index: 1;
         }
 
         .header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 35px;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .logo-img {
+            width: 56px;
+            height: 56px;
+            filter: drop-shadow(0 4px 12px rgba(102, 126, 234, 0.3));
+        }
+
+        .logo-text {
+            font-size: 2rem;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .header h1 {
-            color: #333;
+            color: var(--text-primary);
             font-size: 28px;
             margin-bottom: 10px;
+            font-weight: 600;
         }
 
         .header p {
-            color: #666;
+            color: var(--text-secondary);
             font-size: 16px;
         }
 
         .info-box {
-            background: #f8f9fa;
+            background: rgba(102, 126, 234, 0.1);
             border-left: 4px solid #667eea;
-            padding: 15px;
+            padding: 20px;
             margin-bottom: 25px;
-            border-radius: 4px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
         }
 
         .info-box h3 {
-            color: #333;
+            color: var(--text-primary);
             font-size: 16px;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
+            font-weight: 600;
         }
 
         .info-box p {
-            color: #666;
+            color: var(--text-secondary);
             font-size: 14px;
-            line-height: 1.6;
+            line-height: 1.8;
         }
 
         .status {
             text-align: center;
             padding: 20px;
-            border-radius: 8px;
+            border-radius: 12px;
             margin-bottom: 25px;
-            font-size: 16px;
+            font-size: 15px;
+            backdrop-filter: blur(10px);
         }
 
         .status.pending {
-            background: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeaa7;
+            background: rgba(245, 158, 11, 0.1);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .status.success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .status.error {
+            background: rgba(239, 68, 68, 0.1);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .button {
+            width: 100%;
+            padding: 16px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 12px;
+            font-family: 'Inter', sans-serif;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+            transform: translateX(-100%);
+            transition: transform 0.6s;
+        }
+
+        .button:hover::before {
+            transform: translateX(100%);
+        }
+
+        .button.primary {
+            background: var(--primary-gradient);
+            color: white;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .button.primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .security-notice {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 25px;
+            backdrop-filter: blur(10px);
+        }
+
+        .security-notice h4 {
+            color: #60a5fa;
+            font-size: 14px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+        }
+
+        .security-notice ul {
+            margin-left: 20px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .user-info {
+            background: rgba(102, 126, 234, 0.08);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(10px);
+        }
+
+        .user-info div {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .user-info div:last-child {
+            border-bottom: none;
+        }
+
+        .user-info label {
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .user-info span {
+            color: var(--text-primary);
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+        }
+
+        h3 {
+            color: var(--text-primary);
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .wallet-support-note {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-top: 10px;
+            line-height: 1.6;
+        }
+
+        .wallet-support-note strong {
+            color: var(--text-primary);
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 30px 20px;
+            }
+
+            .logo-img {
+                width: 48px;
+                height: 48px;
+            }
+
+            .logo-text {
+                font-size: 1.5rem;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .button {
+                padding: 14px 20px;
+                font-size: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo-container">
+                <img src="logo.png" alt="JustTheTip Logo" class="logo-img">
+                <span class="logo-text">JustTheTip</span>
+            </div>
+            <h1>Register Your Wallet</h1>
+            <p>Connect your Solana wallet securely to JustTheTip Bot</p>
+        </div>
+
+        <div class="user-info" id="userInfo" style="display: none;">
+            <div>
+                <label>Discord User:</label>
+                <span id="discordUsername"></span>
+            </div>
+            <div>
+                <label>User ID:</label>
+                <span id="discordUserId"></span>
+            </div>
+            <div>
+                <label>Session:</label>
+                <span id="nonce"></span>
+            </div>
+        </div>
+
+        <div id="statusMessage" class="status pending">
+            Waiting for wallet connection...
+        </div>
+
+        <div class="info-box">
+            <h3>📝 What will happen:</h3>
+            <p>
+                1. Connect using Phantom, Solflare, or WalletConnect (any wallet)<br>
+                2. Sign a verification message (non-custodial)<br>
+                3. Your wallet will be registered instantly
+            </p>
+        </div>
+
+        <button id="connectButton" class="button primary">
+            🟣 Connect Phantom Wallet
+        </button>
+
+        <button id="solflareButton" class="button primary" style="background: linear-gradient(135deg, #fc1859 0%, #f5576c 100%); box-shadow: 0 4px 12px rgba(252, 24, 89, 0.4);">
+            🟠 Connect Solflare Wallet
+        </button>
+
+        <button id="walletConnectButton" class="button primary" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); box-shadow: 0 4px 12px rgba(79, 172, 254, 0.4); margin-top: 10px;">
+            🔗 Connect with WalletConnect (Any Wallet)
+        </button>
+
+        <p class="wallet-support-note">
+            <strong>WalletConnect supports:</strong> Phantom, Solflare, Trust Wallet, and any Solana-compatible wallet on mobile or desktop.
+        </p>
+
+        <div class="security-notice">
+            <h4>🔒 Security Guarantees</h4>
+            <ul>
+                <li>Your private keys never leave your wallet</li>
+                <li>Signatures are not stored permanently</li>
+                <li>Registration links expire after 10 minutes</li>
+                <li>Non-custodial - you maintain full control</li>
+            </ul>
+        </div>
+    </div>
         }
 
         .status.success {
@@ -218,19 +529,27 @@
         <div class="info-box">
             <h3>📝 What will happen:</h3>
             <p>
-                1. You'll connect your Phantom or Solflare wallet<br>
+                1. Connect using Phantom, Solflare, or WalletConnect (any wallet)<br>
                 2. Sign a verification message (non-custodial)<br>
                 3. Your wallet will be registered instantly
             </p>
         </div>
 
         <button id="connectButton" class="button primary">
-            Connect Phantom Wallet
+            🟣 Connect Phantom Wallet
         </button>
 
         <button id="solflareButton" class="button primary" style="background: #fc1859;">
-            Connect Solflare Wallet
+            🟠 Connect Solflare Wallet
         </button>
+
+        <button id="walletConnectButton" class="button primary" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); margin-top: 10px;">
+            🔗 Connect with WalletConnect (Any Wallet)
+        </button>
+
+        <p style="text-align: center; color: #666; font-size: 14px; margin-top: 15px;">
+            <strong>WalletConnect supports:</strong> Phantom, Solflare, Trust Wallet, and any Solana-compatible wallet on mobile or desktop.
+        </p>
 
         <div class="security-notice">
             <h4>🔒 Security Guarantees</h4>
@@ -355,8 +674,139 @@
             }
         }
 
+        async function connectWalletConnect() {
+            showStatus('pending', `
+                <h3 style="margin-bottom: 15px;">🔗 WalletConnect Registration</h3>
+                <p style="line-height: 1.8; text-align: left; padding: 0 20px;">
+                    <strong>For mobile wallet users:</strong><br>
+                    1. Open your Solana wallet app (Phantom, Solflare, Trust Wallet, etc.)<br>
+                    2. Copy your wallet address from the app<br>
+                    3. Paste it in the prompt when clicking "Enter Wallet Details" below<br>
+                    4. Sign the message in your wallet app<br>
+                    5. Copy and submit the signature<br><br>
+                    
+                    <strong>For desktop users with mobile wallet:</strong><br>
+                    You can scan a QR code or manually enter your wallet details following the same steps above.<br><br>
+                    
+                    <button onclick="handleManualEntry()" style="padding: 12px 24px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: 600;">
+                        📝 Enter Wallet Details
+                    </button>
+                </p>
+            `);
+        }
+
+        async function handleManualEntry() {
+            const walletAddress = prompt('Enter your Solana wallet address:');
+            
+            if (!walletAddress || walletAddress.trim().length === 0) {
+                showStatus('error', '❌ No wallet address provided. Please try again.');
+                return;
+            }
+            
+            // Validate wallet address format (basic check)
+            if (walletAddress.length < 32 || walletAddress.length > 44) {
+                showStatus('error', '❌ Invalid wallet address format. Solana addresses are 32-44 characters long.');
+                return;
+            }
+            
+            // Create the message to sign
+            const message = {
+                app: "JustTheTip",
+                discord_user: discordUsername,
+                discord_id: discordUserId,
+                timestamp: new Date().toISOString(),
+                nonce: nonce,
+                purpose: "Register this wallet for deposits & withdrawals"
+            };
+
+            const messageString = JSON.stringify(message, null, 2);
+            
+            // Show the message that needs to be signed
+            showStatus('pending', `
+                <div style="text-align: left; padding: 20px;">
+                    <h3 style="margin-bottom: 15px;">✍️ Sign This Message</h3>
+                    <p style="margin-bottom: 15px;">Copy the message below and sign it in your wallet app:</p>
+                    <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin: 15px 0; overflow-x: auto;">
+                        <pre style="margin: 0; white-space: pre-wrap; word-break: break-word; font-size: 12px; color: #333;">${messageString}</pre>
+                    </div>
+                    <button onclick="navigator.clipboard.writeText(\`${messageString.replace(/[`\\]/g, '\\$&')}\`).then(() => alert('Message copied to clipboard!'))" 
+                            style="padding: 12px 24px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; margin-bottom: 15px; font-weight: 600;">
+                        📋 Copy Message
+                    </button>
+                    <p style="margin: 15px 0;"><strong>After signing in your wallet app:</strong></p>
+                    <ol style="margin-left: 20px; line-height: 1.8;">
+                        <li>Copy the signature (base64 or base58 format)</li>
+                        <li>Click "Submit Signature" below</li>
+                        <li>Paste the signature when prompted</li>
+                    </ol>
+                    <button onclick="submitSignature('${walletAddress}')" 
+                            style="padding: 12px 24px; background: #10b981; color: white; border: none; border-radius: 8px; cursor: pointer; margin-top: 15px; font-weight: 600;">
+                        ✍️ Submit Signature
+                    </button>
+                </div>
+            `);
+        }
+
+        async function submitSignature(walletAddress) {
+            let signature = prompt('Enter the signature from your wallet (base64 or base58 format):');
+            
+            if (!signature || signature.trim().length === 0) {
+                showStatus('error', '❌ No signature provided. Please try again.');
+                return;
+            }
+            
+            signature = signature.trim();
+            
+            showStatus('pending', '⏳ Verifying signature...');
+            
+            const message = {
+                app: "JustTheTip",
+                discord_user: discordUsername,
+                discord_id: discordUserId,
+                timestamp: new Date().toISOString(),
+                nonce: nonce,
+                purpose: "Register this wallet for deposits & withdrawals"
+            };
+
+            const messageString = JSON.stringify(message, null, 2);
+            
+            try {
+                // Send to backend for verification
+                const response = await fetch(`${API_BASE_URL}/api/registerwallet/verify`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: messageString,
+                        publicKey: walletAddress,
+                        signature: signature,
+                        discordUserId: discordUserId,
+                        discordUsername: discordUsername,
+                        nonce: nonce
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showStatus('success', `✅ Wallet registered successfully!<br><br>Wallet: ${walletAddress.substring(0, 8)}...${walletAddress.substring(walletAddress.length - 8)}<br><br>You can now close this window and return to Discord.`);
+                    document.getElementById('connectButton').disabled = true;
+                    document.getElementById('solflareButton').disabled = true;
+                    document.getElementById('walletConnectButton').disabled = true;
+                } else {
+                    showStatus('error', `❌ Registration failed: ${result.error || 'Unknown error'}<br><br>Please make sure you:<br>• Signed the exact message shown<br>• Copied the complete signature<br>• Are using the correct wallet address`);
+                }
+
+            } catch (error) {
+                console.error('Signature submission error:', error);
+                showStatus('error', `❌ Error: ${error.message || 'Failed to verify signature'}`);
+            }
+        }
+
         document.getElementById('connectButton').addEventListener('click', () => connectWallet('phantom'));
         document.getElementById('solflareButton').addEventListener('click', () => connectWallet('solflare'));
+        document.getElementById('walletConnectButton').addEventListener('click', connectWalletConnect);
     </script>
 </body>
 </html>
