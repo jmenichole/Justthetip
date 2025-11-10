@@ -16,9 +16,17 @@ JustTheTip now features a streamlined, non-custodial wallet registration system 
 
 ## Supported Wallets
 
-### Desktop (Browser Extensions)
+### Desktop
+
+#### Browser Extensions (Quick & Easy)
 - **Phantom Wallet** (recommended)
 - **Solflare Wallet**
+
+#### Universal Connection (No Extension Required)
+- **WalletConnect** - Use any mobile Solana wallet
+  - Connect by scanning QR code or manual entry
+  - Works with Phantom, Solflare, Trust Wallet, and more
+  - Perfect if you don't want to install browser extensions
 
 ### Mobile (Wallet Apps)
 - **Phantom Wallet** (iOS & Android)
@@ -27,6 +35,8 @@ JustTheTip now features a streamlined, non-custodial wallet registration system 
 - Any Solana-compatible mobile wallet with message signing
 
 > 📱 **Using Discord on mobile?** See our [Mobile Wallet Registration Guide](docs/MOBILE_WALLET_GUIDE.md) for detailed instructions.
+> 
+> 🖥️ **Desktop user without extensions?** WalletConnect allows you to use your mobile wallet with your desktop browser!
 
 ## How to Register Your Wallet
 
@@ -38,15 +48,19 @@ In Discord, use the `/registerwallet` command. The bot will provide you with a s
 
 Click the registration link to open the wallet signing page.
 
-**For Desktop Users:**
-The page will show buttons for Phantom and Solflare browser extensions. Click your preferred wallet button, and the wallet will automatically prompt you to sign.
+**For Desktop Users with Browser Extensions:**
+If you have Phantom or Solflare browser extensions installed, you'll see quick-connect buttons. Click your preferred wallet button, and it will automatically prompt you to sign.
+
+**For Desktop Users without Extensions:**
+Don't have a browser extension? No problem! Click the **"Connect with WalletConnect"** button. This allows you to:
+- Use your mobile wallet with your desktop browser
+- Follow step-by-step instructions to enter your wallet address
+- Sign the message on your phone and submit the signature on desktop
 
 **For Mobile Users:**
-The page will detect your mobile device and show a "Connect Mobile Wallet" button. This will guide you through:
-1. Installing a Solana wallet app (if needed)
-2. Copying your wallet address from the app
-3. Signing a verification message in your wallet
-4. Submitting the signature to complete registration
+The page will detect your mobile device and show appropriate options:
+- If you have a wallet app installed, you can use quick-connect
+- Otherwise, use the WalletConnect flow to register manually
 
 > 📱 For detailed mobile instructions, see our [Mobile Wallet Registration Guide](docs/MOBILE_WALLET_GUIDE.md).
 

@@ -1,8 +1,22 @@
-# Mobile Wallet Registration Guide
+# Universal Wallet Registration Guide
 
 ## Overview
 
-JustTheTip now supports wallet registration for mobile users! Whether you're using Discord on your phone or tablet, you can securely register your Solana wallet using any mobile wallet app.
+JustTheTip now supports wallet registration for **all users** - whether you're on mobile, desktop, or don't have browser extensions installed! You can securely register your Solana wallet using any mobile wallet app.
+
+## Who Should Use This Guide?
+
+✅ **Mobile users** accessing Discord on phones or tablets  
+✅ **Desktop users without browser extensions** (Phantom/Solflare)  
+✅ **Users who prefer mobile wallets** over browser extensions  
+✅ **Anyone wanting a universal solution** that works everywhere  
+
+## Why Use WalletConnect / Manual Registration?
+
+- **No browser extension required** - Use the wallet you already have on your phone
+- **Works on any device** - Desktop, laptop, tablet, or mobile
+- **Universal compatibility** - Works with any Solana wallet that supports message signing
+- **More secure for some users** - Keep your wallet on a separate device from your computer
 
 ## Supported Mobile Wallets
 
@@ -129,19 +143,29 @@ If everything is correct:
 - Try using Phantom or Solflare (they handle longer messages)
 - Or use a desktop computer for registration
 
-## Desktop vs Mobile
+## Desktop vs Mobile vs WalletConnect
 
-### Desktop (Browser Extension)
+### Desktop with Browser Extension
 - ✅ Automatic signing process
-- ✅ Faster and easier
+- ✅ Fastest and easiest method
 - ✅ No manual copying/pasting
 - ❌ Requires browser extension installed
+- ❌ Limited to Phantom and Solflare
 
-### Mobile (Manual Process)
+### Desktop with WalletConnect (No Extension)
+- ✅ No browser extension needed
+- ✅ Use your mobile wallet with desktop browser
+- ✅ Secure (keys stay on mobile device)
+- ✅ Works with any Solana wallet
+- ⚠️ Requires manual entry process
+- ⚠️ Need mobile phone nearby
+
+### Mobile with Wallet App
 - ✅ Works with any mobile wallet app
 - ✅ No browser extension needed
 - ✅ Accessible anywhere via phone
-- ❌ Requires manual copy/paste steps
+- ✅ Same device for Discord and wallet
+- ⚠️ Requires manual copy/paste steps
 
 ## Security Notes
 

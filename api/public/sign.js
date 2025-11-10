@@ -42,29 +42,59 @@ if (discordUserId && discordUsername && nonce) {
 }
 
 /**
- * Setup wallet connection buttons based on device type
+ * Setup wallet connection buttons based on device type and available wallets
  */
 function setupWalletButtons() {
     const desktopButtons = document.getElementById('desktopButtons');
     const mobileButtons = document.getElementById('mobileButtons');
-    const walletConnectButton = document.getElementById('walletConnectButton');
+    const walletConnectSection = document.getElementById('walletConnectSection');
+    
+    // Check if browser extensions are available
+    const hasPhantom = window.solana && window.solana.isPhantom;
+    const hasSolflare = window.solflare;
     
     if (isMobile) {
-        // On mobile, show WalletConnect button prominently
-        desktopButtons.style.display = 'none';
+        // On mobile, prioritize WalletConnect but show extension buttons if apps are installed
         mobileButtons.style.display = 'block';
+        walletConnectSection.style.display = 'block';
         
-        // Still allow desktop wallet apps if they're installed
-        if (window.solana || window.solflare) {
+        if (hasPhantom || hasSolflare) {
             desktopButtons.style.display = 'block';
+            // Show a note that extensions are detected
+            const extensionNote = document.getElementById('extensionNote');
+            if (extensionNote) {
+                extensionNote.style.display = 'block';
+            }
+        } else {
+            desktopButtons.style.display = 'none';
         }
     } else {
-        // On desktop, show browser extension buttons
-        desktopButtons.style.display = 'block';
-        mobileButtons.style.display = 'none';
+        // On desktop, show all options
+        walletConnectSection.style.display = 'block';
         
-        // Also show WalletConnect as an option for desktop
-        walletConnectButton.style.display = 'block';
+        if (hasPhantom || hasSolflare) {
+            // Show browser extension buttons
+            desktopButtons.style.display = 'block';
+            mobileButtons.style.display = 'none';
+        } else {
+            // No extensions detected - hide extension buttons, show WalletConnect prominently
+            desktopButtons.style.display = 'none';
+            mobileButtons.style.display = 'none';
+            
+            // Show a helpful message
+            const noExtensionNote = document.getElementById('noExtensionNote');
+            if (noExtensionNote) {
+                noExtensionNote.style.display = 'block';
+            }
+        }
+    }
+    
+    // Hide individual extension buttons if not available
+    if (!hasPhantom) {
+        document.getElementById('connectButton').style.display = 'none';
+    }
+    if (!hasSolflare) {
+        document.getElementById('solflareButton').style.display = 'none';
     }
 }
 
@@ -362,15 +392,12 @@ async function connectWallet(walletType) {
 }
 
 /**
- * Connect via WalletConnect for mobile wallets
- * Uses a deep link approach for mobile wallet apps
+ * Connect via WalletConnect for mobile wallets or desktop QR code scanning
+ * Uses a manual approach since we need both desktop QR and mobile deep linking
  */
 async function connectWalletConnect() {
     try {
-        showStatus('pending', '<span class="loading"></span>Connecting via WalletConnect...');
-        
-        // For mobile, we'll use a simpler approach with deep links
-        // Most mobile wallets (Phantom, Solflare, etc.) support custom URL schemes
+        showStatus('pending', '<span class="loading"></span>Preparing WalletConnect...');
         
         // Create the message to sign
         const message = {
@@ -388,36 +415,74 @@ async function connectWalletConnect() {
         sessionStorage.setItem('walletConnectMessage', messageString);
         sessionStorage.setItem('walletConnectNonce', nonce);
         
-        // Provide instructions for mobile users
-        const mobileInstructions = `
-            <div style="text-align: left; padding: 20px;">
-                <h3 style="margin-bottom: 15px;">📱 Mobile Wallet Setup</h3>
-                <p style="margin-bottom: 15px;">To register your wallet on mobile:</p>
-                <ol style="margin-left: 20px; line-height: 1.8;">
-                    <li><strong>Install a Solana wallet app:</strong>
-                        <ul style="margin: 10px 0 10px 20px;">
-                            <li>Phantom Wallet (recommended)</li>
-                            <li>Solflare Wallet</li>
-                            <li>Or any Solana-compatible wallet</li>
-                        </ul>
-                    </li>
-                    <li><strong>Open the wallet app</strong> and create/import your wallet</li>
-                    <li><strong>Copy your wallet address</strong> from the app</li>
-                    <li><strong>Return to this page</strong> and click "Enter Wallet Details" below</li>
-                    <li><strong>Paste your wallet address</strong> when prompted</li>
-                    <li><strong>Sign the message</strong> in your wallet app to complete registration</li>
-                </ol>
-                <div style="background: #e7f3ff; padding: 15px; border-radius: 8px; margin-top: 20px;">
-                    <strong>💡 Note:</strong> You'll need to manually sign a message in your wallet app. 
-                    We'll provide the exact message text for you to copy.
-                </div>
-            </div>
-        `;
+        // Provide instructions based on device type
+        let instructions;
         
-        showStatus('pending', mobileInstructions);
+        if (isMobile) {
+            // Mobile instructions - direct wallet app connection
+            instructions = `
+                <div style="text-align: left; padding: 20px;">
+                    <h3 style="margin-bottom: 15px;">📱 Mobile Wallet Connection</h3>
+                    <p style="margin-bottom: 15px;">To register your wallet on mobile:</p>
+                    <ol style="margin-left: 20px; line-height: 1.8;">
+                        <li><strong>Install a Solana wallet app</strong> (if you don't have one):
+                            <ul style="margin: 10px 0 10px 20px;">
+                                <li>Phantom Wallet (recommended)</li>
+                                <li>Solflare Wallet</li>
+                                <li>Trust Wallet</li>
+                                <li>Or any Solana-compatible wallet</li>
+                            </ul>
+                        </li>
+                        <li><strong>Open the wallet app</strong> and create/import your wallet</li>
+                        <li><strong>Copy your wallet address</strong> from the app</li>
+                        <li><strong>Click "Enter Wallet Details"</strong> below</li>
+                        <li><strong>Paste your wallet address</strong> when prompted</li>
+                        <li><strong>Sign the message</strong> in your wallet app to complete registration</li>
+                    </ol>
+                    <div style="background: #e7f3ff; padding: 15px; border-radius: 8px; margin-top: 20px;">
+                        <strong>💡 Note:</strong> You'll need to manually sign a message in your wallet app. 
+                        We'll provide the exact message text for you to copy.
+                    </div>
+                </div>
+            `;
+        } else {
+            // Desktop instructions - QR code scanning with mobile wallet
+            instructions = `
+                <div style="text-align: left; padding: 20px;">
+                    <h3 style="margin-bottom: 15px;">🖥️ Desktop + Mobile Wallet Connection</h3>
+                    <p style="margin-bottom: 15px;">Don't have a browser extension? Connect using your mobile wallet:</p>
+                    <ol style="margin-left: 20px; line-height: 1.8;">
+                        <li><strong>Install a Solana wallet on your phone</strong> (if you don't have one):
+                            <ul style="margin: 10px 0 10px 20px;">
+                                <li>Phantom Wallet (recommended) - <a href="https://phantom.app/" target="_blank">phantom.app</a></li>
+                                <li>Solflare Wallet - <a href="https://solflare.com/" target="_blank">solflare.com</a></li>
+                                <li>Trust Wallet or any Solana wallet</li>
+                            </ul>
+                        </li>
+                        <li><strong>Open your wallet app on your phone</strong></li>
+                        <li><strong>Copy your wallet address</strong> from the app (tap to copy)</li>
+                        <li><strong>Return to this page on desktop</strong></li>
+                        <li><strong>Click "Enter Wallet Details"</strong> below and paste your address</li>
+                        <li><strong>Sign the verification message</strong> in your mobile wallet app</li>
+                        <li><strong>Copy the signature</strong> and submit it here</li>
+                    </ol>
+                    <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-top: 20px;">
+                        <strong>⚡ Why manual entry?</strong> This ensures compatibility with all Solana wallets. 
+                        The process is secure and only takes 2-3 minutes.
+                    </div>
+                    <div style="background: #e7f3ff; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                        <strong>🔒 Security:</strong> Your private keys never leave your phone. 
+                        You're only sharing a cryptographic proof of ownership.
+                    </div>
+                </div>
+            `;
+        }
+        
+        showStatus('pending', instructions);
         
         // Show manual entry button
         document.getElementById('manualEntryButton').style.display = 'block';
+        document.getElementById('mobileButtons').style.display = 'block';
         
     } catch (error) {
         console.error('WalletConnect error:', error);
