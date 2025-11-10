@@ -25,31 +25,23 @@ const { EmbedBuilder } = require('discord.js');
  */
 function createBalanceEmbed(balances, priceConfig, isRefresh = false) {
   const solBalance = balances.SOL || 0;
-  const usdcBalance = balances.USDC || 0;
   
-  // Calculate approximate USD values
+  // Calculate approximate USD value
   const solUsdValue = solBalance * (priceConfig.SOL || 20);
-  const usdcUsdValue = usdcBalance * (priceConfig.USDC || 1);
-  const totalValue = solUsdValue + usdcUsdValue;
   
   // Create formatted balance display with better visual hierarchy
   const embed = new EmbedBuilder()
     .setTitle('💎 Your Portfolio')
     .setColor(0x14F195) // Solana green color
     .setDescription(
-      `**Total Value:** \`$${totalValue.toFixed(2)} USD\`\n` +
+      `**Total Value:** \`$${solUsdValue.toFixed(2)} USD\`\n` +
       `━━━━━━━━━━━━━━━━━━━━━━`
     )
     .addFields(
       {
         name: '☀️ Solana (SOL)',
         value: `\`\`\`\n${solBalance.toFixed(6)} SOL\n\`\`\`\n**USD Value:** $${solUsdValue.toFixed(2)}`,
-        inline: true
-      },
-      {
-        name: '💵 USD Coin (USDC)',
-        value: `\`\`\`\n${usdcBalance.toFixed(6)} USDC\n\`\`\`\n**USD Value:** $${usdcUsdValue.toFixed(2)}`,
-        inline: true
+        inline: false
       }
     )
     .setTimestamp();
@@ -128,16 +120,30 @@ function createWalletRegisteredEmbed(currency, address, isVerified = false) {
  * Create tip success embed
  * @param {Object} sender - Sender user object
  * @param {Object} recipient - Recipient user object
- * @param {number} amount - Tip amount
+ * @param {number} amount - Tip amount (before fee)
  * @param {string} currency - Currency type
+ * @param {number} fee - Fee amount
+ * @param {number} netAmount - Net amount received by recipient (amount - fee)
  * @returns {EmbedBuilder} Discord embed for successful tip
  */
-function createTipSuccessEmbed(sender, recipient, amount, currency) {
-  return new EmbedBuilder()
+function createTipSuccessEmbed(sender, recipient, amount, currency, fee = 0, netAmount = null) {
+  const actualNetAmount = netAmount !== null ? netAmount : amount;
+  const embed = new EmbedBuilder()
     .setTitle('💸 Tip Sent Successfully!')
-    .setDescription(`${sender} tipped ${recipient} **${amount} ${currency}**! 🎉`)
-    .setColor(0x2ecc71)
-    .setFooter({ text: 'Thanks for spreading the love!' });
+    .setDescription(`${sender} tipped ${recipient} **${actualNetAmount.toFixed(6)} ${currency}**! 🎉`)
+    .setColor(0x2ecc71);
+  
+  if (fee > 0) {
+    embed.addFields(
+      { name: '💰 Gross Amount', value: `${amount.toFixed(6)} ${currency}`, inline: true },
+      { name: '📊 Fee (0.5%)', value: `${fee.toFixed(6)} ${currency}`, inline: true },
+      { name: '✅ Net Amount', value: `${actualNetAmount.toFixed(6)} ${currency}`, inline: true }
+    );
+  }
+  
+  embed.setFooter({ text: 'Thanks for spreading the love!' });
+  
+  return embed;
 }
 
 /**
