@@ -44,9 +44,9 @@ try {
 const { PublicKey } = require('@solana/web3.js');
 const { JustTheTipSDK } = require('./contracts/sdk');
 const db = require('./db/database');
+const crypto = require('crypto');
 const {
   createOnChainBalanceEmbed,
-  createWalletRegisteredEmbed,
 } = require('./src/utils/embedBuilders');
 
 const { commands: improvedCommands, helpMessages: HELP_MESSAGES } = require('./IMPROVED_SLASH_COMMANDS');
@@ -60,6 +60,10 @@ const smartContractCommands = improvedCommands;
 
 // In-memory user wallet registry (in production, use a database)
 const userWallets = new Map();
+
+// Get API base URL from environment or use default
+const API_BASE_URL = process.env.API_BASE_URL || 'https://justthetip.vercel.app';
+
 
 client.once('ready', async () => {
   console.log(`🟢 JustTheTip Smart Contract Bot logged in as ${client.user.tag}`);
@@ -105,8 +109,57 @@ client.on(Events.InteractionCreate, async interaction => {
   const { commandName } = interaction;
   
   try {
-    // New command: /verify (simple wallet registration)
-    if (commandName === 'verify') {
+    // New command: /register-wallet (generates verification link)
+    if (commandName === 'register-wallet') {
+      const userId = interaction.user.id;
+      const username = interaction.user.username;
+      
+      // Generate a unique nonce (UUID v4)
+      const nonce = crypto.randomUUID();
+      
+      // Create registration URL with user info and nonce
+      const registrationUrl = `${API_BASE_URL}/sign.html?user=${encodeURIComponent(userId)}&username=${encodeURIComponent(username)}&nonce=${encodeURIComponent(nonce)}`;
+      
+      const embed = new EmbedBuilder()
+        .setTitle('🔐 Register Your Wallet')
+        .setDescription(
+          `Click the link below to register your Solana wallet.\n\n` +
+          `**What happens next:**\n` +
+          `1. The link will open a secure verification page\n` +
+          `2. Connect your Solana wallet (Phantom, Solflare, etc.)\n` +
+          `3. Sign a message to prove wallet ownership\n` +
+          `4. Your wallet will be registered automatically!\n\n` +
+          `**🔒 Security:**\n` +
+          `• Your private keys never leave your wallet\n` +
+          `• This link is unique to you and expires in 10 minutes\n` +
+          `• Only you can complete this registration\n\n` +
+          `**🔗 Registration Link:**\n` +
+          `${registrationUrl}\n\n` +
+          `_Link expires in 10 minutes_`
+        )
+        .setColor(0x667eea)
+        .setFooter({ text: 'JustTheTip - Non-Custodial Wallet Registration' })
+        .setTimestamp();
+        
+      // Create a button that opens the link
+      const row = new ActionRowBuilder()
+        .addComponents(
+          new ButtonBuilder()
+            .setLabel('🔐 Register Wallet')
+            .setStyle(ButtonStyle.Link)
+            .setURL(registrationUrl)
+        );
+        
+      await interaction.reply({ 
+        embeds: [embed], 
+        components: [row],
+        ephemeral: true 
+      });
+      
+      console.log(`📝 Registration link generated for user ${username} (${userId}) with nonce ${nonce.slice(0, 8)}...`);
+      
+    } else if (commandName === 'verify') {
+      // New command: /verify (simple wallet registration)
       const wallet = interaction.options.getString('wallet');
       const userId = interaction.user.id;
       
@@ -316,27 +369,6 @@ client.on(Events.InteractionCreate, async interaction => {
           `**Wallet:** ${walletAddress ? `\`${walletAddress}\`` : 'Not connected'}`
         )
         .setColor(0xef4444);
-        
-      await interaction.reply({ embeds: [embed], ephemeral: true });
-      
-    } else if (commandName === 'register-wallet') {
-      // Keep backward compatibility with old command
-      const address = interaction.options.getString('address');
-      const userId = interaction.user.id;
-      
-      // Validate Solana address
-      try {
-        new PublicKey(address);
-      } catch (error) {
-        return interaction.reply({ 
-          content: '❌ Invalid Solana wallet address', 
-          ephemeral: true 
-        });
-      }
-      
-      userWallets.set(userId, address);
-      
-      const embed = createWalletRegisteredEmbed('SOL', address, false);
         
       await interaction.reply({ embeds: [embed], ephemeral: true });
       

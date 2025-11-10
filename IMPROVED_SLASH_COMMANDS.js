@@ -43,6 +43,11 @@ const improvedCommands = [
 
   // ===== VERIFICATION & NFT COMMANDS =====
   {
+    name: 'register-wallet',
+    description: '🔐 Register your Solana wallet with signature verification',
+  },
+
+  {
     name: 'connect-wallet',
     description: '🔗 Link your Solana wallet to your Discord account',
     options: [
@@ -141,9 +146,10 @@ const HELP_MESSAGES = {
 
 **Getting Verified (3 Easy Steps):**
 
-**Step 1: Connect Your Wallet**
-\`/connect-wallet wallet-address:<your-address> signature:<your-signature>\`
-• Links your Solana wallet to Discord
+**Step 1: Register Your Wallet**
+\`/register-wallet\`
+• Generates a secure verification link
+• Opens your wallet for signature
 • Proves you own the wallet
 
 **Step 2: Pay Verification Fee**
@@ -274,6 +280,7 @@ const commandPermissions = {
     'verify',
     'balance',
     'status',
+    'register-wallet',
     'connect-wallet',
     'get-badge',
     'check-payment',
@@ -293,6 +300,7 @@ const commandPermissions = {
 
 // ===== RATE LIMITS =====
 const rateLimits = {
+  'register-wallet': { max: 5, window: 900000 }, // 5 per 15 minutes
   'connect-wallet': { max: 3, window: 60000 }, // 3 per minute
   'get-badge': { max: 2, window: 60000 }, // 2 per minute
   'check-payment': { max: 5, window: 60000 }, // 5 per minute
