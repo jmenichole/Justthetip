@@ -203,8 +203,7 @@ class AirdropCommand {
     try {
       const airdropId = interaction.customId.replace('claim_airdrop_', '');
       const userId = interaction.user.id;
-      // Username reserved for future logging/notifications
-      // const username = interaction.user.username;
+      const username = interaction.user.username;
 
       // Get airdrop data
       const airdrop = await this.db.getAirdrop(airdropId);
@@ -241,7 +240,61 @@ class AirdropCommand {
         });
       }
 
-      // Claim the airdrop
+      // Check if user has registered wallet
+      const trustBadgeService = require('../utils/trustBadge');
+      let hasWallet = false;
+      try {
+        await trustBadgeService.requireBadge(userId);
+        hasWallet = true;
+      } catch (error) {
+        // User doesn't have wallet registered - hold airdrop for 24 hours
+        hasWallet = false;
+      }
+
+      if (!hasWallet) {
+        // Mark as pending claim
+        await this.db.createPendingAirdrop({
+          airdropId,
+          userId,
+          username,
+          amount: airdrop.amountPerUser,
+          currency: airdrop.currency,
+          expiresAt: Date.now() + (24 * 60 * 60 * 1000) // 24 hours from now
+        });
+
+        // Send DM to user
+        try {
+          const dmEmbed = new EmbedBuilder()
+            .setColor('#fbbf24')
+            .setTitle('🎁 Airdrop Claimed - Wallet Registration Required')
+            .setDescription(
+              `You've claimed **${airdrop.amountPerUser.toFixed(4)} ${airdrop.currency}** from an airdrop!\n\n` +
+              `To receive your airdrop, you need to register your wallet within **24 hours**.\n\n` +
+              `**How to register:**\n` +
+              `1. Use the \`/register-wallet\` command in any server with JustTheTip\n` +
+              `2. Connect your Solana wallet\n` +
+              `3. Your airdrop will be automatically credited!\n\n` +
+              `⏰ **Your claim expires:** <t:${Math.floor((Date.now() + 24 * 60 * 60 * 1000) / 1000)}:R>`
+            )
+            .setFooter({ text: 'JustTheTip - Non-Custodial Tipping Bot' })
+            .setTimestamp();
+
+          await interaction.user.send({ embeds: [dmEmbed] });
+        } catch (dmError) {
+          console.error('Failed to send DM to user:', dmError);
+          // Continue even if DM fails
+        }
+
+        return await interaction.reply({
+          content: 
+            `✅ Airdrop claimed! **${airdrop.amountPerUser.toFixed(4)} ${airdrop.currency}** reserved for you.\n\n` +
+            `⚠️ You need to register your wallet within **24 hours** to receive it.\n` +
+            `Use \`/register-wallet\` to get started. Check your DMs for more info!`,
+          ephemeral: true
+        });
+      }
+
+      // User has wallet - proceed with normal claim
       const claimed = await this.db.claimAirdrop(airdropId, userId);
 
       if (!claimed && this.db.db) {

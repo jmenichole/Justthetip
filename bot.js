@@ -712,8 +712,8 @@ client.on(Events.InteractionCreate, async interaction => {
       }
       
       try {
-        // Create support ticket embed
-        const embed = new EmbedBuilder()
+        // Create support ticket embed for user
+        const userEmbed = new EmbedBuilder()
           .setTitle('🎫 Support Request Submitted')
           .setColor(0x7289da)
           .setDescription('Your support request has been received. Our team will review it shortly.')
@@ -737,12 +737,41 @@ client.on(Events.InteractionCreate, async interaction => {
           .setFooter({ text: `Ticket from: ${interaction.user.tag}` })
           .setTimestamp();
         
-        await interaction.reply({ embeds: [embed], ephemeral: true });
+        await interaction.reply({ embeds: [userEmbed], ephemeral: true });
+        
+        // Send to support channel
+        const SUPPORT_CHANNEL_ID = '1437295074856927363';
+        const ADMIN_USER_ID = '1153034319271559328';
+        
+        try {
+          const supportChannel = await client.channels.fetch(SUPPORT_CHANNEL_ID);
+          if (supportChannel && supportChannel.isTextBased()) {
+            const supportEmbed = new EmbedBuilder()
+              .setTitle('🆘 New Support Request')
+              .setColor(0xff6b6b)
+              .setDescription(`<@${ADMIN_USER_ID}>`)
+              .addFields(
+                { name: '👤 User', value: `<@${interaction.user.id}> (${interaction.user.tag})`, inline: true },
+                { name: '🆔 User ID', value: interaction.user.id, inline: true },
+                { name: '🏠 Server', value: interaction.guild ? interaction.guild.name : 'DM', inline: true },
+                { name: '📝 Issue', value: issue.slice(0, 1024), inline: false },
+                { name: '⏰ Timestamp', value: `<t:${Math.floor(Date.now() / 1000)}:F>`, inline: false }
+              )
+              .setThumbnail(interaction.user.displayAvatarURL())
+              .setFooter({ text: `Support Ticket • User ID: ${interaction.user.id}` })
+              .setTimestamp();
+            
+            await supportChannel.send({ 
+              content: `<@${ADMIN_USER_ID}> New support request from <@${interaction.user.id}>`,
+              embeds: [supportEmbed] 
+            });
+          }
+        } catch (channelError) {
+          console.error('Failed to send to support channel:', channelError);
+        }
         
         // Log support request for admin review
         console.log(`Support request from ${interaction.user.id} (${interaction.user.tag}): ${issue}`);
-        
-        // TODO: In production, send this to a support channel or ticket system
         
       } catch (error) {
         console.error('Support command error:', error);
