@@ -70,11 +70,15 @@ function getFeeWallet(coin) {
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
 
-// Price configuration (TODO: Replace with live price API)
-const PRICE_CONFIG = {
-  SOL: 20, // USD per SOL - should be fetched from price API
-  USDC: 1  // USDC is pegged to USD
-};
+const priceService = require('./src/utils/priceService');
+
+// Price configuration - dynamically fetched from API
+async function getPriceConfig() {
+  const solPrice = await priceService.getSolPrice();
+  return {
+    SOL: solPrice,
+  };
+}
 
 // Note: isValidSolanaAddress is now imported from shared utils
 
@@ -96,10 +100,10 @@ const commands = [
   },
   {
     name: 'tip',
-    description: 'Send SOL to another user',
+    description: 'Send SOL to another user (use $ for USD, e.g., $10 or 0.5 for SOL)',
     options: [
       { name: 'user', type: 6, description: 'User to tip', required: true },
-      { name: 'amount', type: 10, description: 'Amount in SOL to tip', required: true }
+      { name: 'amount', type: 3, description: 'Amount (use $ for USD, e.g., $10 or 0.5 for SOL)', required: true }
     ]
   },
   {
@@ -166,7 +170,8 @@ const HELP_MESSAGE_BASIC = `## 💰 Basic Commands
 
 **💸 Using the Bot:**
 \`/balance\` — Check your funds
-\`/tip @user <amount>\` — Send SOL to a user
+\`/tip @user <amount>\` — Send SOL to a user (use $ for USD, e.g., $10 or 0.5 for SOL)
+  _Note: A 0.5% fee is applied to all tips_
 \`/support <issue>\` — Get help or report an issue
 
 ## 🔒 Pro Tips
@@ -208,8 +213,10 @@ const HELP_MESSAGE_ADVANCED = `# 🤖 JustTheTip Bot - Complete Command Referenc
   _Example: Shows "0.5 SOL (~$75.00)" and total portfolio value_
 
 **Send Tips**
-• \`/tip <@user> <amount>\` — Send SOL to another Discord user
+• \`/tip <@user> <amount>\` — Send SOL to another Discord user (use $ for USD, e.g., $10 or 0.5 for SOL)
   _Example: \`/tip @Alice 0.05\` sends 0.05 SOL_
+  _Example: \`/tip @Bob $5\` sends $5 worth of SOL_
+  _Note: A 0.5% fee is applied to all tips for bot maintenance_
 
 **Get Help**
 • \`/help\` — Display concise command guide
@@ -220,6 +227,8 @@ const HELP_MESSAGE_ADVANCED = `# 🤖 JustTheTip Bot - Complete Command Referenc
 ## 💱 Supported Cryptocurrency
 
 ☀️ **SOL** (Solana) — Fast, low-fee native token
+  _Tip in SOL directly (e.g., 0.5) or in USD (e.g., $10)_
+  _A 0.5% fee is applied to all tips for bot maintenance_
 
 _All transactions run on the Solana blockchain for instant processing_
 
@@ -280,8 +289,9 @@ client.on(Events.InteractionCreate, async interaction => {
       try {
         // Get actual balance from database
         const balances = await db.getBalances(interaction.user.id);
+        const priceConfig = await getPriceConfig();
         
-        const embed = createBalanceEmbed(balances, PRICE_CONFIG);
+        const embed = createBalanceEmbed(balances, priceConfig);
           
         const refreshButton = new ActionRowBuilder()
           .addComponents(
@@ -755,8 +765,9 @@ client.on(Events.InteractionCreate, async interaction => {
     try {
       // Refresh balance display with actual data
       const balances = await db.getBalances(interaction.user.id);
+      const priceConfig = await getPriceConfig();
       
-      const embed = createBalanceEmbed(balances, PRICE_CONFIG, true);
+      const embed = createBalanceEmbed(balances, priceConfig, true);
         
       await interaction.update({ embeds: [embed] });
       
@@ -816,8 +827,9 @@ client.on(Events.MessageCreate, async message => {
     } else if (command === 'balance') {
       // Get balance
       const balances = await db.getBalances(message.author.id);
+      const priceConfig = await getPriceConfig();
       
-      const embed = createBalanceEmbed(balances, PRICE_CONFIG);
+      const embed = createBalanceEmbed(balances, priceConfig);
       await message.reply({ embeds: [embed] });
       
     } else if (command === 'help') {
