@@ -153,8 +153,9 @@ client.on(Events.InteractionCreate, async interaction => {
         });
       }
       
-      // TODO: Verify signature here
+      // TODO: Verify signature here using signature parameter
       // For now, we'll accept the wallet and signature
+      console.log(`User ${userId} connecting wallet ${walletAddress} with signature: ${signature.slice(0, 20)}...`);
       userWallets.set(userId, walletAddress);
       
       const embed = new EmbedBuilder()
