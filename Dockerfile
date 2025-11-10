@@ -1,24 +1,28 @@
 # JustTheTip Discord Bot - Dockerfile
 # Optimized for deployment on Render, VPS, or container platforms
 
-FROM node:18-alpine
+FROM node:18-slim
 
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies
-RUN apk add --no-cache \
+# Install system dependencies for native module compilation
+# Using Debian slim for better compatibility with native modules like usb
+RUN apt-get update && apt-get install -y \
     python3 \
     make \
     g++ \
-    git
+    git \
+    libudev-dev \
+    libusb-1.0-0-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy package files
 COPY package*.json ./
 
 # Install dependencies
-# Use --production for production builds, or omit for development
-RUN npm ci --only=production
+# Use --omit=dev for production builds (--only=production is deprecated)
+RUN npm ci --omit=dev
 
 # Copy application code
 COPY . .
