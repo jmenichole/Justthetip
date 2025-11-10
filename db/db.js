@@ -400,6 +400,10 @@ function getGlobalTipStats() {
  */
 function createPendingTip(senderId, receiverId, amount, currency, amountInUsd = null) {
   try {
+    // Ensure both users exist in the database
+    getUser(senderId);
+    getUser(receiverId);
+    
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(); // 24 hours from now
     
     const result = db.prepare(`

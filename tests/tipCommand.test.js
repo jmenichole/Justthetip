@@ -248,7 +248,7 @@ describe('handleTipCommand', () => {
   it('rejects tip when recipient is not verified', async () => {
     const { handleTipCommand } = require('../src/commands/tipCommand');
     const sender = { id: 'sender', username: 'Alice' };
-    const recipient = { id: 'receiver', username: 'Bob', bot: false };
+    const recipient = { id: 'receiver', username: 'Bob', bot: false, createDM: jest.fn().mockResolvedValue({ send: jest.fn() }) };
 
     const interaction = {
       user: sender,
@@ -268,17 +268,43 @@ describe('handleTipCommand', () => {
       requireBadge: jest
         .fn()
         .mockResolvedValueOnce({ wallet_address: 'wallet-sender', mint_address: 'mint-sender' })
-        .mockRejectedValueOnce(new Error('User is not verified with a TrustBadge NFT yet.')),
+        .mockRejectedValueOnce(new Error('User is not verified. Please use /register-wallet to link your Solana wallet.')),
+    };
+
+    const sqliteMock = {
+      getUser: jest.fn(),
+      createPendingTip: jest.fn().mockReturnValue({
+        id: 1,
+        sender_id: 'sender',
+        receiver_id: 'receiver',
+        amount: 1.5,
+        currency: 'SOL',
+        expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+      }),
+      markPendingTipNotified: jest.fn(),
+    };
+
+    const priceServiceMock = {
+      convertUsdToSol: jest.fn(),
     };
 
     await handleTipCommand(interaction, {
       trustBadgeService: trustBadgeMock,
+      sqlite: sqliteMock,
+      priceService: priceServiceMock,
     });
 
     expect(interaction.deferReply).toHaveBeenCalled();
+    expect(sqliteMock.createPendingTip).toHaveBeenCalled();
     expect(interaction.editReply).toHaveBeenCalledWith(
       expect.objectContaining({
-        content: expect.stringContaining('has not registered their wallet yet'),
+        embeds: expect.arrayContaining([
+          expect.objectContaining({
+            data: expect.objectContaining({
+              title: '💌 Tip Pending - User Not Registered',
+            }),
+          }),
+        ]),
       })
     );
   });
