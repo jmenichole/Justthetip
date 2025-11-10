@@ -1,40 +1,37 @@
-# JustTheTip
+# JustTheTip - Solana Trustless Agent for Discord
 
-Enterprise-ready, non-custodial Discord tipping and verification platform powered by Solana smart contracts. This repository houses the production bot, REST API, on-chain programs, and developer tooling required to mint verification NFTs, manage wallet-based tipping flows, and accept fiat payments through Coinbase Commerce.
+**x402 Hackathon 2025 Entry**
+
+Non-custodial Discord tipping bot powered by Solana. Sign once, tip forever with SOL, USDC, BONK, and more. Works on mobile and desktop with full WalletConnect support.
+
+## 🚀 Quick Start
+
+**Users:** Add the bot to Discord and run `/register-wallet` to get started.  
+**Developers:** See [Getting Started](#getting-started) below.
 
 ---
 
-## Table of Contents
-1. [Platform Overview](#platform-overview)
-2. [Key Capabilities](#key-capabilities)
-3. [System Architecture](#system-architecture)
-4. [Repository Layout](#repository-layout)
-5. [Getting Started](#getting-started)
-6. [Configuration](#configuration)
-7. [Running the Stack](#running-the-stack)
-8. [Solana Developer Toolkit](#solana-developer-toolkit)
-9. [Coinbase Commerce Integration](#coinbase-commerce-integration)
-10. [Discord Bot Operations](#discord-bot-operations)
-11. [REST API Endpoints](#rest-api-endpoints)
-12. [Testing & Quality](#testing--quality)
-13. [Deployment Notes](#deployment-notes)
-14. [Additional Resources](#additional-resources)
+## 🌟 Key Features
+
+### Trustless Agent Technology
+- **Sign Once, Tip Forever** – One wallet signature enables tipping with all tokens
+- **Multi-Token Support** – SOL (live), USDC, BONK, USDT (coming soon)
+- **100% Non-Custodial** – Your keys never leave your wallet
+- **Mobile & Desktop** – WalletConnect, Phantom, Solflare support
+
+### Platform Capabilities
+- **Solana Smart Contracts** – Anchor-based programs for on-chain state tracking
+- **x402 Payment Protocol** – USDC micropayments for premium API features
+- **Wallet Registration** – Cryptographic signature verification (base58 & base64)
+- **NFT Verification** – Metaplex integration for verification badges
+- **Developer Tools** – RPC health checks, devnet airdrops, metadata inspection
+- **Coinbase Commerce** – Fiat on-ramp for crypto purchases
 
 ---
 
 ## Platform Overview
-JustTheTip delivers a production-ready experience for communities that need provable tipping, wallet verification, and NFT-backed access inside Discord. The stack is fully non-custodial—users sign transactions in their own wallets—while administrators gain observability tools for Solana programs, NFT metadata, and payment state.
 
----
-
-## Key Capabilities
-- **Solana Program Suite** – Anchor-based programs inside `justthetip-contracts` provide deterministic PDAs and state tracking for Discord users.
-- **Smart Contract Discord Bot** – `bot_smart_contract.js` exposes slash commands for wallet registration, on-chain tipping, and PDA inspection.
-- **x402 Payment Protocol** – HTTP 402-based instant USDC micropayments for premium API features (NEW for Solana x402 Hackathon).
-- **Verification NFT Minting** – The Express API mints verification NFTs via Metaplex when Discord users prove wallet ownership.
-- **Developer Diagnostics** – `src/utils/solanaDevTools.js` supplies reusable helpers for RPC health, program accounts, devnet airdrops, and metadata inspection.
-- **Fiat On-Ramp** – `src/utils/coinbaseClient.js` and `/api/payments/coinbase/*` endpoints integrate Coinbase Commerce for charge creation, polling, and webhook verification.
-- **Extensive Documentation** – The `docs/` directory plus numerous deployment guides outline migrations, infrastructure, and operational playbooks.
+JustTheTip is a **Solana Trustless Agent** that enables friction-free cryptocurrency tipping in Discord communities. Users register their wallet once with a cryptographic signature, then tip with any supported token without signing again. The bot never holds user funds—all transactions are non-custodial and verifiable on-chain.
 
 ---
 

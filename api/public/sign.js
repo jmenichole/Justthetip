@@ -523,7 +523,7 @@ async function handleManualEntry() {
                 <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin: 15px 0; overflow-x: auto;">
                     <pre style="margin: 0; white-space: pre-wrap; word-break: break-word; font-size: 12px;">${messageString}</pre>
                 </div>
-                <button onclick="navigator.clipboard.writeText(\`${messageString.replace(/`/g, '\\`')}\`).then(() => alert('Message copied to clipboard!'))" 
+                <button onclick="navigator.clipboard.writeText(\`${messageString.replace(/[`\\]/g, '\\$&')}\`).then(() => alert('Message copied to clipboard!'))" 
                         style="padding: 12px 24px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; margin-bottom: 15px;">
                     📋 Copy Message to Clipboard
                 </button>
