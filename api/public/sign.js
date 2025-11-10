@@ -148,9 +148,20 @@ async function testAPIConnectivity() {
     }
 }
 
+/**
+ * Display status message to user
+ * @param {string} type - Status type ('pending', 'success', 'error')
+ * @param {string} message - Message to display (may contain safe HTML)
+ */
 function showStatus(type, message) {
     const statusEl = document.getElementById('statusMessage');
     statusEl.className = `status ${type}`;
+    // Note: innerHTML is used here to support formatted messages with HTML.
+    // All messages are generated from trusted sources (our own code) and do not
+    // include unsanitized user input. Message content is either:
+    // 1. Hardcoded strings with HTML formatting
+    // 2. Template literals with safe variables (HTTP status codes, hardcoded URLs)
+    // 3. Error messages from controlled sources (try/catch blocks)
     statusEl.innerHTML = message;
 }
 
