@@ -315,7 +315,10 @@ function handleConnectionError(error) {
     `);
 }
 
-async function connectWallet(walletType) {
+/**
+ * Connect to wallet extension (legacy function for Phantom/Solflare buttons)
+ */
+async function connectWalletExtension(walletType) {
     const provider = walletType === 'phantom' ? window.solana : window.solflare;
     
     if (!provider) {
@@ -327,6 +330,233 @@ async function connectWallet(walletType) {
         return;
     }
 
+    await connectWallet(walletType.charAt(0).toUpperCase() + walletType.slice(1), provider);
+}
+
+/**
+ * Connect via WalletConnect - Show wallet selection modal
+ * Supports multiple Solana wallets with deep linking and extensions
+ */
+async function connectWalletConnect() {
+    try {
+        showStatus('pending', '<span class="loading"></span>Opening wallet selection...');
+        
+        // Show wallet selection modal
+        showWalletSelectionModal();
+        
+    } catch (error) {
+        console.error('WalletConnect error:', error);
+        handleConnectionError(error);
+    }
+}
+
+/**
+ * Show custom wallet selection modal
+ */
+function showWalletSelectionModal() {
+    // Create modal overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'wallet-modal-overlay';
+    overlay.innerHTML = `
+        <div class="wallet-modal">
+            <div class="wallet-modal-header">
+                <h2>Connect Wallet</h2>
+                <button class="wallet-modal-close">✕</button>
+            </div>
+            <div class="wallet-modal-subtitle">
+                Choose your preferred Solana wallet
+            </div>
+            <div class="wallet-modal-content">
+                ${generateWalletOptions()}
+            </div>
+            <div class="wallet-modal-footer">
+                <p>🔒 Your keys never leave your wallet</p>
+                <p style="font-size: 12px; opacity: 0.7; margin-top: 8px;">
+                    Don't have a wallet? <a href="https://phantom.app/" target="_blank">Download Phantom</a>
+                </p>
+            </div>
+        </div>
+    `;
+    
+    // Add modal styles
+    addWalletModalStyles();
+    
+    // Add event listeners
+    overlay.querySelector('.wallet-modal-close').addEventListener('click', () => {
+        overlay.remove();
+        showStatus('pending', 'Waiting for wallet connection...');
+    });
+    
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+            overlay.remove();
+            showStatus('pending', 'Waiting for wallet connection...');
+        }
+    });
+    
+    // Add wallet option click handlers
+    overlay.querySelectorAll('.wallet-option').forEach(button => {
+        button.addEventListener('click', async () => {
+            const walletId = button.getAttribute('data-wallet-id');
+            overlay.remove();
+            await connectSelectedWallet(walletId);
+        });
+    });
+    
+    // Append to body and animate in
+    document.body.appendChild(overlay);
+    requestAnimationFrame(() => {
+        overlay.classList.add('active');
+    });
+}
+
+/**
+ * Generate wallet option buttons
+ */
+function generateWalletOptions() {
+    const wallets = [
+        {
+            id: 'phantom',
+            name: 'Phantom',
+            icon: '🟣',
+            description: 'Popular Solana wallet',
+            available: window.solana?.isPhantom || isMobile,
+            deepLink: 'https://phantom.app/ul/browse/' + encodeURIComponent(window.location.href)
+        },
+        {
+            id: 'solflare',
+            name: 'Solflare',
+            icon: '🟠',
+            description: 'Secure Solana wallet',
+            available: window.solflare || isMobile,
+            deepLink: 'https://solflare.com/ul/v1/browse/' + encodeURIComponent(window.location.href)
+        },
+        {
+            id: 'trust',
+            name: 'Trust Wallet',
+            icon: '🔵',
+            description: 'Multi-chain wallet',
+            available: isMobile,
+            deepLink: 'trust://open_url?coin_id=501&url=' + encodeURIComponent(window.location.href)
+        },
+        {
+            id: 'coinbase',
+            name: 'Coinbase Wallet',
+            icon: '🔷',
+            description: 'Coinbase self-custody wallet',
+            available: isMobile,
+            deepLink: 'https://go.cb-w.com/dapp?cb_url=' + encodeURIComponent(window.location.href)
+        },
+        {
+            id: 'backpack',
+            name: 'Backpack',
+            icon: '🎒',
+            description: 'Modern Solana wallet',
+            available: window.backpack || isMobile,
+            deepLink: 'https://backpack.app/dapp?url=' + encodeURIComponent(window.location.href)
+        }
+    ];
+    
+    return wallets.map(wallet => `
+        <button class="wallet-option" data-wallet-id="${wallet.id}" data-deep-link="${wallet.deepLink}">
+            <span class="wallet-icon">${wallet.icon}</span>
+            <div class="wallet-info">
+                <div class="wallet-name">${wallet.name}</div>
+                <div class="wallet-description">${wallet.description}</div>
+            </div>
+            <span class="wallet-arrow">→</span>
+        </button>
+    `).join('');
+}
+
+/**
+ * Connect to selected wallet
+ */
+async function connectSelectedWallet(walletId) {
+    try {
+        showStatus('pending', '<span class="loading"></span>Connecting to wallet...');
+        
+        let provider = null;
+        let deepLink = null;
+        
+        // Map wallet ID to provider and deep link
+        switch (walletId) {
+            case 'phantom':
+                provider = window.solana?.isPhantom ? window.solana : null;
+                deepLink = 'https://phantom.app/ul/browse/' + encodeURIComponent(window.location.href);
+                break;
+            case 'solflare':
+                provider = window.solflare;
+                deepLink = 'https://solflare.com/ul/v1/browse/' + encodeURIComponent(window.location.href);
+                break;
+            case 'backpack':
+                provider = window.backpack;
+                deepLink = 'https://backpack.app/dapp?url=' + encodeURIComponent(window.location.href);
+                break;
+            case 'trust':
+                deepLink = 'trust://open_url?coin_id=501&url=' + encodeURIComponent(window.location.href);
+                break;
+            case 'coinbase':
+                deepLink = 'https://go.cb-w.com/dapp?cb_url=' + encodeURIComponent(window.location.href);
+                break;
+        }
+        
+        // Try browser extension first
+        if (provider) {
+            await connectWallet(walletId.charAt(0).toUpperCase() + walletId.slice(1), provider);
+        } else if (deepLink && isMobile) {
+            // On mobile, try deep link
+            showStatus('pending', `
+                <div style="text-align: center; padding: 20px;">
+                    <h3 style="margin-bottom: 15px;">Opening Wallet App...</h3>
+                    <p style="margin-bottom: 15px;">
+                        If the wallet app doesn't open automatically, please:<br><br>
+                        1. Make sure the wallet app is installed<br>
+                        2. Open the wallet app manually<br>
+                        3. Return to this page to complete registration
+                    </p>
+                    <button onclick="window.location.href='${deepLink}'" class="button primary" style="max-width: 300px; margin: 20px auto;">
+                        Open Wallet App
+                    </button>
+                </div>
+            `);
+            
+            // Try to open the deep link
+            setTimeout(() => {
+                window.location.href = deepLink;
+            }, 500);
+            
+        } else {
+            // No provider and not mobile - show install instructions
+            const walletName = walletId.charAt(0).toUpperCase() + walletId.slice(1);
+            const installUrls = {
+                phantom: 'https://phantom.app/',
+                solflare: 'https://solflare.com/',
+                trust: 'https://trustwallet.com/',
+                coinbase: 'https://www.coinbase.com/wallet',
+                backpack: 'https://backpack.app/'
+            };
+            
+            showStatus('error', `
+                ❌ <strong>${walletName} Not Found</strong><br><br>
+                Please install the ${walletName} wallet extension or mobile app:<br><br>
+                <a href="${installUrls[walletId]}" target="_blank" class="button primary" style="display: inline-block; margin-top: 10px;">
+                    Install ${walletName}
+                </a><br><br>
+                After installation, refresh this page and try again.
+            `);
+        }
+        
+    } catch (error) {
+        console.error('Wallet selection error:', error);
+        handleConnectionError(error);
+    }
+}
+
+/**
+ * Generic wallet connection function
+ */
+async function connectWallet(walletName, provider) {
     try {
         showStatus('pending', '<span class="loading"></span>Connecting to wallet...');
         
@@ -379,8 +609,7 @@ async function connectWallet(walletType) {
 
         if (result.success) {
             showStatus('success', `✅ Wallet registered successfully!<br><br>Wallet: ${publicKey.substring(0, 8)}...${publicKey.substring(publicKey.length - 8)}<br><br>You can now close this window and return to Discord.`);
-            document.getElementById('connectButton').disabled = true;
-            document.getElementById('solflareButton').disabled = true;
+            disableAllButtons();
         } else {
             showStatus('error', `❌ Registration failed: ${result.error || 'Unknown error'}<br><br>Please try again or request a new registration link.`);
         }
@@ -392,102 +621,199 @@ async function connectWallet(walletType) {
 }
 
 /**
- * Connect via WalletConnect for mobile wallets or desktop QR code scanning
- * Uses a manual approach since we need both desktop QR and mobile deep linking
+ * Add wallet modal styles to the page
  */
-async function connectWalletConnect() {
-    try {
-        showStatus('pending', '<span class="loading"></span>Preparing WalletConnect...');
-        
-        // Create the message to sign
-        const message = {
-            app: "JustTheTip",
-            discord_user: discordUsername,
-            discord_id: discordUserId,
-            timestamp: new Date().toISOString(),
-            nonce: nonce,
-            purpose: "Register this wallet for deposits & withdrawals"
-        };
-
-        const messageString = JSON.stringify(message, null, 2);
-        
-        // Store the message and session for later verification
-        sessionStorage.setItem('walletConnectMessage', messageString);
-        sessionStorage.setItem('walletConnectNonce', nonce);
-        
-        // Provide instructions based on device type
-        let instructions;
-        
-        if (isMobile) {
-            // Mobile instructions - direct wallet app connection
-            instructions = `
-                <div style="text-align: left; padding: 20px;">
-                    <h3 style="margin-bottom: 15px;">📱 Mobile Wallet Connection</h3>
-                    <p style="margin-bottom: 15px;">To register your wallet on mobile:</p>
-                    <ol style="margin-left: 20px; line-height: 1.8;">
-                        <li><strong>Install a Solana wallet app</strong> (if you don't have one):
-                            <ul style="margin: 10px 0 10px 20px;">
-                                <li>Phantom Wallet (recommended)</li>
-                                <li>Solflare Wallet</li>
-                                <li>Trust Wallet</li>
-                                <li>Or any Solana-compatible wallet</li>
-                            </ul>
-                        </li>
-                        <li><strong>Open the wallet app</strong> and create/import your wallet</li>
-                        <li><strong>Copy your wallet address</strong> from the app</li>
-                        <li><strong>Click "Enter Wallet Details"</strong> below</li>
-                        <li><strong>Paste your wallet address</strong> when prompted</li>
-                        <li><strong>Sign the message</strong> in your wallet app to complete registration</li>
-                    </ol>
-                    <div style="background: #e7f3ff; padding: 15px; border-radius: 8px; margin-top: 20px;">
-                        <strong>💡 Note:</strong> You'll need to manually sign a message in your wallet app. 
-                        We'll provide the exact message text for you to copy.
-                    </div>
-                </div>
-            `;
-        } else {
-            // Desktop instructions - QR code scanning with mobile wallet
-            instructions = `
-                <div style="text-align: left; padding: 20px;">
-                    <h3 style="margin-bottom: 15px;">🖥️ Desktop + Mobile Wallet Connection</h3>
-                    <p style="margin-bottom: 15px;">Don't have a browser extension? Connect using your mobile wallet:</p>
-                    <ol style="margin-left: 20px; line-height: 1.8;">
-                        <li><strong>Install a Solana wallet on your phone</strong> (if you don't have one):
-                            <ul style="margin: 10px 0 10px 20px;">
-                                <li>Phantom Wallet (recommended) - <a href="https://phantom.app/" target="_blank">phantom.app</a></li>
-                                <li>Solflare Wallet - <a href="https://solflare.com/" target="_blank">solflare.com</a></li>
-                                <li>Trust Wallet or any Solana wallet</li>
-                            </ul>
-                        </li>
-                        <li><strong>Open your wallet app on your phone</strong></li>
-                        <li><strong>Copy your wallet address</strong> from the app (tap to copy)</li>
-                        <li><strong>Return to this page on desktop</strong></li>
-                        <li><strong>Click "Enter Wallet Details"</strong> below and paste your address</li>
-                        <li><strong>Sign the verification message</strong> in your mobile wallet app</li>
-                        <li><strong>Copy the signature</strong> and submit it here</li>
-                    </ol>
-                    <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-top: 20px;">
-                        <strong>⚡ Why manual entry?</strong> This ensures compatibility with all Solana wallets. 
-                        The process is secure and only takes 2-3 minutes.
-                    </div>
-                    <div style="background: #e7f3ff; padding: 15px; border-radius: 8px; margin-top: 15px;">
-                        <strong>🔒 Security:</strong> Your private keys never leave your phone. 
-                        You're only sharing a cryptographic proof of ownership.
-                    </div>
-                </div>
-            `;
-        }
-        
-        showStatus('pending', instructions);
-        
-        // Show manual entry button
-        document.getElementById('manualEntryButton').style.display = 'block';
-        document.getElementById('mobileButtons').style.display = 'block';
-        
-    } catch (error) {
-        console.error('WalletConnect error:', error);
-        handleConnectionError(error);
+function addWalletModalStyles() {
+    if (document.getElementById('wallet-modal-styles')) {
+        return; // Already added
     }
+    
+    const style = document.createElement('style');
+    style.id = 'wallet-modal-styles';
+    style.textContent = `
+.wallet-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    padding: 20px;
+}
+
+.wallet-modal-overlay.active {
+    opacity: 1;
+}
+
+.wallet-modal {
+    background: linear-gradient(135deg, rgba(26, 26, 46, 0.95) 0%, rgba(15, 15, 35, 0.95) 100%);
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    max-width: 440px;
+    width: 100%;
+    max-height: 90vh;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.wallet-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 24px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.wallet-modal-header h2 {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.wallet-modal-close {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 24px;
+    cursor: pointer;
+    padding: 4px;
+    line-height: 1;
+    transition: all 0.2s;
+}
+
+.wallet-modal-close:hover {
+    color: #fff;
+    transform: rotate(90deg);
+}
+
+.wallet-modal-subtitle {
+    padding: 0 24px 16px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+}
+
+.wallet-modal-content {
+    padding: 8px 24px 24px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.wallet-option {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 8px;
+    font-family: inherit;
+    text-align: left;
+    color: inherit;
+}
+
+.wallet-option:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(102, 126, 234, 0.5);
+    transform: translateY(-2px);
+}
+
+.wallet-icon {
+    font-size: 32px;
+    line-height: 1;
+}
+
+.wallet-info {
+    flex: 1;
+}
+
+.wallet-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 4px;
+}
+
+.wallet-description {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.wallet-arrow {
+    font-size: 20px;
+    color: rgba(255, 255, 255, 0.4);
+    transition: transform 0.2s;
+}
+
+.wallet-option:hover .wallet-arrow {
+    transform: translateX(4px);
+}
+
+.wallet-modal-footer {
+    padding: 16px 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.wallet-modal-footer a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.wallet-modal-footer a:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 480px) {
+    .wallet-modal {
+        margin: 0;
+        border-radius: 24px 24px 0 0;
+        max-height: 80vh;
+    }
+    
+    .wallet-modal-header h2 {
+        font-size: 20px;
+    }
+    
+    .wallet-option {
+        padding: 14px;
+    }
+    
+    .wallet-icon {
+        font-size: 28px;
+    }
+}
+    `;
+    document.head.appendChild(style);
 }
 
 /**
@@ -608,8 +934,8 @@ async function submitSignature(walletAddress) {
 }
 
 // Setup event listeners for desktop wallet buttons
-document.getElementById('connectButton').addEventListener('click', () => connectWallet('phantom'));
-document.getElementById('solflareButton').addEventListener('click', () => connectWallet('solflare'));
+document.getElementById('connectButton').addEventListener('click', () => connectWalletExtension('phantom'));
+document.getElementById('solflareButton').addEventListener('click', () => connectWalletExtension('solflare'));
 
 // Setup event listener for WalletConnect button (mobile)
 document.getElementById('walletConnectButton').addEventListener('click', connectWalletConnect);

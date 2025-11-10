@@ -8,6 +8,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <link rel="icon" href="../../logo.png" type="image/png">
+    
+    <!-- WalletConnect Modal CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@walletconnect/modal@2.7.0/dist/index.css">
+    
     <style>
         :root {
             --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -467,7 +471,8 @@
         </div>
     </div>
 
-
-    <script src="sign.js"></script>
+    <!-- WalletConnect Dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@1.98.4/lib/index.iife.min.js"></script>
+    <script type="module" src="sign.js"></script>
 </body>
 </html>
