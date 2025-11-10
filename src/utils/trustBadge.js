@@ -1,5 +1,6 @@
 /**
  * JustTheTip - Trust Badge Service
+ * Simplified wallet verification without NFT requirements (NFT feature coming later)
  * 
  * Copyright (c) 2025 JustTheTip Bot
  * 
@@ -15,9 +16,7 @@
 
 'use strict';
 
-const { PublicKey } = require('@solana/web3.js');
 const logger = require('./logger');
-const solanaDevTools = require('./solanaDevTools');
 
 async function fetchBadge(discordId) {
   if (!discordId) {
@@ -29,34 +28,20 @@ async function fetchBadge(discordId) {
   return badge || null;
 }
 
-async function confirmBadgeOnChain(walletAddress, mintAddress) {
-  if (!walletAddress || !mintAddress) {
-    return false;
-  }
-
-  try {
-    const connection = solanaDevTools.getConnection('devnet');
-    const owner = new PublicKey(walletAddress);
-    const mint = new PublicKey(mintAddress);
-    const accounts = await connection.getTokenAccountsByOwner(owner, { mint });
-    return accounts.value.length > 0;
-  } catch (error) {
-    logger.error(`[trust-badge] Failed to confirm badge on-chain: ${error.message}`);
-    return false;
-  }
-}
-
+/**
+ * Require that a user has registered their wallet (signature-verified)
+ * NFT verification is a future feature
+ * @param {string} discordId - Discord user ID
+ * @returns {Object} Badge/wallet info
+ */
 async function requireBadge(discordId) {
   const badge = await fetchBadge(discordId);
   if (!badge) {
-    throw new Error('User is not verified with a TrustBadge NFT yet.');
+    throw new Error('User is not verified. Please use /register-wallet to link your Solana wallet.');
   }
 
-  const confirmed = await confirmBadgeOnChain(badge.wallet_address, badge.mint_address);
-  if (!confirmed) {
-    throw new Error('TrustBadge NFT could not be found on-chain. Ask the user to re-verify.');
-  }
-
+  // For now, we trust that the wallet was signature-verified during registration
+  // NFT on-chain verification will be added as a future feature
   return badge;
 }
 
@@ -71,5 +56,4 @@ module.exports = {
   fetchBadge,
   requireBadge,
   adjustReputation,
-  confirmBadgeOnChain,
 };

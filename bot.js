@@ -52,6 +52,7 @@ const {
   createAirdropEmbed,
   createAirdropCollectedEmbed,
 } = require('./src/utils/embedBuilders');
+const { startPendingTipsProcessor } = require('./src/jobs/pendingTipsProcessor');
 
 // Load fee wallet addresses (reserved for future use)
 const feeWallets = require('./security/feeWallet.json');
@@ -70,11 +71,15 @@ function getFeeWallet(coin) {
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
 
-// Price configuration (TODO: Replace with live price API)
-const PRICE_CONFIG = {
-  SOL: 20, // USD per SOL - should be fetched from price API
-  USDC: 1  // USDC is pegged to USD
-};
+const priceService = require('./src/utils/priceService');
+
+// Price configuration - dynamically fetched from API
+async function getPriceConfig() {
+  const solPrice = await priceService.getSolPrice();
+  return {
+    SOL: solPrice,
+  };
+}
 
 // Note: isValidSolanaAddress is now imported from shared utils
 
@@ -82,6 +87,9 @@ client.once('ready', async () => {
   console.log(`🟢 Logged in as ${client.user.tag}`);
   await db.connectDB();
   console.log('Database connected.');
+  
+  // Start pending tips processor
+  startPendingTipsProcessor(client);
 });
 
 // Register slash commands
@@ -112,6 +120,11 @@ const commands = [
           { name: 'USDT - Tether USD', value: 'USDT' }
         ]
       }
+=======
+    description: 'Send SOL to another user (use $ for USD, e.g., $10 or 0.5 for SOL)',
+    options: [
+      { name: 'user', type: 6, description: 'User to tip', required: true },
+      { name: 'amount', type: 3, description: 'Amount (use $ for USD, e.g., $10 or 0.5 for SOL)', required: true }
     ]
   },
   {
@@ -187,6 +200,12 @@ Your single signature proves wallet ownership for ALL tokens. No repeated signin
 1. Run \`/register-wallet\` and sign the message
 2. Use \`/tip @friend 10 USDC\` or \`/tip @friend 0.1 SOL\`
 3. That's it! Fully non-custodial and secure.
+=======
+**💸 Using the Bot:**
+\`/balance\` — Check your funds
+\`/tip @user <amount>\` — Send SOL to a user (use $ for USD, e.g., $10 or 0.5 for SOL)
+  _Note: A 0.5% fee is applied to all tips_
+\`/support <issue>\` — Get help or report an issue
 
 Need help? Use \`/support <your issue>\``;
 
@@ -234,6 +253,11 @@ JustTheTip uses **Solana Trustless Agent** technology. One wallet signature enab
   • \`/tip @Alice 0.5 SOL\` — Send half a SOL
   • \`/tip @Bob 10 USDC\` — Send 10 USD Coin (coming soon)
   • \`/tip @Charlie 1000 BONK\` — Send Bonk tokens (coming soon)
+=======
+• \`/tip <@user> <amount>\` — Send SOL to another Discord user (use $ for USD, e.g., $10 or 0.5 for SOL)
+  _Example: \`/tip @Alice 0.05\` sends 0.05 SOL_
+  _Example: \`/tip @Bob $5\` sends $5 worth of SOL_
+  _Note: A 0.5% fee is applied to all tips for bot maintenance_
 
 **Get Help**
 • \`/help\` — Quick command guide
@@ -247,6 +271,10 @@ JustTheTip uses **Solana Trustless Agent** technology. One wallet signature enab
 🔄 **USDC** (USD Coin) — Coming soon
 🔄 **BONK** (Bonk) — Coming soon  
 🔄 **USDT** (Tether) — Coming soon
+=======
+☀️ **SOL** (Solana) — Fast, low-fee native token
+  _Tip in SOL directly (e.g., 0.5) or in USD (e.g., $10)_
+  _A 0.5% fee is applied to all tips for bot maintenance_
 
 **One signature enables ALL tokens!** Register once with \`/register-wallet\`, then tip with any token as they become available.
 
@@ -310,8 +338,9 @@ client.on(Events.InteractionCreate, async interaction => {
       try {
         // Get actual balance from database
         const balances = await db.getBalances(interaction.user.id);
+        const priceConfig = await getPriceConfig();
         
-        const embed = createBalanceEmbed(balances, PRICE_CONFIG);
+        const embed = createBalanceEmbed(balances, priceConfig);
           
         const refreshButton = new ActionRowBuilder()
           .addComponents(
@@ -785,8 +814,9 @@ client.on(Events.InteractionCreate, async interaction => {
     try {
       // Refresh balance display with actual data
       const balances = await db.getBalances(interaction.user.id);
+      const priceConfig = await getPriceConfig();
       
-      const embed = createBalanceEmbed(balances, PRICE_CONFIG, true);
+      const embed = createBalanceEmbed(balances, priceConfig, true);
         
       await interaction.update({ embeds: [embed] });
       
@@ -846,8 +876,9 @@ client.on(Events.MessageCreate, async message => {
     } else if (command === 'balance') {
       // Get balance
       const balances = await db.getBalances(message.author.id);
+      const priceConfig = await getPriceConfig();
       
-      const embed = createBalanceEmbed(balances, PRICE_CONFIG);
+      const embed = createBalanceEmbed(balances, priceConfig);
       await message.reply({ embeds: [embed] });
       
     } else if (command === 'help') {
