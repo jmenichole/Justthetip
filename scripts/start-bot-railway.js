@@ -131,7 +131,7 @@ async function performHealthChecks() {
 function startBot() {
   logHeader('Step 3: Starting Discord Bot');
   
-  const botPath = path.join(__dirname, '..', 'bot.js');
+  const botPath = path.join(__dirname, '..', 'bot_smart_contract.js');
   log(`Starting bot from: ${botPath}`, 'cyan');
   log('', 'reset');
   
