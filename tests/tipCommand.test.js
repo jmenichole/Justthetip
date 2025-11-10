@@ -15,7 +15,8 @@
 
 describe('handleTipCommand', () => {
   beforeEach(() => {
-    process.env.X402_PAYER_SECRET = '2'.repeat(88);
+    // Valid base58 encoded secret key for testing (generated keypair)
+    process.env.X402_PAYER_SECRET = '3ef9mWKpS3dfkJgfA8SPpP8Uc9Hhrw4ZsFWvuPGBBy3M2TrFMQuMQihUmBhPPWuTK1sDpofi9yqZuFy8tX3tnMJK';
     jest.resetModules();
   });
 
@@ -307,5 +308,67 @@ describe('handleTipCommand', () => {
         ]),
       })
     );
+  });
+
+  it('handles "all" keyword to send full balance', async () => {
+    const { handleTipCommand } = require('../src/commands/tipCommand');
+    const sender = { id: 'sender', username: 'Alice' };
+    const recipient = { id: 'receiver', username: 'Bob', bot: false };
+
+    const interaction = {
+      user: sender,
+      options: {
+        getUser: jest.fn(() => recipient),
+        getString: jest.fn((key) => {
+          if (key === 'amount') return 'all';
+          return null;
+        }),
+      },
+      reply: jest.fn(),
+      deferReply: jest.fn(),
+      editReply: jest.fn(),
+    };
+
+    const x402Mock = {
+      getBalance: jest.fn().mockResolvedValue({
+        lamports: 2000000000, // 2 SOL in lamports
+        sol: 2.0,
+      }),
+      sendPayment: jest.fn()
+        .mockResolvedValueOnce({ signature: 'sig123' }) // Main payment
+        .mockResolvedValueOnce({ signature: 'feesig456' }), // Fee payment
+    };
+
+    const trustBadgeMock = {
+      requireBadge: jest
+        .fn()
+        .mockResolvedValueOnce({ wallet_address: 'wallet-sender', mint_address: 'mint-sender' })
+        .mockResolvedValueOnce({ wallet_address: 'wallet-receiver', mint_address: 'mint-receiver' }),
+      adjustReputation: jest.fn().mockResolvedValueOnce(5).mockResolvedValueOnce(8),
+    };
+
+    const sqliteMock = {
+      getUser: jest.fn(),
+      recordTip: jest.fn(),
+    };
+
+    const priceServiceMock = {
+      convertUsdToSol: jest.fn().mockResolvedValue(0.5),
+    };
+
+    await handleTipCommand(interaction, {
+      x402Client: x402Mock,
+      trustBadgeService: trustBadgeMock,
+      sqlite: sqliteMock,
+      priceService: priceServiceMock,
+    });
+
+    expect(interaction.deferReply).toHaveBeenCalled();
+    expect(x402Mock.getBalance).toHaveBeenCalled();
+    
+    // Should send payment with balance minus fee reserve (2.0 - 0.001 = 1.999)
+    expect(x402Mock.sendPayment).toHaveBeenCalledTimes(2);
+    expect(sqliteMock.recordTip).toHaveBeenCalledWith('sender', 'receiver', 1.999, 'SOL', 'sig123');
+    expect(interaction.editReply).toHaveBeenCalled();
   });
 });
