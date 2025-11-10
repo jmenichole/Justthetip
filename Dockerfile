@@ -6,19 +6,22 @@ FROM node:18-alpine
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies
+# Install system dependencies including linux-headers for native module compilation
 RUN apk add --no-cache \
     python3 \
     make \
     g++ \
-    git
+    git \
+    linux-headers \
+    eudev-dev \
+    libusb-dev
 
 # Copy package files
 COPY package*.json ./
 
 # Install dependencies
-# Use --production for production builds, or omit for development
-RUN npm ci --only=production
+# Use --omit=dev for production builds (--only=production is deprecated)
+RUN npm ci --omit=dev
 
 # Copy application code
 COPY . .
