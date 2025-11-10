@@ -20,8 +20,6 @@ const x402Client = require('../utils/x402Client');
 const trustBadgeService = require('../utils/trustBadge');
 const { createTipSuccessEmbed } = require('../utils/embedBuilders');
 const { isValidAmount } = require('../utils/validation');
-const { isTokenSupported, getTokenInfo, getTokenDecimals } = require('../utils/tokenRegistry');
-=======
 const priceService = require('../utils/priceService');
 const feeWallets = require('../../security/feeWallet.json');
 
@@ -39,47 +37,32 @@ async function handleTipCommand(interaction, dependencies = {}) {
   const amountInput = interaction.options.getString('amount');
   const currency = 'SOL'; // Only SOL is supported now
 
+  // Check if amount is "all" keyword
+  const isAllAmount = typeof amountInput === 'string' && amountInput.toLowerCase() === 'all';
+  
   // Check if amount starts with $ to indicate USD
   let isUsdAmount = false;
   let numericAmount = 0;
 
-  if (typeof amountInput === 'string' && amountInput.startsWith('$')) {
-    isUsdAmount = true;
-    numericAmount = parseFloat(amountInput.substring(1));
-  } else {
-    numericAmount = parseFloat(amountInput);
-  }
+  if (!isAllAmount) {
+    if (typeof amountInput === 'string' && amountInput.startsWith('$')) {
+      isUsdAmount = true;
+      numericAmount = parseFloat(amountInput.substring(1));
+    } else {
+      numericAmount = parseFloat(amountInput);
+    }
 
-  if (!isValidAmount(numericAmount)) {
-    await interaction.reply({ content: '❌ Amount must be a positive number. Use `$10` for USD or `0.5` for SOL.', ephemeral: true });
-    return;
+    if (!isValidAmount(numericAmount)) {
+      await interaction.reply({ content: '❌ Amount must be a positive number. Use `$10` for USD, `0.5` for SOL, or `all` to send your entire balance.', ephemeral: true });
+      return;
+    }
   }
 
   if (recipient.id === interaction.user.id) {
     await interaction.reply({ content: '😅 You cannot tip yourself. Try a friend instead!', ephemeral: true });
     return;
   }
-  // Check if token is supported
-  const tokenSymbol = currency.toUpperCase();
-  if (!isTokenSupported(tokenSymbol)) {
-    await interaction.reply({ 
-      content: `❌ Token ${tokenSymbol} is not supported. Supported tokens: SOL, USDC, BONK, USDT`, 
-      ephemeral: true 
-    });
-    return;
-  }
 
-  // For now, only SOL tips are enabled via x402 client
-  // Multi-token support requires on-chain transaction building
-  if (tokenSymbol !== 'SOL') {
-    await interaction.reply({ 
-      content: `⚠️ ${tokenSymbol} tipping is coming soon! Currently only SOL tips are available via the x402 micropayment system.\n\nMulti-token support (USDC, BONK, USDT) will be enabled in the next update as part of our Trustless Agent enhancement.`, 
-      ephemeral: true 
-    });
-    return;
-  }
-
-=======
   if (!MICROPAYMENT_SIGNER) {
     await interaction.reply({ content: '❌ Payment signer not configured. Set X402_PAYER_SECRET in your environment.', ephemeral: true });
     return;
@@ -89,14 +72,48 @@ async function handleTipCommand(interaction, dependencies = {}) {
 
   try {
     // Check if sender has a badge
+    let senderBadge;
     try {
-      await badges.requireBadge(interaction.user.id);
+      senderBadge = await badges.requireBadge(interaction.user.id);
     } catch (error) {
       await interaction.editReply({ 
         content: '❌ You need to register your wallet before sending tips.\n\n' +
                  'Use `/register-wallet` to get started!',
       });
       return;
+    }
+
+    // If user specified "all", get their current balance from the payment signer wallet
+    if (isAllAmount) {
+      try {
+        // Get the balance of the micropayment signer (bot's wallet that holds funds)
+        // Note: In this system, the bot wallet holds the funds and sends on behalf of users
+        const { Keypair } = require('@solana/web3.js');
+        const bs58 = require('bs58');
+        const bs58decode = bs58.default?.decode || bs58.decode;
+        const signerKeypair = Keypair.fromSecretKey(bs58decode(MICROPAYMENT_SIGNER));
+        const balanceResult = await payments.getBalance(signerKeypair.publicKey.toBase58());
+        
+        // Reserve some SOL for transaction fees (0.001 SOL per transaction)
+        const reservedForFees = 0.001;
+        const availableBalance = balanceResult.sol - reservedForFees;
+        
+        if (availableBalance <= 0) {
+          await interaction.editReply({ 
+            content: '❌ Insufficient balance to send tip. Your available balance (after reserving for fees) is 0 SOL.',
+          });
+          return;
+        }
+        
+        numericAmount = availableBalance;
+        // Note: "all" cannot be used with USD conversion, so isUsdAmount remains false
+      } catch (balanceError) {
+        console.error('Failed to get balance for "all" amount:', balanceError);
+        await interaction.editReply({ 
+          content: '❌ Failed to retrieve balance. Please try again or specify a specific amount.',
+        });
+        return;
+      }
     }
 
     // Check if recipient has a badge
@@ -106,7 +123,7 @@ async function handleTipCommand(interaction, dependencies = {}) {
     } catch (error) {
       // Recipient is not registered - create pending tip and notify them
       
-      // Convert USD to SOL if needed
+      // Convert USD to SOL if needed, or use the amount we already have (from "all" or direct input)
       let amountInSol = numericAmount;
       let originalUsdAmount = null;
       if (isUsdAmount) {
@@ -128,7 +145,9 @@ async function handleTipCommand(interaction, dependencies = {}) {
         const dmChannel = await recipient.createDM();
         const amountDisplay = isUsdAmount 
           ? `$${numericAmount} USD (${amountInSol.toFixed(6)} SOL)` 
-          : `${amountInSol.toFixed(6)} SOL`;
+          : isAllAmount 
+            ? `${amountInSol.toFixed(6)} SOL (your full balance)`
+            : `${amountInSol.toFixed(6)} SOL`;
         
         await dmChannel.send(
           `🎉 **You've received a tip!**\n\n` +
@@ -159,7 +178,15 @@ async function handleTipCommand(interaction, dependencies = {}) {
         )
         .setColor(0xffa500)
         .addFields(
-          { name: '💰 Amount', value: isUsdAmount ? `$${numericAmount} USD (${amountInSol.toFixed(6)} SOL)` : `${amountInSol.toFixed(6)} SOL`, inline: true },
+          { 
+            name: '💰 Amount', 
+            value: isUsdAmount 
+              ? `$${numericAmount} USD (${amountInSol.toFixed(6)} SOL)` 
+              : isAllAmount 
+                ? `${amountInSol.toFixed(6)} SOL (your full balance)` 
+                : `${amountInSol.toFixed(6)} SOL`, 
+            inline: true 
+          },
           { name: '⏰ Expires', value: `<t:${Math.floor(new Date(pendingTip.expires_at).getTime() / 1000)}:R>`, inline: true }
         )
         .setFooter({ text: 'If not claimed within 24 hours, the tip will be returned to you.' });
