@@ -19,7 +19,6 @@ const path = require('path');
 
 describe('Dotenv Configuration', () => {
   const botFiles = [
-    'bot.js',
     'bot_smart_contract.js',
     'clear-commands.js'
   ];
@@ -57,18 +56,8 @@ describe('Dotenv Configuration', () => {
     expect(content).toMatch(/allowEmptyValues:\s*true/);
   });
 
-  test('bot.js should maintain allowEmptyValues: true configuration', () => {
-    const filePath = path.join(process.cwd(), 'bot.js');
-    
-    if (!fs.existsSync(filePath)) {
-      throw new Error('bot.js not found');
-    }
-
-    const content = fs.readFileSync(filePath, 'utf-8');
-    
-    // Verify the configuration includes allowEmptyValues
-    expect(content).toMatch(/allowEmptyValues:\s*true/);
-  });
+  // Note: bot.js test removed as the file has been replaced by bot_smart_contract.js
+  // The legacy bot.js is no longer used in the repository
 
   test('.env.example should document optional variables as commented', () => {
     const envExamplePath = path.join(process.cwd(), '.env.example');
@@ -107,7 +96,7 @@ describe('Dotenv Configuration', () => {
   });
 
   test('bot files should have try-catch wrapper for dotenv-safe to handle missing .env file', () => {
-    const criticalBotFiles = ['bot.js', 'bot_smart_contract.js'];
+    const criticalBotFiles = ['bot_smart_contract.js'];
     
     for (const file of criticalBotFiles) {
       const filePath = path.join(process.cwd(), file);
@@ -127,7 +116,7 @@ describe('Dotenv Configuration', () => {
   });
 
   test('bot files should validate required environment variables', () => {
-    const criticalBotFiles = ['bot.js', 'bot_smart_contract.js'];
+    const criticalBotFiles = ['bot_smart_contract.js'];
     
     for (const file of criticalBotFiles) {
       const filePath = path.join(process.cwd(), file);
