@@ -41,6 +41,7 @@ try {
 
 const db = require('./db/database');
 const { handleTipCommand } = require('./src/commands/tipCommand');
+const { handleTiplogCommand, handleTimeframeSelection } = require('./src/commands/tiplogCommand');
 const fs = require('fs');
 const crypto = require('crypto');
 const { isValidSolanaAddress, verifySignature } = require('./src/utils/validation');
@@ -119,6 +120,10 @@ const commands = [
         { name: 'Global Stats', value: 'global' }
       ]}
     ]
+  },
+  {
+    name: 'tiplog',
+    description: 'View your transaction history with timeframe selection 📋',
   },
   {
     name: 'help',
@@ -716,6 +721,10 @@ client.on(Events.InteractionCreate, async interaction => {
         });
       }
       
+    } else if (commandName === 'tiplog') {
+      // Handle tiplog command
+      await handleTiplogCommand(interaction);
+      
     } else if (commandName === 'support') {
       const issue = interaction.options.getString('issue');
       
@@ -816,7 +825,15 @@ client.on(Events.InteractionCreate, async interaction => {
 
 // Handle button interactions
 client.on(Events.InteractionCreate, async interaction => {
-  if (!interaction.isButton()) return;
+  if (!interaction.isButton() && !interaction.isStringSelectMenu()) return;
+  
+  // Handle string select menus
+  if (interaction.isStringSelectMenu()) {
+    if (interaction.customId === 'tiplog_timeframe') {
+      await handleTimeframeSelection(interaction);
+      return;
+    }
+  }
   
   if (interaction.customId === 'collect_airdrop') {
     const userId = interaction.user.id;

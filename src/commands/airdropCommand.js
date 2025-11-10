@@ -184,6 +184,22 @@ class AirdropCommand {
       // Update airdrop with message ID
       await this.db.updateAirdrop(airdropId, { messageId: airdropMessage.id });
 
+      // Log airdrop creation to admin channel
+      try {
+        const { logAirdrop } = require('../utils/transactionLogger');
+        await logAirdrop(interaction.client, {
+          creatorId: userId,
+          totalAmount: totalAmount,
+          currency: currency,
+          maxRecipients: numRecipients,
+          duration: durationText,
+          message: message,
+          airdropId: airdropId
+        });
+      } catch (logError) {
+        console.error('Failed to log airdrop:', logError);
+      }
+
       // Schedule expiration check
       this.scheduleExpiration(airdropId, durationMs, interaction.channel);
 
@@ -346,6 +362,20 @@ class AirdropCommand {
         content: `✅ You claimed **${airdrop.amountPerUser.toFixed(4)} ${airdrop.currency}**!`,
         ephemeral: true
       });
+
+      // Log airdrop claim to admin channel
+      try {
+        const { logAirdropClaim } = require('../utils/transactionLogger');
+        await logAirdropClaim(interaction.client, {
+          userId: userId,
+          amount: airdrop.amountPerUser,
+          currency: airdrop.currency,
+          hasWallet: hasWallet,
+          airdropId: airdropId
+        });
+      } catch (logError) {
+        console.error('Failed to log airdrop claim:', logError);
+      }
 
     } catch (error) {
       console.error('Error claiming airdrop:', error);

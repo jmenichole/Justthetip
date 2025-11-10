@@ -255,9 +255,45 @@ async function handleTipCommand(interaction, dependencies = {}) {
     embed.setFooter({ text: footerText });
 
     await interaction.editReply({ embeds: [embed] });
+
+    // Log transaction to admin channel
+    try {
+      const { logTransaction } = require('../utils/transactionLogger');
+      await logTransaction(interaction.client, {
+        senderId: interaction.user.id,
+        recipientId: recipient.id,
+        amount: amountInSol,
+        currency: currency,
+        fee: feeAmount,
+        netAmount: netAmount,
+        usdAmount: isUsdAmount ? numericAmount : null,
+        status: 'success',
+        signature: paymentResult.signature,
+        guildName: interaction.guild ? interaction.guild.name : 'DM'
+      });
+    } catch (logError) {
+      console.error('Failed to log transaction:', logError);
+      // Don't fail the transaction if logging fails
+    }
   } catch (error) {
     console.error('Tip command failed:', error);
     await interaction.editReply({ content: `❌ Tip failed: ${error.message}` });
+    
+    // Log failed transaction
+    try {
+      const { logTransaction } = require('../utils/transactionLogger');
+      await logTransaction(interaction.client, {
+        senderId: interaction.user.id,
+        recipientId: recipient.id,
+        amount: numericAmount,
+        currency: currency,
+        status: 'failed',
+        error: error.message,
+        guildName: interaction.guild ? interaction.guild.name : 'DM'
+      });
+    } catch (logError) {
+      console.error('Failed to log failed transaction:', logError);
+    }
   }
 }
 
