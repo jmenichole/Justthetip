@@ -91,6 +91,56 @@ function initDatabase() {
     db.exec('CREATE INDEX IF NOT EXISTS idx_pending_tips_receiver ON pending_tips(receiver_id)');
     db.exec('CREATE INDEX IF NOT EXISTS idx_pending_tips_expires ON pending_tips(expires_at)');
 
+    // Airdrops table
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS airdrops (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        airdrop_id TEXT UNIQUE NOT NULL,
+        creator_id TEXT NOT NULL,
+        creator_name TEXT,
+        currency TEXT NOT NULL,
+        total_amount REAL NOT NULL,
+        amount_per_user REAL NOT NULL,
+        max_recipients INTEGER NOT NULL,
+        claimed_count INTEGER DEFAULT 0,
+        message TEXT,
+        duration TEXT,
+        expires_at INTEGER NOT NULL,
+        active INTEGER DEFAULT 1,
+        message_id TEXT,
+        channel_id TEXT,
+        guild_id TEXT,
+        claimed_users TEXT DEFAULT '[]',
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    db.exec('CREATE INDEX IF NOT EXISTS idx_airdrops_id ON airdrops(airdrop_id)');
+    db.exec('CREATE INDEX IF NOT EXISTS idx_airdrops_creator ON airdrops(creator_id)');
+    db.exec('CREATE INDEX IF NOT EXISTS idx_airdrops_expires ON airdrops(expires_at)');
+    db.exec('CREATE INDEX IF NOT EXISTS idx_airdrops_active ON airdrops(active)');
+
+    // Pending airdrops table
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS pending_airdrops (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        airdrop_id TEXT NOT NULL,
+        user_id TEXT NOT NULL,
+        username TEXT,
+        amount REAL NOT NULL,
+        currency TEXT NOT NULL,
+        claimed_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        expires_at INTEGER NOT NULL,
+        credited INTEGER DEFAULT 0,
+        UNIQUE(airdrop_id, user_id)
+      )
+    `);
+
+    db.exec('CREATE INDEX IF NOT EXISTS idx_pending_airdrops_user ON pending_airdrops(user_id)');
+    db.exec('CREATE INDEX IF NOT EXISTS idx_pending_airdrops_airdrop ON pending_airdrops(airdrop_id)');
+    db.exec('CREATE INDEX IF NOT EXISTS idx_pending_airdrops_expires ON pending_airdrops(expires_at)');
+    db.exec('CREATE INDEX IF NOT EXISTS idx_pending_airdrops_credited ON pending_airdrops(credited)');
+
     console.log('✅ SQLite database ready');
   } catch (error) {
     console.error('Database initialization error:', error);
@@ -501,6 +551,182 @@ function getPendingTipsTotal(receiverId) {
   }
 }
 
+/**
+ * ==========================================
+ * AIRDROP MANAGEMENT FUNCTIONS
+ * ==========================================
+ */
+
+/**
+ * Create a new airdrop
+ * @param {Object} airdropData - Airdrop configuration
+ * @returns {boolean} Success status
+ */
+function createAirdrop(airdropData) {
+  try {
+    const stmt = db.prepare(`
+      INSERT INTO airdrops (
+        airdrop_id, creator_id, creator_name, currency, total_amount,
+        amount_per_user, max_recipients, message, duration, expires_at,
+        active, message_id, channel_id, guild_id, claimed_users
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    
+    stmt.run(
+      airdropData.airdropId,
+      airdropData.creator,
+      airdropData.creatorName,
+      airdropData.currency,
+      airdropData.totalAmount,
+      airdropData.amountPerUser,
+      airdropData.maxRecipients,
+      airdropData.message,
+      airdropData.duration,
+      airdropData.expiresAt,
+      airdropData.active ? 1 : 0,
+      airdropData.messageId,
+      airdropData.channelId,
+      airdropData.guildId,
+      '[]' // Empty array for claimed users
+    );
+    
+    return true;
+  } catch (error) {
+    console.error('Error creating airdrop:', error);
+    return false;
+  }
+}
+
+/**
+ * Get airdrop data by ID
+ * @param {string} airdropId - Airdrop ID
+ * @returns {Object|null} Airdrop data
+ */
+function getAirdrop(airdropId) {
+  try {
+    const airdrop = db.prepare('SELECT * FROM airdrops WHERE airdrop_id = ?').get(airdropId);
+    if (airdrop && airdrop.claimed_users) {
+      airdrop.claimedUsers = JSON.parse(airdrop.claimed_users);
+    }
+    return airdrop;
+  } catch (error) {
+    console.error('Error getting airdrop:', error);
+    return null;
+  }
+}
+
+/**
+ * Update airdrop data
+ * @param {string} airdropId - Airdrop ID
+ * @param {Object} updates - Fields to update
+ * @returns {boolean} Success status
+ */
+function updateAirdrop(airdropId, updates) {
+  try {
+    const fields = Object.keys(updates);
+    const values = Object.values(updates);
+    const setClause = fields.map(f => `${f} = ?`).join(', ');
+    
+    const stmt = db.prepare(`UPDATE airdrops SET ${setClause} WHERE airdrop_id = ?`);
+    stmt.run(...values, airdropId);
+    return true;
+  } catch (error) {
+    console.error('Error updating airdrop:', error);
+    return false;
+  }
+}
+
+/**
+ * Claim an airdrop for a user
+ * @param {string} airdropId - Airdrop ID
+ * @param {string} userId - User's Discord ID
+ * @returns {boolean} Success status
+ */
+function claimAirdrop(airdropId, userId) {
+  try {
+    const airdrop = getAirdrop(airdropId);
+    if (!airdrop) return false;
+    
+    const claimedUsers = airdrop.claimedUsers || [];
+    if (claimedUsers.includes(userId)) return false;
+    
+    claimedUsers.push(userId);
+    
+    const stmt = db.prepare(`
+      UPDATE airdrops 
+      SET claimed_users = ?, claimed_count = ?
+      WHERE airdrop_id = ?
+    `);
+    
+    stmt.run(JSON.stringify(claimedUsers), claimedUsers.length, airdropId);
+    return true;
+  } catch (error) {
+    console.error('Error claiming airdrop:', error);
+    return false;
+  }
+}
+
+/**
+ * Create a pending airdrop for user without wallet
+ * @param {Object} pendingData - Pending airdrop data
+ * @returns {boolean} Success status
+ */
+function createPendingAirdrop(pendingData) {
+  try {
+    const stmt = db.prepare(`
+      INSERT INTO pending_airdrops (airdrop_id, user_id, username, amount, currency, expires_at)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `);
+    
+    stmt.run(
+      pendingData.airdropId,
+      pendingData.userId,
+      pendingData.username,
+      pendingData.amount,
+      pendingData.currency,
+      pendingData.expiresAt
+    );
+    
+    return true;
+  } catch (error) {
+    console.error('Error creating pending airdrop:', error);
+    return false;
+  }
+}
+
+/**
+ * Get pending airdrops for a user
+ * @param {string} userId - User's Discord ID
+ * @returns {Array} Pending airdrops
+ */
+function getPendingAirdropsForUser(userId) {
+  try {
+    return db.prepare(`
+      SELECT * FROM pending_airdrops 
+      WHERE user_id = ? AND credited = 0 AND expires_at > ?
+    `).all(userId, Date.now());
+  } catch (error) {
+    console.error('Error getting pending airdrops:', error);
+    return [];
+  }
+}
+
+/**
+ * Credit a pending airdrop to user
+ * @param {number} pendingId - Pending airdrop ID
+ * @returns {boolean} Success status
+ */
+function creditPendingAirdrop(pendingId) {
+  try {
+    const stmt = db.prepare('UPDATE pending_airdrops SET credited = 1 WHERE id = ?');
+    stmt.run(pendingId);
+    return true;
+  } catch (error) {
+    console.error('Error crediting pending airdrop:', error);
+    return false;
+  }
+}
+
 // Export functions
 module.exports = {
   getUser,
@@ -522,6 +748,14 @@ module.exports = {
   getExpiredPendingTips,
   deletePendingTip,
   getPendingTipsTotal,
+  // Airdrop methods
+  createAirdrop,
+  getAirdrop,
+  updateAirdrop,
+  claimAirdrop,
+  createPendingAirdrop,
+  getPendingAirdropsForUser,
+  creditPendingAirdrop,
   db, // Export for testing
 };
 
