@@ -42,7 +42,6 @@ try {
 
 const { PublicKey } = require('@solana/web3.js');
 const { JustTheTipSDK } = require('./contracts/sdk');
-const { handleSwapCommand, handleSwapHelpButton } = require('./src/commands/swapCommand');
 const db = require('./db/database');
 const {
   createOnChainBalanceEmbed,
@@ -287,8 +286,7 @@ client.on(Events.InteractionCreate, async interaction => {
           `**⚡ Smart Contracts:** All transactions through Solana programs\n` +
           `**🔗 PDAs:** Program Derived Addresses for advanced features\n` +
           `**🛠️ TypeScript SDK:** Fully typed with comprehensive documentation\n` +
-          `**⚙️ Zero Private Keys:** Bot never handles sensitive information\n` +
-          `**🔄 Jupiter Swaps:** Cross-token tipping via Jupiter Aggregator\n\n` +
+          `**⚙️ Zero Private Keys:** Bot never handles sensitive information\n\n` +
           `**Supported Wallets:**\n` +
           `• Phantom, Solflare (browser extensions & mobile)\n` +
           `• WalletConnect (universal support for all Solana wallets)\n` +
@@ -298,15 +296,11 @@ client.on(Events.InteractionCreate, async interaction => {
           `• \`/sc-tip\` - Create smart contract tip\n` +
           `• \`/sc-balance\` - Check on-chain balance\n` +
           `• \`/generate-pda\` - Generate your PDA\n` +
-          `• \`/swap\` - Convert tokens via Jupiter\n` +
           `• \`/sc-info\` - Show this information`
         )
         .setColor(0x8b5cf6);
         
       await interaction.reply({ embeds: [embed], ephemeral: true });
-      
-    } else if (commandName === 'swap') {
-      await handleSwapCommand(interaction, userWallets);
       
     } else if (commandName === 'balance') {
       const userId = interaction.user.id;
@@ -364,8 +358,8 @@ client.on(Events.InteractionCreate, async interaction => {
           `• \`/sc-balance\` - Check on-chain balance\n` +
           `• \`/sc-tip <user> <amount>\` - Create smart contract tip\n` +
           `• \`/generate-pda\` - Generate your Program Derived Address\n` +
-          `• \`/swap\` - Convert tokens via Jupiter\n` +
           `• \`/sc-info\` - View smart contract details\n` +
+          `• \`/support\` - Get help or report an issue\n` +
           `• \`/help\` - Show this help message\n\n` +
           `**🔒 Security:**\n` +
           `• 100% Non-custodial - Your keys never leave your wallet\n` +
@@ -525,9 +519,6 @@ client.on(Events.InteractionCreate, async interaction => {
     const embed = createOnChainBalanceEmbed(walletAddress, balance, true);
       
     await interaction.update({ embeds: [embed] });
-    
-  } else if (interaction.customId === 'swap_help') {
-    await handleSwapHelpButton(interaction);
   }
 });
 
