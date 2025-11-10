@@ -3,6 +3,7 @@
  * Handles wallet connection, signature verification, and registration
  * 
  * This file is loaded by sign.html for CSP compliance (no inline scripts)
+ * Supports both desktop browser extensions and mobile wallets via WalletConnect
  * 
  * @eslint-env browser
  */
@@ -20,19 +21,61 @@ const discordUserId = urlParams.get('user');
 const discordUsername = urlParams.get('username');
 const nonce = urlParams.get('nonce');
 
-// Display user info
+// Detect if user is on mobile device
+const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+// Display user info and setup UI based on device
 if (discordUserId && discordUsername && nonce) {
     document.getElementById('userInfo').style.display = 'block';
     document.getElementById('discordUsername').textContent = discordUsername;
     document.getElementById('discordUserId').textContent = discordUserId;
     document.getElementById('nonce').textContent = nonce.substring(0, 8) + '...';
     
+    // Setup UI based on device type
+    setupWalletButtons();
+    
     // Test API connectivity on page load
     testAPIConnectivity();
 } else {
     showStatus('error', '❌ Invalid registration link. Please request a new one from Discord.');
-    document.getElementById('connectButton').disabled = true;
-    document.getElementById('solflareButton').disabled = true;
+    disableAllButtons();
+}
+
+/**
+ * Setup wallet connection buttons based on device type
+ */
+function setupWalletButtons() {
+    const desktopButtons = document.getElementById('desktopButtons');
+    const mobileButtons = document.getElementById('mobileButtons');
+    const walletConnectButton = document.getElementById('walletConnectButton');
+    
+    if (isMobile) {
+        // On mobile, show WalletConnect button prominently
+        desktopButtons.style.display = 'none';
+        mobileButtons.style.display = 'block';
+        
+        // Still allow desktop wallet apps if they're installed
+        if (window.solana || window.solflare) {
+            desktopButtons.style.display = 'block';
+        }
+    } else {
+        // On desktop, show browser extension buttons
+        desktopButtons.style.display = 'block';
+        mobileButtons.style.display = 'none';
+        
+        // Also show WalletConnect as an option for desktop
+        walletConnectButton.style.display = 'block';
+    }
+}
+
+/**
+ * Disable all connection buttons
+ */
+function disableAllButtons() {
+    const buttons = document.querySelectorAll('button');
+    buttons.forEach(button => {
+        button.disabled = true;
+    });
 }
 
 /**
@@ -318,5 +361,193 @@ async function connectWallet(walletType) {
     }
 }
 
+/**
+ * Connect via WalletConnect for mobile wallets
+ * Uses a deep link approach for mobile wallet apps
+ */
+async function connectWalletConnect() {
+    try {
+        showStatus('pending', '<span class="loading"></span>Connecting via WalletConnect...');
+        
+        // For mobile, we'll use a simpler approach with deep links
+        // Most mobile wallets (Phantom, Solflare, etc.) support custom URL schemes
+        
+        // Create the message to sign
+        const message = {
+            app: "JustTheTip",
+            discord_user: discordUsername,
+            discord_id: discordUserId,
+            timestamp: new Date().toISOString(),
+            nonce: nonce,
+            purpose: "Register this wallet for deposits & withdrawals"
+        };
+
+        const messageString = JSON.stringify(message, null, 2);
+        
+        // Store the message and session for later verification
+        sessionStorage.setItem('walletConnectMessage', messageString);
+        sessionStorage.setItem('walletConnectNonce', nonce);
+        
+        // Provide instructions for mobile users
+        const mobileInstructions = `
+            <div style="text-align: left; padding: 20px;">
+                <h3 style="margin-bottom: 15px;">📱 Mobile Wallet Setup</h3>
+                <p style="margin-bottom: 15px;">To register your wallet on mobile:</p>
+                <ol style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>Install a Solana wallet app:</strong>
+                        <ul style="margin: 10px 0 10px 20px;">
+                            <li>Phantom Wallet (recommended)</li>
+                            <li>Solflare Wallet</li>
+                            <li>Or any Solana-compatible wallet</li>
+                        </ul>
+                    </li>
+                    <li><strong>Open the wallet app</strong> and create/import your wallet</li>
+                    <li><strong>Copy your wallet address</strong> from the app</li>
+                    <li><strong>Return to this page</strong> and click "Enter Wallet Details" below</li>
+                    <li><strong>Paste your wallet address</strong> when prompted</li>
+                    <li><strong>Sign the message</strong> in your wallet app to complete registration</li>
+                </ol>
+                <div style="background: #e7f3ff; padding: 15px; border-radius: 8px; margin-top: 20px;">
+                    <strong>💡 Note:</strong> You'll need to manually sign a message in your wallet app. 
+                    We'll provide the exact message text for you to copy.
+                </div>
+            </div>
+        `;
+        
+        showStatus('pending', mobileInstructions);
+        
+        // Show manual entry button
+        document.getElementById('manualEntryButton').style.display = 'block';
+        
+    } catch (error) {
+        console.error('WalletConnect error:', error);
+        handleConnectionError(error);
+    }
+}
+
+/**
+ * Handle manual wallet address entry for mobile users
+ */
+async function handleManualEntry() {
+    try {
+        const walletAddress = prompt('Enter your Solana wallet address:');
+        
+        if (!walletAddress || walletAddress.trim().length === 0) {
+            showStatus('error', '❌ No wallet address provided. Please try again.');
+            return;
+        }
+        
+        // Validate wallet address format (basic check)
+        if (walletAddress.length < 32 || walletAddress.length > 44) {
+            showStatus('error', '❌ Invalid wallet address format. Solana addresses are 32-44 characters long.');
+            return;
+        }
+        
+        const messageString = sessionStorage.getItem('walletConnectMessage');
+        
+        if (!messageString) {
+            showStatus('error', '❌ Session expired. Please refresh and try again.');
+            return;
+        }
+        
+        // Show the message that needs to be signed
+        const signatureInstructions = `
+            <div style="text-align: left; padding: 20px;">
+                <h3 style="margin-bottom: 15px;">✍️ Sign This Message</h3>
+                <p style="margin-bottom: 15px;">Copy the message below and sign it in your wallet app:</p>
+                <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin: 15px 0; overflow-x: auto;">
+                    <pre style="margin: 0; white-space: pre-wrap; word-break: break-word; font-size: 12px;">${messageString}</pre>
+                </div>
+                <button onclick="navigator.clipboard.writeText(\`${messageString.replace(/`/g, '\\`')}\`).then(() => alert('Message copied to clipboard!'))" 
+                        style="padding: 12px 24px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; margin-bottom: 15px;">
+                    📋 Copy Message to Clipboard
+                </button>
+                <p style="margin: 15px 0;"><strong>After signing in your wallet app:</strong></p>
+                <ol style="margin-left: 20px; line-height: 1.8;">
+                    <li>Your wallet will generate a signature</li>
+                    <li>Copy the signature (usually in base64 or base58 format)</li>
+                    <li>Click "Submit Signature" below</li>
+                    <li>Paste the signature when prompted</li>
+                </ol>
+            </div>
+        `;
+        
+        showStatus('pending', signatureInstructions);
+        
+        // Show signature entry button
+        document.getElementById('signatureEntryButton').style.display = 'block';
+        document.getElementById('signatureEntryButton').onclick = () => submitSignature(walletAddress);
+        
+    } catch (error) {
+        console.error('Manual entry error:', error);
+        showStatus('error', `❌ Error: ${error.message}`);
+    }
+}
+
+/**
+ * Submit the signature for verification
+ */
+async function submitSignature(walletAddress) {
+    try {
+        let signature = prompt('Enter the signature from your wallet (base64 or base58 format):');
+        
+        if (!signature || signature.trim().length === 0) {
+            showStatus('error', '❌ No signature provided. Please try again.');
+            return;
+        }
+        
+        signature = signature.trim();
+        
+        // Note: Backend will handle both base58 and base64 signature formats
+        const signatureToSend = signature;
+        
+        showStatus('pending', '<span class="loading"></span>Verifying signature...');
+        
+        const messageString = sessionStorage.getItem('walletConnectMessage');
+        
+        // Send to backend for verification with retry logic
+        const response = await fetchWithRetry(`${API_BASE_URL}/api/registerwallet/verify`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                message: messageString,
+                publicKey: walletAddress,
+                signature: signatureToSend,
+                discordUserId: discordUserId,
+                discordUsername: discordUsername,
+                nonce: nonce
+            })
+        }, 2);
+
+        const result = await response.json();
+
+        if (result.success) {
+            showStatus('success', `✅ Wallet registered successfully!<br><br>Wallet: ${walletAddress.substring(0, 8)}...${walletAddress.substring(walletAddress.length - 8)}<br><br>You can now close this window and return to Discord.`);
+            document.getElementById('manualEntryButton').style.display = 'none';
+            document.getElementById('signatureEntryButton').style.display = 'none';
+            disableAllButtons();
+            
+            // Clear session storage
+            sessionStorage.removeItem('walletConnectMessage');
+            sessionStorage.removeItem('walletConnectNonce');
+        } else {
+            showStatus('error', `❌ Registration failed: ${result.error || 'Unknown error'}<br><br>Please make sure you:<br>• Signed the exact message shown<br>• Copied the complete signature<br>• Are using the correct wallet address<br><br>You can try again by refreshing this page and requesting a new registration link from Discord.`);
+        }
+
+    } catch (error) {
+        console.error('Signature submission error:', error);
+        handleConnectionError(error);
+    }
+}
+
+// Setup event listeners for desktop wallet buttons
 document.getElementById('connectButton').addEventListener('click', () => connectWallet('phantom'));
 document.getElementById('solflareButton').addEventListener('click', () => connectWallet('solflare'));
+
+// Setup event listener for WalletConnect button (mobile)
+document.getElementById('walletConnectButton').addEventListener('click', connectWalletConnect);
+
+// Setup event listener for manual entry button
+document.getElementById('manualEntryButton').addEventListener('click', handleManualEntry);

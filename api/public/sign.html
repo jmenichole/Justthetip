@@ -218,19 +218,35 @@
         <div class="info-box">
             <h3>📝 What will happen:</h3>
             <p>
-                1. You'll connect your Phantom or Solflare wallet<br>
+                1. You'll connect your Solana wallet<br>
                 2. Sign a verification message (non-custodial)<br>
                 3. Your wallet will be registered instantly
             </p>
         </div>
 
-        <button id="connectButton" class="button primary">
-            Connect Phantom Wallet
-        </button>
+        <div id="desktopButtons">
+            <button id="connectButton" class="button primary">
+                Connect Phantom Wallet
+            </button>
 
-        <button id="solflareButton" class="button primary" style="background: #fc1859;">
-            Connect Solflare Wallet
-        </button>
+            <button id="solflareButton" class="button primary" style="background: #fc1859;">
+                Connect Solflare Wallet
+            </button>
+        </div>
+
+        <div id="mobileButtons" style="display: none;">
+            <button id="walletConnectButton" class="button primary" style="background: #3b99fc;">
+                📱 Connect Mobile Wallet
+            </button>
+            
+            <button id="manualEntryButton" class="button primary" style="background: #667eea; display: none; margin-top: 15px;">
+                Enter Wallet Details
+            </button>
+            
+            <button id="signatureEntryButton" class="button primary" style="background: #00ff88; color: #333; display: none; margin-top: 15px;">
+                ✍️ Submit Signature
+            </button>
+        </div>
 
         <div class="security-notice">
             <h4>🔒 Security Guarantees</h4>
