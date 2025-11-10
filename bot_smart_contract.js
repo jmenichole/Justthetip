@@ -25,7 +25,8 @@ try {
   require('dotenv').config();
   
   // Only fail if truly required variables are missing (smart contract bot)
-  const requiredVars = ['DISCORD_BOT_TOKEN', 'DISCORD_CLIENT_ID', 'MONGODB_URI', 'SOLANA_RPC_URL'];
+  // MONGODB_URI is optional - bot uses SQLite by default
+  const requiredVars = ['DISCORD_BOT_TOKEN', 'DISCORD_CLIENT_ID', 'SOLANA_RPC_URL'];
   const missingVars = requiredVars.filter(v => !process.env[v]);
   
   if (missingVars.length > 0) {
