@@ -57,7 +57,7 @@ const client = new Client({
 const smartContractCommands = [
   {
     name: 'register-wallet',
-    description: 'Register your Solana wallet for on-chain operations',
+    description: 'Register your Solana wallet (supports Phantom, Solflare, WalletConnect & more)',
     options: [
       { name: 'address', type: 3, description: 'Your Solana wallet address', required: true }
     ]
@@ -88,7 +88,7 @@ const smartContractCommands = [
   },
   {
     name: 'help',
-    description: 'Show smart contract bot commands and usage guide'
+    description: 'Show bot commands and wallet connection options'
   }
 ];
 
@@ -282,6 +282,10 @@ client.on(Events.InteractionCreate, async interaction => {
           `**🛠️ TypeScript SDK:** Fully typed with comprehensive documentation\n` +
           `**⚙️ Zero Private Keys:** Bot never handles sensitive information\n` +
           `**🔄 Jupiter Swaps:** Cross-token tipping via Jupiter Aggregator\n\n` +
+          `**Supported Wallets:**\n` +
+          `• Phantom, Solflare (browser extensions & mobile)\n` +
+          `• WalletConnect (universal support for all Solana wallets)\n` +
+          `• Trust Wallet and other mobile wallets\n\n` +
           `**Commands:**\n` +
           `• \`/register-wallet\` - Register your Solana wallet\n` +
           `• \`/sc-tip\` - Create smart contract tip\n` +
@@ -296,6 +300,77 @@ client.on(Events.InteractionCreate, async interaction => {
       
     } else if (commandName === 'swap') {
       await handleSwapCommand(interaction, userWallets);
+      
+    } else if (commandName === 'balance') {
+      const userId = interaction.user.id;
+      const walletAddress = userWallets.get(userId);
+      
+      if (!walletAddress) {
+        return interaction.reply({ 
+          content: '❌ You need to register your wallet first! Use `/register-wallet` to get started.\n\n' +
+                   '**Supported Wallets:**\n' +
+                   '• Phantom (browser extension or mobile app)\n' +
+                   '• Solflare (browser extension or mobile app)\n' +
+                   '• WalletConnect (any Solana-compatible wallet)\n' +
+                   '• Trust Wallet and other mobile wallets via WalletConnect',
+          ephemeral: true 
+        });
+      }
+      
+      // If wallet is registered, show balance using sc-balance logic
+      const balance = await getSolanaBalance(walletAddress);
+      
+      const embed = createOnChainBalanceEmbed(walletAddress, balance);
+        
+      const refreshButton = new ActionRowBuilder()
+        .addComponents(
+          new ButtonBuilder()
+            .setCustomId('refresh_balance')
+            .setLabel('🔄 Refresh')
+            .setStyle(ButtonStyle.Primary)
+        );
+        
+      await interaction.reply({ 
+        embeds: [embed], 
+        components: [refreshButton], 
+        ephemeral: true 
+      });
+      
+    } else if (commandName === 'help') {
+      const embed = new EmbedBuilder()
+        .setTitle('🤖 JustTheTip - Solana Trustless Agent')
+        .setDescription(
+          `Welcome to JustTheTip! A non-custodial Discord tipping bot powered by Solana.\n\n` +
+          `**Getting Started:**\n` +
+          `1. Use \`/register-wallet\` to connect your wallet\n` +
+          `2. Sign the verification message in your wallet\n` +
+          `3. Start tipping with SOL, USDC, BONK, and more!\n\n` +
+          `**Supported Wallets:**\n` +
+          `• 🟣 **Phantom** - Browser extension & mobile app\n` +
+          `• 🟠 **Solflare** - Browser extension & mobile app\n` +
+          `• 🔗 **WalletConnect** - Universal protocol for any Solana wallet\n` +
+          `• 📱 **Trust Wallet** - Via WalletConnect\n` +
+          `• 📱 **Other Wallets** - Any Solana-compatible wallet via WalletConnect\n\n` +
+          `**Available Commands:**\n` +
+          `• \`/register-wallet <address>\` - Register your Solana wallet\n` +
+          `• \`/balance\` - Check your wallet balance (requires registration)\n` +
+          `• \`/sc-balance\` - Check on-chain balance\n` +
+          `• \`/sc-tip <user> <amount>\` - Create smart contract tip\n` +
+          `• \`/generate-pda\` - Generate your Program Derived Address\n` +
+          `• \`/swap\` - Convert tokens via Jupiter\n` +
+          `• \`/sc-info\` - View smart contract details\n` +
+          `• \`/help\` - Show this help message\n\n` +
+          `**🔒 Security:**\n` +
+          `• 100% Non-custodial - Your keys never leave your wallet\n` +
+          `• Sign once, tip forever - Trustless agent technology\n` +
+          `• All transactions are verifiable on-chain\n\n` +
+          `**Need Help?**\n` +
+          `If you have issues registering your wallet, try using WalletConnect which supports all Solana wallets!`
+        )
+        .setColor(0x667eea)
+        .setFooter({ text: 'JustTheTip - Powered by Solana' });
+        
+      await interaction.reply({ embeds: [embed], ephemeral: true });
     }
     
   } catch (error) {
@@ -320,6 +395,24 @@ client.on(Events.InteractionCreate, async interaction => {
   if (!interaction.isButton()) return;
   
   if (interaction.customId === 'refresh_sc_balance') {
+    const userId = interaction.user.id;
+    const walletAddress = userWallets.get(userId);
+    
+    if (!walletAddress) {
+      return interaction.update({ 
+        content: '❌ Wallet not found. Please register again.', 
+        embeds: [], 
+        components: [] 
+      });
+    }
+    
+    const balance = await getSolanaBalance(walletAddress);
+    
+    const embed = createOnChainBalanceEmbed(walletAddress, balance, true);
+      
+    await interaction.update({ embeds: [embed] });
+    
+  } else if (interaction.customId === 'refresh_balance') {
     const userId = interaction.user.id;
     const walletAddress = userWallets.get(userId);
     
