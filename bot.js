@@ -52,6 +52,7 @@ const {
   createAirdropEmbed,
   createAirdropCollectedEmbed,
 } = require('./src/utils/embedBuilders');
+const { startPendingTipsProcessor } = require('./src/jobs/pendingTipsProcessor');
 
 // Load fee wallet addresses (reserved for future use)
 const feeWallets = require('./security/feeWallet.json');
@@ -86,6 +87,9 @@ client.once('ready', async () => {
   console.log(`🟢 Logged in as ${client.user.tag}`);
   await db.connectDB();
   console.log('Database connected.');
+  
+  // Start pending tips processor
+  startPendingTipsProcessor(client);
 });
 
 // Register slash commands

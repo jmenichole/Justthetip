@@ -19,7 +19,7 @@ const axios = require('axios');
 const logger = require('./logger');
 
 // Cache for price data
-let priceCache = {
+const priceCache = {
   SOL: 20, // Default fallback price
   lastUpdated: 0,
   cacheDuration: 60000, // 1 minute cache

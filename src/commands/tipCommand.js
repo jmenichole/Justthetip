@@ -15,7 +15,7 @@
 
 'use strict';
 
-const { LAMPORTS_PER_SOL, PublicKey } = require('@solana/web3.js');
+const { LAMPORTS_PER_SOL } = require('@solana/web3.js');
 const x402Client = require('../utils/x402Client');
 const trustBadgeService = require('../utils/trustBadge');
 const { createTipSuccessEmbed } = require('../utils/embedBuilders');
@@ -66,8 +66,85 @@ async function handleTipCommand(interaction, dependencies = {}) {
   await interaction.deferReply();
 
   try {
-    const senderBadge = await badges.requireBadge(interaction.user.id);
-    const recipientBadge = await badges.requireBadge(recipient.id);
+    // Check if sender has a badge
+    try {
+      await badges.requireBadge(interaction.user.id);
+    } catch (error) {
+      await interaction.editReply({ 
+        content: '❌ You need to register your wallet before sending tips.\n\n' +
+                 'Use `/register-wallet` to get started!',
+      });
+      return;
+    }
+
+    // Check if recipient has a badge
+    let recipientBadge;
+    try {
+      recipientBadge = await badges.requireBadge(recipient.id);
+    } catch (error) {
+      // Recipient is not registered - create pending tip and notify them
+      
+      // Convert USD to SOL if needed
+      let amountInSol = numericAmount;
+      let originalUsdAmount = null;
+      if (isUsdAmount) {
+        amountInSol = await prices.convertUsdToSol(numericAmount);
+        originalUsdAmount = numericAmount;
+      }
+
+      // Create pending tip
+      const pendingTip = db.createPendingTip(
+        interaction.user.id,
+        recipient.id,
+        amountInSol,
+        currency,
+        originalUsdAmount
+      );
+
+      // Try to DM the recipient
+      try {
+        const dmChannel = await recipient.createDM();
+        const amountDisplay = isUsdAmount 
+          ? `$${numericAmount} USD (${amountInSol.toFixed(6)} SOL)` 
+          : `${amountInSol.toFixed(6)} SOL`;
+        
+        await dmChannel.send(
+          `🎉 **You've received a tip!**\n\n` +
+          `${interaction.user} just sent you **${amountDisplay}**!\n\n` +
+          `To claim your tip, you need to register your wallet:\n` +
+          `1. Use the \`/register-wallet\` command in any server where JustTheTip is available\n` +
+          `2. Complete the wallet verification process\n` +
+          `3. Your tip will be automatically sent to your wallet!\n\n` +
+          `⏰ **Important:** You have **24 hours** to register your wallet. ` +
+          `After that, the tip will be returned to ${interaction.user.username}.\n\n` +
+          `_Need help? Use \`/support\` in the server._`
+        );
+        
+        db.markPendingTipNotified(pendingTip.id);
+      } catch (dmError) {
+        console.error('Failed to DM recipient:', dmError);
+        // Continue even if DM fails
+      }
+
+      // Reply to the sender
+      const { EmbedBuilder } = require('discord.js');
+      const embed = new EmbedBuilder()
+        .setTitle('💌 Tip Pending - User Not Registered')
+        .setDescription(
+          `Your tip to ${recipient} has been queued!\n\n` +
+          `They've been notified via DM and have **24 hours** to register their wallet.\n` +
+          `Once they register, the tip will be sent automatically.`
+        )
+        .setColor(0xffa500)
+        .addFields(
+          { name: '💰 Amount', value: isUsdAmount ? `$${numericAmount} USD (${amountInSol.toFixed(6)} SOL)` : `${amountInSol.toFixed(6)} SOL`, inline: true },
+          { name: '⏰ Expires', value: `<t:${Math.floor(new Date(pendingTip.expires_at).getTime() / 1000)}:R>`, inline: true }
+        )
+        .setFooter({ text: 'If not claimed within 24 hours, the tip will be returned to you.' });
+      
+      await interaction.editReply({ embeds: [embed] });
+      return;
+    }
 
     // Convert USD to SOL if needed
     let amountInSol = numericAmount;

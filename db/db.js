@@ -62,7 +62,7 @@ function initDatabase() {
       CREATE TABLE IF NOT EXISTS trust_badges (
         discord_id TEXT PRIMARY KEY,
         wallet_address TEXT NOT NULL,
-        mint_address TEXT NOT NULL,
+        mint_address TEXT,
         reputation_score INTEGER DEFAULT 0,
         created_at TEXT DEFAULT CURRENT_TIMESTAMP,
         updated_at TEXT DEFAULT CURRENT_TIMESTAMP
@@ -70,6 +70,26 @@ function initDatabase() {
     `);
 
     db.exec('CREATE INDEX IF NOT EXISTS idx_trust_badges_wallet ON trust_badges(wallet_address)');
+
+    // Pending tips table - for tips sent to unregistered users
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS pending_tips (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        sender_id TEXT NOT NULL,
+        receiver_id TEXT NOT NULL,
+        amount REAL NOT NULL,
+        currency TEXT NOT NULL,
+        amount_in_usd REAL,
+        expires_at TEXT NOT NULL,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        notified INTEGER DEFAULT 0,
+        FOREIGN KEY(sender_id) REFERENCES users(id),
+        FOREIGN KEY(receiver_id) REFERENCES users(id)
+      )
+    `);
+
+    db.exec('CREATE INDEX IF NOT EXISTS idx_pending_tips_receiver ON pending_tips(receiver_id)');
+    db.exec('CREATE INDEX IF NOT EXISTS idx_pending_tips_expires ON pending_tips(expires_at)');
 
     console.log('✅ SQLite database ready');
   } catch (error) {
@@ -369,6 +389,114 @@ function getGlobalTipStats() {
   }
 }
 
+/**
+ * Create a pending tip for an unregistered user
+ * @param {string} senderId - Sender's Discord ID
+ * @param {string} receiverId - Receiver's Discord ID
+ * @param {number} amount - Tip amount in SOL
+ * @param {string} currency - Currency (SOL)
+ * @param {number} amountInUsd - Original USD amount if specified
+ * @returns {Object} Created pending tip
+ */
+function createPendingTip(senderId, receiverId, amount, currency, amountInUsd = null) {
+  try {
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(); // 24 hours from now
+    
+    const result = db.prepare(`
+      INSERT INTO pending_tips (sender_id, receiver_id, amount, currency, amount_in_usd, expires_at)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `).run(senderId, receiverId, amount, currency, amountInUsd, expiresAt);
+
+    return db.prepare('SELECT * FROM pending_tips WHERE id = ?').get(result.lastInsertRowid);
+  } catch (error) {
+    console.error('Error creating pending tip:', error);
+    throw error;
+  }
+}
+
+/**
+ * Mark a pending tip as notified
+ * @param {number} tipId - Pending tip ID
+ */
+function markPendingTipNotified(tipId) {
+  try {
+    db.prepare('UPDATE pending_tips SET notified = 1 WHERE id = ?').run(tipId);
+  } catch (error) {
+    console.error('Error marking pending tip as notified:', error);
+  }
+}
+
+/**
+ * Get all pending tips for a user
+ * @param {string} receiverId - Receiver's Discord ID
+ * @returns {Array} Array of pending tips
+ */
+function getPendingTipsForUser(receiverId) {
+  try {
+    return db.prepare(`
+      SELECT * FROM pending_tips 
+      WHERE receiver_id = ? AND expires_at > datetime('now')
+      ORDER BY created_at DESC
+    `).all(receiverId);
+  } catch (error) {
+    console.error('Error getting pending tips:', error);
+    return [];
+  }
+}
+
+/**
+ * Get expired pending tips that need to be returned
+ * @returns {Array} Array of expired pending tips
+ */
+function getExpiredPendingTips() {
+  try {
+    return db.prepare(`
+      SELECT * FROM pending_tips 
+      WHERE expires_at <= datetime('now')
+    `).all();
+  } catch (error) {
+    console.error('Error getting expired pending tips:', error);
+    return [];
+  }
+}
+
+/**
+ * Delete a pending tip (after processing or expiry)
+ * @param {number} tipId - Pending tip ID
+ */
+function deletePendingTip(tipId) {
+  try {
+    db.prepare('DELETE FROM pending_tips WHERE id = ?').run(tipId);
+  } catch (error) {
+    console.error('Error deleting pending tip:', error);
+  }
+}
+
+/**
+ * Get total pending tips amount for a receiver
+ * @param {string} receiverId - Receiver's Discord ID
+ * @returns {Object} Total pending tips by currency
+ */
+function getPendingTipsTotal(receiverId) {
+  try {
+    const totals = db.prepare(`
+      SELECT currency, SUM(amount) as total
+      FROM pending_tips
+      WHERE receiver_id = ? AND expires_at > datetime('now')
+      GROUP BY currency
+    `).all(receiverId);
+    
+    const result = {};
+    totals.forEach(t => {
+      result[t.currency] = t.total;
+    });
+    return result;
+  } catch (error) {
+    console.error('Error getting pending tips total:', error);
+    return {};
+  }
+}
+
 // Export functions
 module.exports = {
   getUser,
@@ -384,6 +512,12 @@ module.exports = {
   getReputationScore,
   getUserTipStats,
   getGlobalTipStats,
+  createPendingTip,
+  markPendingTipNotified,
+  getPendingTipsForUser,
+  getExpiredPendingTips,
+  deletePendingTip,
+  getPendingTipsTotal,
   db, // Export for testing
 };
 
