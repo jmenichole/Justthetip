@@ -20,6 +20,7 @@ const helmet = require('helmet');
 const path = require('path');
 const { PublicKey } = require('@solana/web3.js');
 const nacl = require('tweetnacl');
+const bs58 = require('bs58');
 const adminRoutes = require('./adminRoutes');
 const solanaDevTools = require('../src/utils/solanaDevTools');
 const coinbaseClient = require('../src/utils/coinbaseClient');
@@ -621,7 +622,34 @@ app.post('/api/registerwallet/verify', walletRegistrationLimiter, async (req, re
         // Verify the signature
         try {
             const messageBytes = new TextEncoder().encode(message);
-            const signatureBytes = Buffer.from(signature, 'base64');
+            let signatureBytes;
+            
+            // Try to decode signature - support both base64 and base58 formats
+            try {
+                // First try base64 (standard format)
+                signatureBytes = Buffer.from(signature, 'base64');
+                
+                // Validate the decoded signature length (should be 64 bytes for ed25519)
+                if (signatureBytes.length !== 64) {
+                    throw new Error('Invalid base64 signature length');
+                }
+            } catch (base64Error) {
+                // If base64 fails, try base58 (common in Solana wallets)
+                try {
+                    signatureBytes = bs58.decode(signature);
+                    
+                    if (signatureBytes.length !== 64) {
+                        throw new Error('Invalid base58 signature length');
+                    }
+                } catch (base58Error) {
+                    console.error('Signature decode error:', { base64Error, base58Error });
+                    return res.status(401).json({
+                        success: false,
+                        error: 'Invalid signature format. Please provide signature in base64 or base58 format.'
+                    });
+                }
+            }
+            
             const publicKeyBytes = new PublicKey(publicKey).toBytes();
             
             const isValid = nacl.sign.detached.verify(

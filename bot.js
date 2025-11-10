@@ -104,6 +104,23 @@ const commands = [
   },
   {
     name: 'tip',
+    description: 'Send crypto to another user (SOL, USDC, BONK, USDT)',
+    options: [
+      { name: 'user', type: 6, description: 'User to tip', required: true },
+      { name: 'amount', type: 10, description: 'Amount to tip', required: true },
+      { 
+        name: 'currency', 
+        type: 3, 
+        description: 'Token to send (default: SOL)', 
+        required: false,
+        choices: [
+          { name: 'SOL - Solana', value: 'SOL' },
+          { name: 'USDC - USD Coin', value: 'USDC' },
+          { name: 'BONK - Bonk', value: 'BONK' },
+          { name: 'USDT - Tether USD', value: 'USDT' }
+        ]
+      }
+=======
     description: 'Send SOL to another user (use $ for USD, e.g., $10 or 0.5 for SOL)',
     options: [
       { name: 'user', type: 6, description: 'User to tip', required: true },
@@ -165,115 +182,143 @@ const airdrops = loadAirdrops();
 // Note: Rate limiting is now handled by the shared rateLimiter module
 
 // Concise help message for default /help command
-const HELP_MESSAGE_BASIC = `## 💰 Basic Commands
+const HELP_MESSAGE_BASIC = `## 💰 JustTheTip - Quick Guide
 
-**🚀 Getting Started:**
-1️⃣ \`/register-wallet\` — Register your wallet with signature verification (trustless & secure)
+**🔐 One Signature, All Tokens:**
+Register once with \`/register-wallet\` to tip with SOL, USDC, BONK, and more!
 
-2️⃣ \`/verify\` — Check your wallet registration and verification status
+**Essential Commands:**
+• \`/register-wallet\` — Connect your wallet (sign once, use forever)
+• \`/balance\` — Check your token balances
+• \`/tip @user <amount> [token]\` — Send tokens (default: SOL)
+• \`/verify\` — Check your wallet status
 
+**💡 How It Works:**
+Your single signature proves wallet ownership for ALL tokens. No repeated signing needed!
+
+**🚀 Quick Start:**
+1. Run \`/register-wallet\` and sign the message
+2. Use \`/tip @friend 10 USDC\` or \`/tip @friend 0.1 SOL\`
+3. That's it! Fully non-custodial and secure.
+=======
 **💸 Using the Bot:**
 \`/balance\` — Check your funds
 \`/tip @user <amount>\` — Send SOL to a user (use $ for USD, e.g., $10 or 0.5 for SOL)
   _Note: A 0.5% fee is applied to all tips_
 \`/support <issue>\` — Get help or report an issue
 
-## 🔒 Pro Tips
-• Use \`/register-wallet\` for cryptographic proof of ownership (trustless)
-• Use \`/verify\` anytime to check your status
-• Start small, double-check addresses
-• Never share private keys`;
+Need help? Use \`/support <your issue>\``;
 
 // Advanced help message with full command list - kept for backwards compatibility
-const HELP_MESSAGE_ADVANCED = `# 🤖 JustTheTip Bot - Complete Command Reference
+const HELP_MESSAGE_ADVANCED = `# 🤖 JustTheTip Bot - Complete Guide
 
-⚠️ **IMPORTANT:** This bot handles real cryptocurrency. Always start with small test amounts!
+## 🔒 Trustless Agent - Sign Once, Tip Forever
 
-## 🚀 Quick Start Guide
+JustTheTip uses **Solana Trustless Agent** technology. One wallet signature enables tipping with all supported tokens without signing again for each transaction.
 
-**New to JustTheTip?** Here's how to get started:
+**Supported Tokens:** SOL (live now), USDC, BONK, USDT (coming soon)
 
-**Step 1 - Register Your Wallet:**
-• Use \`/register-wallet\` for trustless verification with cryptographic signature proof
-• Your keys never leave your wallet - fully non-custodial
+---
+
+## 🚀 Getting Started
+
+**Step 1 - Register Your Wallet (One Time Only):**
+• Run \`/register-wallet\` to get a registration link
+• Works on mobile (WalletConnect) and desktop (Phantom/Solflare)
+• Sign ONE message to prove wallet ownership
+• Your signature works for ALL tokens - no per-token registration!
 
 **Step 2 - Verify Your Setup:**
-• Use \`/verify\` to check your wallet registration status and verification level
+• Use \`/verify\` to check your wallet registration status
 
-**Step 3 - Start Using the Bot:**
-• Use \`/balance\` to see your current portfolio
-• Try \`/tip @friend 0.01\` to send a small tip in SOL!
+**Step 3 - Start Tipping:**
+• \`/tip @friend 0.5 SOL\` — Send Solana
+• \`/tip @friend 10 USDC\` — Send USD Coin (coming soon)
+• \`/tip @friend 1000 BONK\` — Send Bonk (coming soon)
 
 ---
 
 ## 💰 Available Commands
 
 **Wallet Management**
-• \`/register-wallet\` — Trustless registration with cryptographic signature (secure & recommended)
-• \`/verify\` — Check wallet registration status and verification level
+• \`/register-wallet\` — Sign once, tip with all tokens forever
+• \`/verify\` — Check your wallet status
 
-**View Your Portfolio**
-• \`/balance\` — See your crypto balances with USD values 💎
-  _Example: Shows "0.5 SOL (~$75.00)" and total portfolio value_
+**View Balances**
+• \`/balance\` — See all your token balances (SOL, USDC, BONK, USDT)
 
 **Send Tips**
+• \`/tip @user <amount> [token]\` — Send tokens to any Discord user
+  Examples:
+  • \`/tip @Alice 0.5 SOL\` — Send half a SOL
+  • \`/tip @Bob 10 USDC\` — Send 10 USD Coin (coming soon)
+  • \`/tip @Charlie 1000 BONK\` — Send Bonk tokens (coming soon)
+=======
 • \`/tip <@user> <amount>\` — Send SOL to another Discord user (use $ for USD, e.g., $10 or 0.5 for SOL)
   _Example: \`/tip @Alice 0.05\` sends 0.05 SOL_
   _Example: \`/tip @Bob $5\` sends $5 worth of SOL_
   _Note: A 0.5% fee is applied to all tips for bot maintenance_
 
 **Get Help**
-• \`/help\` — Display concise command guide
-• \`/support <issue>\` — Get help or report an issue
+• \`/help\` — Quick command guide
+• \`/support <issue>\` — Report problems or get assistance
 
 ---
 
-## 💱 Supported Cryptocurrency
+## 💱 Supported Tokens
 
+✅ **SOL** (Solana) — Live now! Fast, low-fee transactions
+🔄 **USDC** (USD Coin) — Coming soon
+🔄 **BONK** (Bonk) — Coming soon  
+🔄 **USDT** (Tether) — Coming soon
+=======
 ☀️ **SOL** (Solana) — Fast, low-fee native token
   _Tip in SOL directly (e.g., 0.5) or in USD (e.g., $10)_
   _A 0.5% fee is applied to all tips for bot maintenance_
 
-_All transactions run on the Solana blockchain for instant processing_
+**One signature enables ALL tokens!** Register once with \`/register-wallet\`, then tip with any token as they become available.
 
 ---
 
-## 💡 Pro Tips
+## 💡 Key Features
 
-✅ **Start small** — Test with tiny amounts (0.01 SOL) before larger transactions
-✅ **Double-check addresses** — Always verify wallet addresses carefully
-✅ **Use the refresh button** — Click 🔄 on your balance to update prices
-✅ **Stay secure** — Never share your wallet's private keys or seed phrases
-✅ **Trustless** — This bot never has access to your private keys
+🔒 **Trustless Agent** — Sign once, tip unlimited times with any token
+📱 **Mobile & Desktop** — Works with WalletConnect, Phantom, Solflare
+🔐 **100% Non-Custodial** — Your keys never leave your wallet
+⚡ **Instant Tips** — Send tokens in seconds
+🌐 **All Tokens, One Address** — Your Solana wallet holds all tokens
 
 ---
 
-**Need more help?** Use \`/support\` or contact server administrators.
+**Need help?** Use \`/support\` or visit our documentation.
 
-_Powered by Solana blockchain • Non-custodial • Trustless • Secure_`;
+_x402 Hackathon Entry • Solana Trustless Agent • Fully Open Source_`;
 
 // Wallet registration help message
-const HELP_MESSAGE_REGISTER = `## 🔐 Wallet Registration Guide
+const HELP_MESSAGE_REGISTER = `## 🔐 Wallet Registration - Sign Once, Tip Forever
 
-**Why register your wallet?**
-Wallet registration allows you to securely link your Solana wallet to your Discord account.
+**What You Get:**
+✅ Tip with SOL, USDC, BONK, USDT (as they launch)
+✅ Works on mobile and desktop
+✅ One signature covers all tokens
+✅ 100% non-custodial security
 
-**How it works:**
-1. Run the \`/register-wallet\` command for web-based verification
-2. Click the provided link to open the registration page
-3. Connect your Phantom or Solflare wallet
-4. Sign the verification message (non-custodial - no keys stored!)
-5. Your wallet is instantly registered and verified ✅
+**Quick Steps:**
+1. Run \`/register-wallet\` to get your unique link
+2. Click the link (works on phone or computer)
+3. Connect with Phantom, Solflare, or WalletConnect
+4. Sign ONE message to prove wallet ownership
+5. Done! Start tipping immediately
 
-**Alternative: Smart Contract Registration**
-Use \`/connect-wallet <address>\` to register your wallet address directly for on-chain operations.
+**How It Works:**
+Your signature proves you own your Solana wallet address. Since all tokens (SOL, USDC, BONK, etc.) share the same address, one signature enables everything. No per-token setup needed!
 
 **Supported Wallets:**
-• Phantom (recommended)
-• Solflare
-• Any Solana wallet with signMessage support
+• **Desktop:** Phantom, Solflare browser extensions
+• **Mobile:** Any Solana wallet app via WalletConnect
+• **Both:** Scan QR code with mobile wallet on desktop
 
-**Security Features:**
+**Security:**
 • ✅ Non-custodial: Your private keys never leave your wallet
 • ✅ Time-limited: Registration links expire after 10 minutes
 • ✅ Signature-based: Cryptographically proves wallet ownership

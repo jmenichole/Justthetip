@@ -448,6 +448,149 @@ body {
     color: var(--text-muted);
 }
 
+/* Trustless Agent Section */
+.trustless-agent {
+    padding: 7rem 0;
+    background: linear-gradient(180deg, transparent 0%, rgba(102, 126, 234, 0.05) 50%, transparent 100%);
+}
+
+.trustless-content {
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.trustless-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 2rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+}
+
+.trustless-badge .badge-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--success);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+.trustless-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+}
+
+.trustless-description {
+    font-size: 1.25rem;
+    color: var(--text-secondary);
+    margin-bottom: 3rem;
+    line-height: 1.8;
+}
+
+.trustless-features {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.trustless-feature {
+    display: flex;
+    gap: 1rem;
+    text-align: left;
+    padding: 1.5rem;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 1rem;
+    transition: all 0.3s;
+}
+
+.trustless-feature:hover {
+    border-color: rgba(102, 126, 234, 0.5);
+    transform: translateY(-2px);
+}
+
+.trustless-icon {
+    font-size: 2rem;
+    flex-shrink: 0;
+}
+
+.trustless-text h4 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.trustless-text p {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.trustless-benefits {
+    text-align: left;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 1rem;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.trustless-benefits h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+}
+
+.trustless-benefits ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.trustless-benefits li {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--card-border);
+    font-size: 0.9375rem;
+    color: var(--text-secondary);
+    line-height: 1.8;
+}
+
+.trustless-benefits li:last-child {
+    border-bottom: none;
+}
+
+.trustless-benefits strong {
+    color: var(--text-primary);
+}
+
+.trustless-cta {
+    margin-top: 2rem;
+}
+
+@media (max-width: 768px) {
+    .trustless-features {
+        grid-template-columns: 1fr;
+    }
+    
+    .trustless-title {
+        font-size: 2rem;
+    }
+    
+    .trustless-description {
+        font-size: 1.125rem;
+    }
+}
+
 /* Roadmap */
 .roadmap {
     padding: 7rem 0;

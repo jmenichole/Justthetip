@@ -20,6 +20,8 @@ const x402Client = require('../utils/x402Client');
 const trustBadgeService = require('../utils/trustBadge');
 const { createTipSuccessEmbed } = require('../utils/embedBuilders');
 const { isValidAmount } = require('../utils/validation');
+const { isTokenSupported, getTokenInfo, getTokenDecimals } = require('../utils/tokenRegistry');
+=======
 const priceService = require('../utils/priceService');
 const feeWallets = require('../../security/feeWallet.json');
 
@@ -57,7 +59,27 @@ async function handleTipCommand(interaction, dependencies = {}) {
     await interaction.reply({ content: '😅 You cannot tip yourself. Try a friend instead!', ephemeral: true });
     return;
   }
+  // Check if token is supported
+  const tokenSymbol = currency.toUpperCase();
+  if (!isTokenSupported(tokenSymbol)) {
+    await interaction.reply({ 
+      content: `❌ Token ${tokenSymbol} is not supported. Supported tokens: SOL, USDC, BONK, USDT`, 
+      ephemeral: true 
+    });
+    return;
+  }
 
+  // For now, only SOL tips are enabled via x402 client
+  // Multi-token support requires on-chain transaction building
+  if (tokenSymbol !== 'SOL') {
+    await interaction.reply({ 
+      content: `⚠️ ${tokenSymbol} tipping is coming soon! Currently only SOL tips are available via the x402 micropayment system.\n\nMulti-token support (USDC, BONK, USDT) will be enabled in the next update as part of our Trustless Agent enhancement.`, 
+      ephemeral: true 
+    });
+    return;
+  }
+
+=======
   if (!MICROPAYMENT_SIGNER) {
     await interaction.reply({ content: '❌ Payment signer not configured. Set X402_PAYER_SECRET in your environment.', ephemeral: true });
     return;

@@ -4,7 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JustTheTip - Register Wallet</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="icon" href="../../logo.png" type="image/png">
     <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --dark-bg: #0a0a0f;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --text-muted: rgba(255, 255, 255, 0.5);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --info: #3b82f6;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -12,147 +32,216 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 30%, rgba(102, 126, 234, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 70%, rgba(118, 75, 162, 0.15) 0%, transparent 50%);
+            pointer-events: none;
         }
 
         .container {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            max-width: 600px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            max-width: 650px;
             width: 100%;
             padding: 40px;
+            position: relative;
+            z-index: 1;
         }
 
         .header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 35px;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .logo-img {
+            width: 56px;
+            height: 56px;
+            filter: drop-shadow(0 4px 12px rgba(102, 126, 234, 0.3));
+        }
+
+        .logo-text {
+            font-size: 2rem;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .header h1 {
-            color: #333;
+            color: var(--text-primary);
             font-size: 28px;
             margin-bottom: 10px;
+            font-weight: 600;
         }
 
         .header p {
-            color: #666;
+            color: var(--text-secondary);
             font-size: 16px;
         }
 
         .info-box {
-            background: #f8f9fa;
+            background: rgba(102, 126, 234, 0.1);
             border-left: 4px solid #667eea;
-            padding: 15px;
+            padding: 20px;
             margin-bottom: 25px;
-            border-radius: 4px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
         }
 
         .info-box h3 {
-            color: #333;
+            color: var(--text-primary);
             font-size: 16px;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
+            font-weight: 600;
         }
 
         .info-box p {
-            color: #666;
+            color: var(--text-secondary);
             font-size: 14px;
-            line-height: 1.6;
+            line-height: 1.8;
         }
 
         .status {
             text-align: center;
             padding: 20px;
-            border-radius: 8px;
+            border-radius: 12px;
             margin-bottom: 25px;
-            font-size: 16px;
+            font-size: 15px;
+            backdrop-filter: blur(10px);
         }
 
         .status.pending {
-            background: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeaa7;
+            background: rgba(245, 158, 11, 0.1);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.3);
         }
 
         .status.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
+            background: rgba(16, 185, 129, 0.1);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
         }
 
         .status.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+            background: rgba(239, 68, 68, 0.1);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.3);
         }
 
         .button {
             width: 100%;
-            padding: 16px;
+            padding: 16px 24px;
             font-size: 16px;
             font-weight: 600;
             border: none;
-            border-radius: 8px;
+            border-radius: 12px;
             cursor: pointer;
             transition: all 0.3s ease;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
+            font-family: 'Inter', sans-serif;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+            transform: translateX(-100%);
+            transition: transform 0.6s;
+        }
+
+        .button:hover::before {
+            transform: translateX(100%);
         }
 
         .button.primary {
-            background: #667eea;
+            background: var(--primary-gradient);
             color: white;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
         }
 
         .button.primary:hover:not(:disabled) {
-            background: #5568d3;
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
         }
 
         .button:disabled {
-            opacity: 0.6;
+            opacity: 0.5;
             cursor: not-allowed;
+            transform: none !important;
         }
 
         .security-notice {
-            background: #e7f3ff;
-            border: 1px solid #bee5eb;
-            padding: 15px;
-            border-radius: 8px;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            padding: 20px;
+            border-radius: 12px;
             margin-top: 25px;
+            backdrop-filter: blur(10px);
         }
 
         .security-notice h4 {
-            color: #004085;
+            color: #60a5fa;
             font-size: 14px;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
             display: flex;
             align-items: center;
             gap: 8px;
+            font-weight: 600;
         }
 
         .security-notice ul {
             margin-left: 20px;
-            color: #004085;
+            color: var(--text-secondary);
             font-size: 14px;
             line-height: 1.8;
         }
 
         .loading {
             display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #f3f3f3;
+            width: 18px;
+            height: 18px;
+            border: 3px solid rgba(255, 255, 255, 0.2);
             border-top: 3px solid #667eea;
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin-right: 10px;
+            vertical-align: middle;
         }
 
         @keyframes spin {
@@ -161,17 +250,19 @@
         }
 
         .user-info {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
+            background: rgba(102, 126, 234, 0.08);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(10px);
         }
 
         .user-info div {
             display: flex;
             justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid #dee2e6;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--card-border);
         }
 
         .user-info div:last-child {
@@ -179,21 +270,100 @@
         }
 
         .user-info label {
-            color: #666;
+            color: var(--text-secondary);
             font-weight: 600;
+            font-size: 14px;
         }
 
         .user-info span {
-            color: #333;
-            font-family: monospace;
+            color: var(--text-primary);
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+        }
+
+        h3 {
+            color: var(--text-primary);
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .note-box {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+
+        .note-box.info {
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 4px solid #3b82f6;
+        }
+
+        .note-box.success {
+            background: rgba(16, 185, 129, 0.1);
+            border-left: 4px solid #10b981;
+        }
+
+        .note-box.warning {
+            background: rgba(245, 158, 11, 0.1);
+            border-left: 4px solid #f59e0b;
+        }
+
+        .note-box h4 {
+            margin-bottom: 8px;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .note-box p {
+            font-size: 14px;
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        .note-box.info h4 { color: #60a5fa; }
+        .note-box.info p { color: rgba(96, 165, 250, 0.9); }
+        
+        .note-box.success h4 { color: #34d399; }
+        .note-box.success p { color: rgba(52, 211, 153, 0.9); }
+        
+        .note-box.warning h4 { color: #fbbf24; }
+        .note-box.warning p { color: rgba(251, 191, 36, 0.9); }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 30px 20px;
+            }
+
+            .logo-img {
+                width: 48px;
+                height: 48px;
+            }
+
+            .logo-text {
+                font-size: 1.5rem;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .button {
+                padding: 14px 20px;
+                font-size: 15px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🔐 Register Your Wallet</h1>
-            <p>Connect your Solana wallet to JustTheTip Bot</p>
+            <div class="logo-container">
+                <img src="../../logo.png" alt="JustTheTip Logo" class="logo-img">
+                <span class="logo-text">JustTheTip</span>
+            </div>
+            <h1>Register Your Wallet</h1>
+            <p>Connect your Solana wallet securely to JustTheTip Bot</p>
         </div>
 
         <div class="user-info" id="userInfo" style="display: none;">
@@ -211,26 +381,79 @@
             </div>
         </div>
 
+        <div class="note-box info" style="margin-bottom: 25px;">
+            <h4>🤖 Powered by Solana Trustless Agent</h4>
+            <p>
+                <strong>Register Once, Use All Tokens:</strong> Your single wallet signature proves ownership of your Solana address, 
+                which holds all your tokens (SOL, USDC, BONK, USDT, etc.). After this one-time registration, you'll be able to 
+                tip with any supported token without signing again. Your wallet stays secure and non-custodial.
+            </p>
+            <p style="margin-top: 10px; font-size: 13px; opacity: 0.9;">
+                <strong>Note:</strong> Currently, only SOL tipping is fully implemented. Multi-token support (USDC, BONK, USDT) 
+                is being added as part of the x402 Hackathon enhancement. Same registration, more tokens soon!
+            </p>
+        </div>
+
+        <div class="info-box">
+            <h3>✨ How Trustless Agent Works</h3>
+            <p>
+                <strong>1. Sign Once:</strong> One signature proves ownership of your entire wallet<br>
+                <strong>2. All Tokens Ready:</strong> Your Solana address holds SOL, USDC, and all SPL tokens<br>
+                <strong>3. Tip Freely:</strong> Send any supported token without additional signatures<br>
+                <strong>4. Stay Secure:</strong> Your keys never leave your wallet—100% non-custodial<br>
+                <strong>5. Full Control:</strong> Disconnect anytime, works on mobile & desktop
+            </p>
+        </div>
+
         <div id="statusMessage" class="status pending">
             Waiting for wallet connection...
         </div>
 
-        <div class="info-box">
-            <h3>📝 What will happen:</h3>
+        <div id="noExtensionNote" class="note-box warning" style="display: none;">
+            <h4>💡 No Browser Extension Detected</h4>
             <p>
-                1. You'll connect your Phantom or Solflare wallet<br>
-                2. Sign a verification message (non-custodial)<br>
-                3. Your wallet will be registered instantly
+                Don't have a browser extension? No problem! Use WalletConnect below to connect with your mobile wallet by scanning a QR code, 
+                or follow the manual process.
             </p>
         </div>
 
-        <button id="connectButton" class="button primary">
-            Connect Phantom Wallet
-        </button>
+        <div id="extensionNote" class="note-box success" style="display: none;">
+            <h4>✅ Wallet Extension Detected</h4>
+            <p>
+                You can use your installed wallet extension for quick registration, or use WalletConnect below.
+            </p>
+        </div>
 
-        <button id="solflareButton" class="button primary" style="background: #fc1859;">
-            Connect Solflare Wallet
-        </button>
+        <div id="desktopButtons">
+            <h3 style="margin: 20px 0 15px 0;">Quick Connect (Browser Extension)</h3>
+            <button id="connectButton" class="button primary">
+                🟣 Connect Phantom Wallet
+            </button>
+
+            <button id="solflareButton" class="button primary" style="background: linear-gradient(135deg, #fc1859 0%, #f5576c 100%); box-shadow: 0 4px 12px rgba(252, 24, 89, 0.4);">
+                🟠 Connect Solflare Wallet
+            </button>
+        </div>
+
+        <div id="walletConnectSection" style="margin-top: 30px;">
+            <h3 style="margin: 20px 0 15px 0;">Universal Connection (All Wallets)</h3>
+            <button id="walletConnectButton" class="button primary" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); box-shadow: 0 4px 12px rgba(79, 172, 254, 0.4);">
+                🔗 Connect with WalletConnect
+            </button>
+            <p style="text-align: center; color: var(--text-secondary); font-size: 14px; margin-top: 10px;">
+                Works with any Solana wallet app. Desktop users will scan a QR code with their mobile wallet.
+            </p>
+        </div>
+
+        <div id="mobileButtons" style="display: none; margin-top: 20px;">
+            <button id="manualEntryButton" class="button primary" style="display: none; margin-top: 15px;">
+                Enter Wallet Details
+            </button>
+            
+            <button id="signatureEntryButton" class="button primary" style="background: linear-gradient(135deg, #10b981 0%, #34d399 100%); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4); display: none; margin-top: 15px;">
+                ✍️ Submit Signature
+            </button>
+        </div>
 
         <div class="security-notice">
             <h4>🔒 Security Guarantees</h4>
