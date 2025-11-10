@@ -56,8 +56,8 @@ JustTheTip is a **Solana Trustless Agent** that enables friction-free cryptocurr
 | Path | Description |
 |------|-------------|
 | `api/` | Express REST API for OAuth, NFT minting, Solana tooling, and Coinbase Commerce webhooks. |
-| `bot_smart_contract.js` | Non-custodial Discord bot that relies on on-chain programs instead of wallet custody. |
-| `bot.js` | Legacy custodial bot kept for backwards compatibility. |
+| `bot_smart_contract.js` | Non-custodial Discord bot using Solana smart contracts instead of wallet custody. This is the main bot implementation. |
+| `deprecated/` | Archived legacy code no longer in use (including old custodial bot). |
 | `contracts/` | TypeScript SDK examples and helpers that interact with the on-chain programs. |
 | `justthetip-contracts/` | Anchor workspace containing the Solana programs and test suite. |
 | `src/utils/` | Shared utilities including logging, Solana dev tools, and Coinbase Commerce client helpers. |
@@ -110,8 +110,8 @@ Additional blockchain-specific guides live in the `/docs` and root-level `*_GUID
 | Command | Purpose |
 |---------|---------|
 | `npm run start` | Launches the Express API (`api/server.js`). |
-| `npm run start:smart-contract` | Starts the non-custodial Discord bot after verifying smart-contract env requirements. |
-| `npm run start:bot` | Runs the legacy custodial bot for backward compatibility testing. |
+| `npm run start:bot` | Starts the non-custodial Discord bot after verifying environment requirements. |
+| `npm run start:smart-contract` | Alternative command to start the non-custodial Discord bot. |
 | `npm run demo:sdk` | Demonstrates Solana SDK usage via `contracts/example.js`. |
 | `npm run build:contracts` | Builds the Anchor programs in `justthetip-contracts`. |
 | `npm run test:contracts` | Executes Anchor integration tests. |
@@ -143,8 +143,7 @@ Enable fiat onboarding with Coinbase Commerce credentials:
 ---
 
 ## Discord Bot Operations
-- **Smart Contract Bot:** `bot_smart_contract.js` exposes slash commands such as `/register-wallet`, `/sc-tip`, `/sc-balance`, and `/generate-pda` using on-chain state instead of custodial balances.
-- **Legacy Bot:** `bot.js` maintains backwards compatibility but should be phased out in favor of the non-custodial flow.
+- **Smart Contract Bot:** `bot_smart_contract.js` exposes slash commands such as `/register-wallet`, `/balance`, `/sc-tip`, `/sc-balance`, `/support`, and `/generate-pda` using on-chain state instead of custodial balances.
 - **Command Registration:** Run `node register-commands.js` after updating slash commands to sync them with your Discord application.
 
 Refer to `QUICKSTART_SOLANA.md`, `BOT_RAILWAY_SETUP.md`, and related guides for deployment targets like Railway or Docker.
