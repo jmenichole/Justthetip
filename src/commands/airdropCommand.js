@@ -49,10 +49,10 @@ class AirdropCommand {
           .setMaxValue(100))
       .addStringOption(option =>
         option.setName('duration')
-          .setDescription('How long the airdrop lasts')
-          .setRequired(true)
+          .setDescription('How long the airdrop lasts (default: 1 hour)')
+          .setRequired(false)
           .addChoices(
-            { name: '1 Hour', value: '1h' },
+            { name: '1 Hour (Default)', value: '1h' },
             { name: '6 Hours', value: '6h' },
             { name: '12 Hours', value: '12h' },
             { name: '24 Hours (1 Day)', value: '24h' },
@@ -105,7 +105,7 @@ class AirdropCommand {
       const currency = interaction.options.getString('currency');
       const totalAmount = interaction.options.getNumber('amount');
       const numRecipients = interaction.options.getInteger('recipients');
-      const duration = interaction.options.getString('duration');
+      const duration = interaction.options.getString('duration') || '1h'; // Default to 1 hour
       const message = interaction.options.getString('message') || `${totalAmount} ${currency} Airdrop!`;
 
       const userId = interaction.user.id;
@@ -114,7 +114,7 @@ class AirdropCommand {
       // Calculate per-recipient amount
       const amountPerUser = totalAmount / numRecipients;
 
-      // Calculate expiration time
+      // Calculate expiration time (default 1 hour)
       const durationMs = this.parseDuration(duration);
       const expiresAt = Date.now() + durationMs;
       const durationText = this.formatDuration(duration);
@@ -184,6 +184,22 @@ class AirdropCommand {
       // Update airdrop with message ID
       await this.db.updateAirdrop(airdropId, { messageId: airdropMessage.id });
 
+      // Log airdrop creation to admin channel
+      try {
+        const { logAirdrop } = require('../utils/transactionLogger');
+        await logAirdrop(interaction.client, {
+          creatorId: userId,
+          totalAmount: totalAmount,
+          currency: currency,
+          maxRecipients: numRecipients,
+          duration: durationText,
+          message: message,
+          airdropId: airdropId
+        });
+      } catch (logError) {
+        console.error('Failed to log airdrop:', logError);
+      }
+
       // Schedule expiration check
       this.scheduleExpiration(airdropId, durationMs, interaction.channel);
 
@@ -203,8 +219,7 @@ class AirdropCommand {
     try {
       const airdropId = interaction.customId.replace('claim_airdrop_', '');
       const userId = interaction.user.id;
-      // Username reserved for future logging/notifications
-      // const username = interaction.user.username;
+      const username = interaction.user.username;
 
       // Get airdrop data
       const airdrop = await this.db.getAirdrop(airdropId);
@@ -241,7 +256,61 @@ class AirdropCommand {
         });
       }
 
-      // Claim the airdrop
+      // Check if user has registered wallet
+      const trustBadgeService = require('../utils/trustBadge');
+      let hasWallet = false;
+      try {
+        await trustBadgeService.requireBadge(userId);
+        hasWallet = true;
+      } catch (error) {
+        // User doesn't have wallet registered - hold airdrop for 24 hours
+        hasWallet = false;
+      }
+
+      if (!hasWallet) {
+        // Mark as pending claim
+        await this.db.createPendingAirdrop({
+          airdropId,
+          userId,
+          username,
+          amount: airdrop.amountPerUser,
+          currency: airdrop.currency,
+          expiresAt: Date.now() + (24 * 60 * 60 * 1000) // 24 hours from now
+        });
+
+        // Send DM to user
+        try {
+          const dmEmbed = new EmbedBuilder()
+            .setColor('#fbbf24')
+            .setTitle('🎁 Airdrop Claimed - Wallet Registration Required')
+            .setDescription(
+              `You've claimed **${airdrop.amountPerUser.toFixed(4)} ${airdrop.currency}** from an airdrop!\n\n` +
+              `To receive your airdrop, you need to register your wallet within **24 hours**.\n\n` +
+              `**How to register:**\n` +
+              `1. Use the \`/register-wallet\` command in any server with JustTheTip\n` +
+              `2. Connect your Solana wallet\n` +
+              `3. Your airdrop will be automatically credited!\n\n` +
+              `⏰ **Your claim expires:** <t:${Math.floor((Date.now() + 24 * 60 * 60 * 1000) / 1000)}:R>`
+            )
+            .setFooter({ text: 'JustTheTip - Non-Custodial Tipping Bot' })
+            .setTimestamp();
+
+          await interaction.user.send({ embeds: [dmEmbed] });
+        } catch (dmError) {
+          console.error('Failed to send DM to user:', dmError);
+          // Continue even if DM fails
+        }
+
+        return await interaction.reply({
+          content: 
+            `✅ Airdrop claimed! **${airdrop.amountPerUser.toFixed(4)} ${airdrop.currency}** reserved for you.\n\n` +
+            `⚠️ You need to register your wallet within **24 hours** to receive it.\n` +
+            `Use \`/register-wallet\` to get started. Check your DMs for more info!`,
+          ephemeral: true
+        });
+      }
+
+      // User has wallet - proceed with normal claim
       const claimed = await this.db.claimAirdrop(airdropId, userId);
 
       if (!claimed && this.db.db) {
@@ -294,6 +363,20 @@ class AirdropCommand {
         ephemeral: true
       });
 
+      // Log airdrop claim to admin channel
+      try {
+        const { logAirdropClaim } = require('../utils/transactionLogger');
+        await logAirdropClaim(interaction.client, {
+          userId: userId,
+          amount: airdrop.amountPerUser,
+          currency: airdrop.currency,
+          hasWallet: hasWallet,
+          airdropId: airdropId
+        });
+      } catch (logError) {
+        console.error('Failed to log airdrop claim:', logError);
+      }
+
     } catch (error) {
       console.error('Error claiming airdrop:', error);
       await interaction.reply({
@@ -312,17 +395,39 @@ class AirdropCommand {
         const airdrop = await this.db.getAirdrop(airdropId);
         if (!airdrop || !airdrop.active) return;
 
+        // Calculate unclaimed amount
+        const claimedCount = airdrop.claimedUsers ? airdrop.claimedUsers.length : 0;
+        const unclaimedCount = airdrop.maxRecipients - claimedCount;
+        const unclaimedAmount = unclaimedCount * airdrop.amountPerUser;
+
         // Mark as expired
         await this.db.updateAirdrop(airdropId, { active: false });
+
+        // Return unclaimed funds to creator if any
+        if (unclaimedAmount > 0) {
+          try {
+            await this.db.creditBalance(airdrop.creator_id, unclaimedAmount, airdrop.currency);
+            console.log(`Returned ${unclaimedAmount} ${airdrop.currency} from expired airdrop ${airdropId} to creator ${airdrop.creator_id}`);
+          } catch (creditError) {
+            console.error('Error returning unclaimed funds:', creditError);
+          }
+        }
 
         // Update message if possible
         if (airdrop.messageId) {
           try {
             const message = await channel.messages.fetch(airdrop.messageId);
             
+            let description = `**${airdrop.creatorName}**'s airdrop has expired.`;
+            if (unclaimedAmount > 0) {
+              description += `\n\n💰 **${unclaimedAmount.toFixed(4)} ${airdrop.currency}** returned to creator (${unclaimedCount} unclaimed slots).`;
+            } else {
+              description += '\n\n🎉 All slots were claimed!';
+            }
+
             const expiredEmbed = EmbedBuilder.from(message.embeds[0])
-              .setColor('#95a5a6')
-              .setDescription(`**${airdrop.creatorName}**'s airdrop has expired.`);
+              .setColor(unclaimedAmount > 0 ? '#95a5a6' : '#00ff88')
+              .setDescription(description);
 
             const disabledButton = new ButtonBuilder()
               .setCustomId(`claim_airdrop_${airdropId}`)

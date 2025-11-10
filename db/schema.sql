@@ -178,6 +178,58 @@ CREATE INDEX IF NOT EXISTS idx_tickets_created_at ON tickets(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_tickets_status ON tickets(status);
 
 -- ==========================================
+-- AIRDROPS SYSTEM
+-- ==========================================
+
+-- Airdrops table for managing airdrop campaigns
+CREATE TABLE IF NOT EXISTS airdrops (
+    id SERIAL PRIMARY KEY,
+    airdrop_id VARCHAR(255) UNIQUE NOT NULL,
+    creator_id VARCHAR(255) NOT NULL,
+    creator_name VARCHAR(255),
+    currency VARCHAR(10) NOT NULL,
+    total_amount NUMERIC(20, 8) NOT NULL,
+    amount_per_user NUMERIC(20, 8) NOT NULL,
+    max_recipients INTEGER NOT NULL,
+    claimed_count INTEGER DEFAULT 0,
+    message TEXT,
+    duration TEXT,
+    expires_at BIGINT NOT NULL,
+    active BOOLEAN DEFAULT TRUE,
+    message_id VARCHAR(255),
+    channel_id VARCHAR(255),
+    guild_id VARCHAR(255),
+    claimed_users TEXT[], -- Array of user IDs who claimed
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Indexes for airdrops table
+CREATE INDEX IF NOT EXISTS idx_airdrops_id ON airdrops(airdrop_id);
+CREATE INDEX IF NOT EXISTS idx_airdrops_creator ON airdrops(creator_id);
+CREATE INDEX IF NOT EXISTS idx_airdrops_expires_at ON airdrops(expires_at);
+CREATE INDEX IF NOT EXISTS idx_airdrops_active ON airdrops(active);
+
+-- Pending airdrops table for users who claim without wallet registration
+CREATE TABLE IF NOT EXISTS pending_airdrops (
+    id SERIAL PRIMARY KEY,
+    airdrop_id VARCHAR(255) NOT NULL,
+    user_id VARCHAR(255) NOT NULL,
+    username VARCHAR(255),
+    amount NUMERIC(20, 8) NOT NULL,
+    currency VARCHAR(10) NOT NULL,
+    claimed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expires_at BIGINT NOT NULL,
+    credited BOOLEAN DEFAULT FALSE,
+    UNIQUE(airdrop_id, user_id)
+);
+
+-- Indexes for pending_airdrops table
+CREATE INDEX IF NOT EXISTS idx_pending_airdrops_user ON pending_airdrops(user_id);
+CREATE INDEX IF NOT EXISTS idx_pending_airdrops_airdrop ON pending_airdrops(airdrop_id);
+CREATE INDEX IF NOT EXISTS idx_pending_airdrops_expires ON pending_airdrops(expires_at);
+CREATE INDEX IF NOT EXISTS idx_pending_airdrops_credited ON pending_airdrops(credited);
+
+-- ==========================================
 -- FUNCTIONS AND TRIGGERS
 -- ==========================================
 
