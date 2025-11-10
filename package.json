@@ -2,11 +2,11 @@
   "name": "justthetip",
   "version": "1.0.0",
   "description": "Professional Solana Smart Contract SDK for enterprise Discord bot development",
-  "main": "bot.js",
+  "main": "bot_smart_contract.js",
   "homepage": "https://jmenichole.github.io/Justthetip",
   "scripts": {
     "start": "node api/server.js",
-    "start:bot": "npm run verify-env -- --legacy && node bot.js",
+    "start:bot": "npm run verify-env -- --smart-contract && node bot_smart_contract.js",
     "start:bot-railway": "node scripts/start-bot-railway.js",
     "start:smart-contract": "npm run verify-env -- --smart-contract && node bot_smart_contract.js",
     "test": "jest",

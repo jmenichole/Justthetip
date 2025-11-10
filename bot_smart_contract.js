@@ -42,7 +42,6 @@ try {
 
 const { PublicKey } = require('@solana/web3.js');
 const { JustTheTipSDK } = require('./contracts/sdk');
-const { handleSwapCommand, handleSwapHelpButton } = require('./src/commands/swapCommand');
 const db = require('./db/database');
 const {
   createOnChainBalanceEmbed,
@@ -57,7 +56,7 @@ const client = new Client({
 const smartContractCommands = [
   {
     name: 'register-wallet',
-    description: 'Register your Solana wallet for on-chain operations',
+    description: 'Register your Solana wallet (supports Phantom, Solflare, WalletConnect & more)',
     options: [
       { name: 'address', type: 3, description: 'Your Solana wallet address', required: true }
     ]
@@ -88,7 +87,14 @@ const smartContractCommands = [
   },
   {
     name: 'help',
-    description: 'Show smart contract bot commands and usage guide'
+    description: 'Show bot commands and wallet connection options'
+  },
+  {
+    name: 'support',
+    description: 'Get help or report an issue',
+    options: [
+      { name: 'issue', type: 3, description: 'Describe your problem or question', required: true }
+    ]
   }
 ];
 
@@ -280,22 +286,181 @@ client.on(Events.InteractionCreate, async interaction => {
           `**⚡ Smart Contracts:** All transactions through Solana programs\n` +
           `**🔗 PDAs:** Program Derived Addresses for advanced features\n` +
           `**🛠️ TypeScript SDK:** Fully typed with comprehensive documentation\n` +
-          `**⚙️ Zero Private Keys:** Bot never handles sensitive information\n` +
-          `**🔄 Jupiter Swaps:** Cross-token tipping via Jupiter Aggregator\n\n` +
+          `**⚙️ Zero Private Keys:** Bot never handles sensitive information\n\n` +
+          `**Supported Wallets:**\n` +
+          `• Phantom, Solflare (browser extensions & mobile)\n` +
+          `• WalletConnect (universal support for all Solana wallets)\n` +
+          `• Trust Wallet and other mobile wallets\n\n` +
           `**Commands:**\n` +
           `• \`/register-wallet\` - Register your Solana wallet\n` +
           `• \`/sc-tip\` - Create smart contract tip\n` +
           `• \`/sc-balance\` - Check on-chain balance\n` +
           `• \`/generate-pda\` - Generate your PDA\n` +
-          `• \`/swap\` - Convert tokens via Jupiter\n` +
           `• \`/sc-info\` - Show this information`
         )
         .setColor(0x8b5cf6);
         
       await interaction.reply({ embeds: [embed], ephemeral: true });
       
-    } else if (commandName === 'swap') {
-      await handleSwapCommand(interaction, userWallets);
+    } else if (commandName === 'balance') {
+      const userId = interaction.user.id;
+      const walletAddress = userWallets.get(userId);
+      
+      if (!walletAddress) {
+        return interaction.reply({ 
+          content: '❌ You need to register your wallet first! Use `/register-wallet` to get started.\n\n' +
+                   '**Supported Wallets:**\n' +
+                   '• Phantom (browser extension or mobile app)\n' +
+                   '• Solflare (browser extension or mobile app)\n' +
+                   '• WalletConnect (any Solana-compatible wallet)\n' +
+                   '• Trust Wallet and other mobile wallets via WalletConnect',
+          ephemeral: true 
+        });
+      }
+      
+      // If wallet is registered, show balance using sc-balance logic
+      const balance = await getSolanaBalance(walletAddress);
+      
+      const embed = createOnChainBalanceEmbed(walletAddress, balance);
+        
+      const refreshButton = new ActionRowBuilder()
+        .addComponents(
+          new ButtonBuilder()
+            .setCustomId('refresh_balance')
+            .setLabel('🔄 Refresh')
+            .setStyle(ButtonStyle.Primary)
+        );
+        
+      await interaction.reply({ 
+        embeds: [embed], 
+        components: [refreshButton], 
+        ephemeral: true 
+      });
+      
+    } else if (commandName === 'help') {
+      const embed = new EmbedBuilder()
+        .setTitle('🤖 JustTheTip - Solana Trustless Agent')
+        .setDescription(
+          `Welcome to JustTheTip! A non-custodial Discord tipping bot powered by Solana.\n\n` +
+          `**Getting Started:**\n` +
+          `1. Use \`/register-wallet\` to connect your wallet\n` +
+          `2. Sign the verification message in your wallet\n` +
+          `3. Start tipping with SOL, USDC, BONK, and more!\n\n` +
+          `**Supported Wallets:**\n` +
+          `• 🟣 **Phantom** - Browser extension & mobile app\n` +
+          `• 🟠 **Solflare** - Browser extension & mobile app\n` +
+          `• 🔗 **WalletConnect** - Universal protocol for any Solana wallet\n` +
+          `• 📱 **Trust Wallet** - Via WalletConnect\n` +
+          `• 📱 **Other Wallets** - Any Solana-compatible wallet via WalletConnect\n\n` +
+          `**Available Commands:**\n` +
+          `• \`/register-wallet <address>\` - Register your Solana wallet\n` +
+          `• \`/balance\` - Check your wallet balance (requires registration)\n` +
+          `• \`/sc-balance\` - Check on-chain balance\n` +
+          `• \`/sc-tip <user> <amount>\` - Create smart contract tip\n` +
+          `• \`/generate-pda\` - Generate your Program Derived Address\n` +
+          `• \`/sc-info\` - View smart contract details\n` +
+          `• \`/support\` - Get help or report an issue\n` +
+          `• \`/help\` - Show this help message\n\n` +
+          `**🔒 Security:**\n` +
+          `• 100% Non-custodial - Your keys never leave your wallet\n` +
+          `• Sign once, tip forever - Trustless agent technology\n` +
+          `• All transactions are verifiable on-chain\n\n` +
+          `**Need Help?**\n` +
+          `If you have issues registering your wallet, try using WalletConnect which supports all Solana wallets!`
+        )
+        .setColor(0x667eea)
+        .setFooter({ text: 'JustTheTip - Powered by Solana' });
+        
+      await interaction.reply({ embeds: [embed], ephemeral: true });
+      
+    } else if (commandName === 'support') {
+      const issue = interaction.options.getString('issue');
+      
+      if (!issue || issue.trim().length === 0) {
+        return await interaction.reply({
+          content: '❌ Please describe your issue or question.',
+          ephemeral: true
+        });
+      }
+      
+      try {
+        // Create support ticket embed for user
+        const userEmbed = new EmbedBuilder()
+          .setTitle('🎫 Support Request Submitted')
+          .setColor(0x667eea)
+          .setDescription('Your support request has been received. Our team will review it shortly.')
+          .addFields(
+            { 
+              name: '📝 Your Issue', 
+              value: issue.slice(0, 1000), // Limit to 1000 chars
+              inline: false 
+            },
+            { 
+              name: '⏱️ Expected Response Time', 
+              value: 'We typically respond within 24-48 hours.',
+              inline: false 
+            },
+            { 
+              name: '💡 Quick Help', 
+              value: '• Check `/help` for command documentation\n• Use `/balance` to view your wallet balance\n• Try WalletConnect if registration fails',
+              inline: false 
+            }
+          )
+          .setFooter({ text: `Ticket from: ${interaction.user.tag}` })
+          .setTimestamp();
+        
+        await interaction.reply({ embeds: [userEmbed], ephemeral: true });
+        
+        // Send to support channel with mention
+        const SUPPORT_CHANNEL_ID = process.env.SUPPORT_CHANNEL_ID || '1437295074856927363';
+        const ADMIN_USER_ID = process.env.ADMIN_USER_ID || '1153034319271559328';
+        
+        try {
+          const supportChannel = await client.channels.fetch(SUPPORT_CHANNEL_ID);
+          if (supportChannel && supportChannel.isTextBased()) {
+            const supportEmbed = new EmbedBuilder()
+              .setTitle('🆘 New Support Request')
+              .setColor(0xff6b6b)
+              .addFields(
+                { name: '👤 User', value: `<@${interaction.user.id}> (${interaction.user.tag})`, inline: true },
+                { name: '🆔 User ID', value: interaction.user.id, inline: true },
+                { name: '🏠 Server', value: interaction.guild ? interaction.guild.name : 'DM', inline: true },
+                { name: '📝 Issue', value: issue.slice(0, 1024), inline: false },
+                { name: '⏰ Timestamp', value: `<t:${Math.floor(Date.now() / 1000)}:F>`, inline: false }
+              )
+              .setThumbnail(interaction.user.displayAvatarURL())
+              .setFooter({ text: `Support Ticket • User ID: ${interaction.user.id}` })
+              .setTimestamp();
+            
+            // Send with admin mention BEFORE the embed so the admin gets pinged
+            await supportChannel.send({
+              content: `<@${ADMIN_USER_ID}> **New support request from <@${interaction.user.id}>**`,
+              embeds: [supportEmbed]
+            });
+            
+            console.log(`✅ Support request forwarded to channel ${SUPPORT_CHANNEL_ID} with admin ping`);
+          } else {
+            console.error('❌ Support channel not found or not text-based');
+          }
+        } catch (channelError) {
+          console.error('❌ Failed to send to support channel:', channelError);
+          // Don't fail the user's command - they still got confirmation
+        }
+        
+        // Log support request
+        console.log(`📋 Support request from ${interaction.user.id} (${interaction.user.tag}): ${issue}`);
+        
+      } catch (error) {
+        console.error('Support command error:', error);
+        
+        // Try to respond if we haven't already
+        if (!interaction.replied && !interaction.deferred) {
+          await interaction.reply({
+            content: '❌ Error submitting support request. Please try contacting server administrators directly.',
+            ephemeral: true
+          });
+        }
+      }
     }
     
   } catch (error) {
@@ -337,8 +502,23 @@ client.on(Events.InteractionCreate, async interaction => {
       
     await interaction.update({ embeds: [embed] });
     
-  } else if (interaction.customId === 'swap_help') {
-    await handleSwapHelpButton(interaction);
+  } else if (interaction.customId === 'refresh_balance') {
+    const userId = interaction.user.id;
+    const walletAddress = userWallets.get(userId);
+    
+    if (!walletAddress) {
+      return interaction.update({ 
+        content: '❌ Wallet not found. Please register again.', 
+        embeds: [], 
+        components: [] 
+      });
+    }
+    
+    const balance = await getSolanaBalance(walletAddress);
+    
+    const embed = createOnChainBalanceEmbed(walletAddress, balance, true);
+      
+    await interaction.update({ embeds: [embed] });
   }
 });
 
