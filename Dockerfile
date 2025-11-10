@@ -1,20 +1,21 @@
 # JustTheTip Discord Bot - Dockerfile
 # Optimized for deployment on Render, VPS, or container platforms
 
-FROM node:18-alpine
+FROM node:18-slim
 
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies including linux-headers for native module compilation
-RUN apk add --no-cache \
+# Install system dependencies for native module compilation
+# Using Debian slim for better compatibility with native modules like usb
+RUN apt-get update && apt-get install -y \
     python3 \
     make \
     g++ \
     git \
-    linux-headers \
-    eudev-dev \
-    libusb-dev
+    libudev-dev \
+    libusb-1.0-0-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy package files
 COPY package*.json ./
