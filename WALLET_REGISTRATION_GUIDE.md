@@ -6,11 +6,27 @@ JustTheTip now features a streamlined, non-custodial wallet registration system 
 
 ## Features
 
-- **One-Click Registration**: No manual signature copying required
+- **Mobile Support**: Works on both desktop and mobile devices
+- **One-Click Registration** (Desktop): No manual signature copying required
+- **Mobile Wallet Flow**: Step-by-step guidance for mobile wallet apps
 - **Non-Custodial**: Your private keys never leave your wallet
 - **Secure**: Uses ed25519 signature verification
 - **Time-Limited**: Registration links expire after 10 minutes
 - **Rate-Limited**: Protection against abuse (5 attempts per 15 minutes)
+
+## Supported Wallets
+
+### Desktop (Browser Extensions)
+- **Phantom Wallet** (recommended)
+- **Solflare Wallet**
+
+### Mobile (Wallet Apps)
+- **Phantom Wallet** (iOS & Android)
+- **Solflare Wallet** (iOS & Android)
+- **Trust Wallet** (iOS & Android)
+- Any Solana-compatible mobile wallet with message signing
+
+> 📱 **Using Discord on mobile?** See our [Mobile Wallet Registration Guide](docs/MOBILE_WALLET_GUIDE.md) for detailed instructions.
 
 ## How to Register Your Wallet
 
@@ -20,10 +36,19 @@ In Discord, use the `/registerwallet` command. The bot will provide you with a s
 
 ### Step 2: Connect Your Wallet
 
-Click the registration link to open the wallet signing page. You can use:
-- **Phantom Wallet** (recommended)
-- **Solflare Wallet**
-- Any Solana wallet that supports `signMessage()`
+Click the registration link to open the wallet signing page.
+
+**For Desktop Users:**
+The page will show buttons for Phantom and Solflare browser extensions. Click your preferred wallet button, and the wallet will automatically prompt you to sign.
+
+**For Mobile Users:**
+The page will detect your mobile device and show a "Connect Mobile Wallet" button. This will guide you through:
+1. Installing a Solana wallet app (if needed)
+2. Copying your wallet address from the app
+3. Signing a verification message in your wallet
+4. Submitting the signature to complete registration
+
+> 📱 For detailed mobile instructions, see our [Mobile Wallet Registration Guide](docs/MOBILE_WALLET_GUIDE.md).
 
 ### Step 3: Sign the Verification Message
 
