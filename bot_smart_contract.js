@@ -44,26 +44,59 @@ try {
 const { PublicKey } = require('@solana/web3.js');
 const { JustTheTipSDK } = require('./contracts/sdk');
 const db = require('./db/database');
-const crypto = require('crypto');
 const {
   createOnChainBalanceEmbed,
+  createWalletRegisteredEmbed,
 } = require('./src/utils/embedBuilders');
-
-const { commands: improvedCommands, helpMessages: HELP_MESSAGES } = require('./IMPROVED_SLASH_COMMANDS');
 
 const client = new Client({ 
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] 
 });
 
-// Use improved commands from IMPROVED_SLASH_COMMANDS.js
-const smartContractCommands = improvedCommands;
+// Smart Contract Commands
+const smartContractCommands = [
+  {
+    name: 'register-wallet',
+    description: 'Register your Solana wallet (supports Phantom, Solflare, WalletConnect & more)',
+    options: [
+      { name: 'address', type: 3, description: 'Your Solana wallet address', required: true }
+    ]
+  },
+  {
+    name: 'sc-tip',
+    description: 'Create smart contract tip transaction',
+    options: [
+      { name: 'user', type: 6, description: 'User to tip', required: true },
+      { name: 'amount', type: 10, description: 'Amount in SOL', required: true }
+    ]
+  },
+  {
+    name: 'sc-balance',
+    description: 'Check on-chain wallet balance'
+  },
+  {
+    name: 'sc-info',
+    description: 'View smart contract bot information and program details'
+  },
+  {
+    name: 'balance',
+    description: 'Check your wallet balance'
+  },
+  {
+    name: 'help',
+    description: 'Show bot commands and wallet connection options'
+  },
+  {
+    name: 'support',
+    description: 'Get help or report an issue',
+    options: [
+      { name: 'issue', type: 3, description: 'Describe your problem or question', required: true }
+    ]
+  }
+];
 
 // In-memory user wallet registry (in production, use a database)
 const userWallets = new Map();
-
-// Get API base URL from environment or use default
-const API_BASE_URL = process.env.API_BASE_URL || 'https://justthetip.vercel.app';
-
 
 client.once('ready', async () => {
   console.log(`🟢 JustTheTip Smart Contract Bot logged in as ${client.user.tag}`);
@@ -89,11 +122,6 @@ const sdk = new JustTheTipSDK(
   process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com'
 );
 
-// Generate Program Derived Address for a user (now uses SDK)
-function generateUserPDA(discordUserId) {
-  return sdk.generateUserPDA(discordUserId);
-}
-
 // Get Solana balance (now uses SDK)
 async function getSolanaBalance(address) {
   return await sdk.getBalance(address);
@@ -109,266 +137,23 @@ client.on(Events.InteractionCreate, async interaction => {
   const { commandName } = interaction;
   
   try {
-    // New command: /register-wallet (generates verification link)
     if (commandName === 'register-wallet') {
-      const userId = interaction.user.id;
-      const username = interaction.user.username;
-      
-      // Generate a unique nonce (UUID v4)
-      const nonce = crypto.randomUUID();
-      
-      // Create registration URL with user info and nonce
-      const registrationUrl = `${API_BASE_URL}/sign.html?user=${encodeURIComponent(userId)}&username=${encodeURIComponent(username)}&nonce=${encodeURIComponent(nonce)}`;
-      
-      const embed = new EmbedBuilder()
-        .setTitle('🔐 Register Your Wallet')
-        .setDescription(
-          `Click the link below to register your Solana wallet.\n\n` +
-          `**What happens next:**\n` +
-          `1. The link will open a secure verification page\n` +
-          `2. Connect your Solana wallet (Phantom, Solflare, etc.)\n` +
-          `3. Sign a message to prove wallet ownership\n` +
-          `4. Your wallet will be registered automatically!\n\n` +
-          `**🔒 Security:**\n` +
-          `• Your private keys never leave your wallet\n` +
-          `• This link is unique to you and expires in 10 minutes\n` +
-          `• Only you can complete this registration\n\n` +
-          `**🔗 Registration Link:**\n` +
-          `${registrationUrl}\n\n` +
-          `_Link expires in 10 minutes_`
-        )
-        .setColor(0x667eea)
-        .setFooter({ text: 'JustTheTip - Non-Custodial Wallet Registration' })
-        .setTimestamp();
-        
-      // Create a button that opens the link
-      const row = new ActionRowBuilder()
-        .addComponents(
-          new ButtonBuilder()
-            .setLabel('🔐 Register Wallet')
-            .setStyle(ButtonStyle.Link)
-            .setURL(registrationUrl)
-        );
-        
-      await interaction.reply({ 
-        embeds: [embed], 
-        components: [row],
-        ephemeral: true 
-      });
-      
-      console.log(`📝 Registration link generated for user ${username} (${userId}) with nonce ${nonce.slice(0, 8)}...`);
-      
-    } else if (commandName === 'verify') {
-      // New command: /verify (simple wallet registration)
-      const wallet = interaction.options.getString('wallet');
+      const address = interaction.options.getString('address');
       const userId = interaction.user.id;
       
       // Validate Solana address
       try {
-        new PublicKey(wallet);
+        new PublicKey(address);
       } catch (error) {
         return interaction.reply({ 
-          content: '❌ Invalid Solana wallet address. Please provide a valid Solana address.', 
+          content: '❌ Invalid Solana wallet address', 
           ephemeral: true 
         });
       }
       
-      userWallets.set(userId, wallet);
+      userWallets.set(userId, address);
       
-      const embed = new EmbedBuilder()
-        .setTitle('✅ Wallet Verified!')
-        .setDescription(
-          `Your wallet has been connected to your Discord account.\n\n` +
-          `**Wallet:** \`${wallet.slice(0, 8)}...${wallet.slice(-8)}\`\n\n` +
-          `**Next Steps:**\n` +
-          `• Use \`/balance\` to check your wallet balance\n` +
-          `• Use \`/status\` to view your verification status\n` +
-          `• Use \`/get-badge\` to mint your verification NFT (requires payment)`
-        )
-        .setColor(0x00ff00)
-        .setFooter({ text: 'JustTheTip - Solana Verification' });
-        
-      await interaction.reply({ embeds: [embed], ephemeral: true });
-      
-    } else if (commandName === 'connect-wallet') {
-      // New command: /connect-wallet with signature verification
-      const walletAddress = interaction.options.getString('wallet-address');
-      const signature = interaction.options.getString('signature');
-      const userId = interaction.user.id;
-      
-      // Validate Solana address
-      try {
-        new PublicKey(walletAddress);
-      } catch (error) {
-        return interaction.reply({ 
-          content: '❌ Invalid Solana wallet address.', 
-          ephemeral: true 
-        });
-      }
-      
-      // TODO: Verify signature here using signature parameter
-      // For now, we'll accept the wallet and signature
-      console.log(`User ${userId} connecting wallet ${walletAddress} with signature: ${signature.slice(0, 20)}...`);
-      userWallets.set(userId, walletAddress);
-      
-      const embed = new EmbedBuilder()
-        .setTitle('🔗 Wallet Connected!')
-        .setDescription(
-          `Your wallet has been securely connected.\n\n` +
-          `**Wallet:** \`${walletAddress.slice(0, 8)}...${walletAddress.slice(-8)}\`\n` +
-          `**Signature Verified:** ✅\n\n` +
-          `**Next Steps:**\n` +
-          `1. Pay verification fee: **0.02 SOL**\n` +
-          `2. Use \`/check-payment\` to verify payment\n` +
-          `3. Use \`/get-badge\` to mint your NFT badge`
-        )
-        .setColor(0x667eea)
-        .setFooter({ text: 'Verification in progress...' });
-        
-      await interaction.reply({ embeds: [embed], ephemeral: true });
-      
-    } else if (commandName === 'status') {
-      // New command: /status to check verification status
-      const userId = interaction.user.id;
-      const walletAddress = userWallets.get(userId);
-      
-      if (!walletAddress) {
-        return interaction.reply({ 
-          content: '❌ No wallet connected. Use `/verify` or `/connect-wallet` to get started.', 
-          ephemeral: true 
-        });
-      }
-      
-      const embed = new EmbedBuilder()
-        .setTitle('🔍 Verification Status')
-        .setDescription(
-          `**Wallet:** \`${walletAddress.slice(0, 8)}...${walletAddress.slice(-8)}\`\n` +
-          `**Connected:** ✅\n` +
-          `**Payment:** Pending\n` +
-          `**NFT Badge:** Not minted\n\n` +
-          `Use \`/check-payment\` to check payment status.`
-        )
-        .setColor(0x3b82f6);
-        
-      await interaction.reply({ embeds: [embed], ephemeral: true });
-      
-    } else if (commandName === 'get-badge') {
-      // New command: /get-badge to mint verification NFT
-      const userId = interaction.user.id;
-      const walletAddress = userWallets.get(userId);
-      
-      if (!walletAddress) {
-        return interaction.reply({ 
-          content: '❌ Please connect your wallet first using `/connect-wallet`.', 
-          ephemeral: true 
-        });
-      }
-      
-      const embed = new EmbedBuilder()
-        .setTitle('🎖️ Mint Verification Badge')
-        .setDescription(
-          `**Ready to mint your verification NFT!**\n\n` +
-          `**Requirements:**\n` +
-          `✅ Wallet connected\n` +
-          `⏳ Payment verification (0.02 SOL)\n\n` +
-          `**What You Get:**\n` +
-          `• Permanent verification NFT\n` +
-          `• On-chain proof of Discord verification\n` +
-          `• Verified Discord role\n\n` +
-          `Use \`/check-payment\` first to verify your payment has been received.`
-        )
-        .setColor(0xf59e0b);
-        
-      await interaction.reply({ embeds: [embed], ephemeral: true });
-      
-    } else if (commandName === 'check-payment') {
-      // New command: /check-payment to verify payment
-      const userId = interaction.user.id;
-      const walletParam = interaction.options.getString('wallet');
-      const walletAddress = walletParam || userWallets.get(userId);
-      
-      if (!walletAddress) {
-        return interaction.reply({ 
-          content: '❌ No wallet specified. Please provide a wallet address or connect your wallet first.', 
-          ephemeral: true 
-        });
-      }
-      
-      const embed = new EmbedBuilder()
-        .setTitle('💳 Payment Verification')
-        .setDescription(
-          `Checking payment status for:\n` +
-          `\`${walletAddress.slice(0, 8)}...${walletAddress.slice(-8)}\`\n\n` +
-          `**Status:** Checking recent transactions...\n\n` +
-          `If you just sent payment, please wait 2-3 minutes for confirmation.`
-        )
-        .setColor(0x8b5cf6);
-        
-      await interaction.reply({ embeds: [embed], ephemeral: true });
-      
-    } else if (commandName === 'pricing') {
-      // New command: /pricing to show costs
-      const embed = new EmbedBuilder()
-        .setTitle('💵 Verification Pricing')
-        .setDescription(HELP_MESSAGES.pricing)
-        .setColor(0x10b981);
-        
-      await interaction.reply({ embeds: [embed], ephemeral: true });
-      
-    } else if (commandName === 'info') {
-      // New command: /info about the bot
-      const embed = new EmbedBuilder()
-        .setTitle('ℹ️ About JustTheTip')
-        .setDescription(HELP_MESSAGES.info)
-        .setColor(0x667eea);
-        
-      await interaction.reply({ embeds: [embed], ephemeral: true });
-      
-    } else if (commandName === 'stats') {
-      // New command: /stats for bot statistics
-      const embed = new EmbedBuilder()
-        .setTitle('📊 Bot Statistics')
-        .setDescription(
-          `**Network:** Solana Mainnet\n` +
-          `**Status:** 🟢 Online\n` +
-          `**Uptime:** ${Math.floor(process.uptime() / 3600)}h ${Math.floor((process.uptime() % 3600) / 60)}m\n` +
-          `**Connected Wallets:** ${userWallets.size}\n` +
-          `**Commands Available:** ${smartContractCommands.length}\n\n` +
-          `**Verification Fee:** 0.02 SOL\n` +
-          `**NFT Standard:** Metaplex`
-        )
-        .setColor(0x3b82f6);
-        
-      await interaction.reply({ embeds: [embed], ephemeral: true });
-      
-    } else if (commandName === 'admin-stats') {
-      // Admin command: detailed statistics
-      // Check if user is admin (simplified check)
-      const embed = new EmbedBuilder()
-        .setTitle('👑 Admin Statistics')
-        .setDescription(
-          `**Total Users:** ${userWallets.size}\n` +
-          `**Bot Uptime:** ${Math.floor(process.uptime())} seconds\n` +
-          `**Memory Usage:** ${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)}MB\n` +
-          `**Process ID:** ${process.pid}`
-        )
-        .setColor(0xef4444);
-        
-      await interaction.reply({ embeds: [embed], ephemeral: true });
-      
-    } else if (commandName === 'admin-user') {
-      // Admin command: lookup user details
-      const user = interaction.options.getUser('user');
-      const walletAddress = userWallets.get(user.id);
-      
-      const embed = new EmbedBuilder()
-        .setTitle('👑 User Lookup')
-        .setDescription(
-          `**User:** ${user.tag}\n` +
-          `**User ID:** ${user.id}\n` +
-          `**Wallet:** ${walletAddress ? `\`${walletAddress}\`` : 'Not connected'}`
-        )
-        .setColor(0xef4444);
+      const embed = createWalletRegisteredEmbed('SOL', address, false);
         
       await interaction.reply({ embeds: [embed], ephemeral: true });
       
@@ -389,7 +174,7 @@ client.on(Events.InteractionCreate, async interaction => {
       
       if (!senderWallet) {
         return interaction.reply({ 
-          content: '❌ Please connect your wallet first using `/verify` or `/connect-wallet`', 
+          content: '❌ Please register your wallet first with `/register-wallet`', 
           ephemeral: true 
         });
       }
@@ -440,7 +225,7 @@ client.on(Events.InteractionCreate, async interaction => {
       
       if (!walletAddress) {
         return interaction.reply({ 
-          content: '❌ Please connect your wallet first using `/verify` or `/connect-wallet`', 
+          content: '❌ Please register your wallet first with `/register-wallet`', 
           ephemeral: true 
         });
       }
@@ -462,28 +247,6 @@ client.on(Events.InteractionCreate, async interaction => {
         components: [refreshButton], 
         ephemeral: true 
       });
-      
-    } else if (commandName === 'generate-pda') {
-      const userId = interaction.user.id;
-      const pda = generateUserPDA(userId);
-      
-      if (!pda) {
-        return interaction.reply({ 
-          content: '❌ Error generating PDA', 
-          ephemeral: true 
-        });
-      }
-      
-      const embed = new EmbedBuilder()
-        .setTitle('🔗 Program Derived Address')
-        .setDescription(
-          `**Your PDA:** \`${pda.address}\`\n` +
-          `**Bump:** ${pda.bump}\n\n` +
-          `*This is your unique Program Derived Address for advanced smart contract features.*`
-        )
-        .setColor(0x2d1b69);
-        
-      await interaction.reply({ embeds: [embed], ephemeral: true });
       
     } else if (commandName === 'sc-info') {
       const embed = new EmbedBuilder()
@@ -515,7 +278,7 @@ client.on(Events.InteractionCreate, async interaction => {
       
       if (!walletAddress) {
         return interaction.reply({ 
-          content: '❌ You need to connect your wallet first! Use `/verify` or `/connect-wallet` to get started.\n\n' +
+          content: '❌ You need to register your wallet first! Use `/register-wallet` to get started.\n\n' +
                    '**Supported Wallets:**\n' +
                    '• Phantom (browser extension or mobile app)\n' +
                    '• Solflare (browser extension or mobile app)\n' +
@@ -546,8 +309,35 @@ client.on(Events.InteractionCreate, async interaction => {
       
     } else if (commandName === 'help') {
       const embed = new EmbedBuilder()
-        .setTitle('🤖 JustTheTip - Verification Bot')
-        .setDescription(HELP_MESSAGES.userGuide)
+        .setTitle('🤖 JustTheTip - Solana Trustless Agent')
+        .setDescription(
+          `Welcome to JustTheTip! A non-custodial Discord tipping bot powered by Solana.\n\n` +
+          `**Getting Started:**\n` +
+          `1. Use \`/register-wallet\` to connect your wallet\n` +
+          `2. Sign the verification message in your wallet\n` +
+          `3. Start tipping with SOL, USDC, BONK, and more!\n\n` +
+          `**Supported Wallets:**\n` +
+          `• 🟣 **Phantom** - Browser extension & mobile app\n` +
+          `• 🟠 **Solflare** - Browser extension & mobile app\n` +
+          `• 🔗 **WalletConnect** - Universal protocol for any Solana wallet\n` +
+          `• 📱 **Trust Wallet** - Via WalletConnect\n` +
+          `• 📱 **Other Wallets** - Any Solana-compatible wallet via WalletConnect\n\n` +
+          `**Available Commands:**\n` +
+          `• \`/register-wallet <address>\` - Register your Solana wallet\n` +
+          `• \`/balance\` - Check your wallet balance (requires registration)\n` +
+          `• \`/sc-balance\` - Check on-chain balance\n` +
+          `• \`/sc-tip <user> <amount>\` - Create smart contract tip\n` +
+          `• \`/generate-pda\` - Generate your Program Derived Address\n` +
+          `• \`/sc-info\` - View smart contract details\n` +
+          `• \`/support\` - Get help or report an issue\n` +
+          `• \`/help\` - Show this help message\n\n` +
+          `**🔒 Security:**\n` +
+          `• 100% Non-custodial - Your keys never leave your wallet\n` +
+          `• Sign once, tip forever - Trustless agent technology\n` +
+          `• All transactions are verifiable on-chain\n\n` +
+          `**Need Help?**\n` +
+          `If you have issues registering your wallet, try using WalletConnect which supports all Solana wallets!`
+        )
         .setColor(0x667eea)
         .setFooter({ text: 'JustTheTip - Powered by Solana' });
         

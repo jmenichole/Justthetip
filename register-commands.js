@@ -19,7 +19,47 @@
 const { REST, Routes } = require('discord.js');
 require('dotenv').config();
 
-const { commands } = require('./IMPROVED_SLASH_COMMANDS');
+// Define commands inline
+const commands = [
+  {
+    name: 'register-wallet',
+    description: 'Register your Solana wallet (supports Phantom, Solflare, WalletConnect & more)',
+    options: [
+      { name: 'address', type: 3, description: 'Your Solana wallet address', required: true }
+    ]
+  },
+  {
+    name: 'sc-tip',
+    description: 'Create smart contract tip transaction',
+    options: [
+      { name: 'user', type: 6, description: 'User to tip', required: true },
+      { name: 'amount', type: 10, description: 'Amount in SOL', required: true }
+    ]
+  },
+  {
+    name: 'sc-balance',
+    description: 'Check on-chain wallet balance'
+  },
+  {
+    name: 'sc-info',
+    description: 'View smart contract bot information and program details'
+  },
+  {
+    name: 'balance',
+    description: 'Check your wallet balance'
+  },
+  {
+    name: 'help',
+    description: 'Show bot commands and wallet connection options'
+  },
+  {
+    name: 'support',
+    description: 'Get help or report an issue',
+    options: [
+      { name: 'issue', type: 3, description: 'Describe your problem or question', required: true }
+    ]
+  }
+];
 
 // Try different variable names
 const CLIENT_ID = process.env.DISCORD_CLIENT_ID || process.env.DISCORD_APP_ID || '1419742988128616479';
@@ -114,9 +154,9 @@ async function main() {
     console.log('   3. Test each command to ensure they work\n');
     
     console.log('💡 Command Highlights:');
-    console.log('   • /verify - Main verification command');
-    console.log('   • /connect-wallet - Link Solana wallet');
-    console.log('   • /get-badge - Mint verification NFT');
+    console.log('   • /register-wallet - Register your Solana wallet');
+    console.log('   • /sc-tip - Create smart contract tips');
+    console.log('   • /balance - Check your wallet balance');
     console.log('   • /help - User guide');
     console.log('   • /support - Get help\n');
 
