@@ -61,8 +61,8 @@ const smartContractCommands = improvedCommands;
 // In-memory user wallet registry (in production, use a database)
 const userWallets = new Map();
 
-// Get API base URL from environment or use default
-const API_BASE_URL = process.env.API_BASE_URL || 'https://justthetip.vercel.app';
+// Get frontend URL for wallet registration page
+const FRONTEND_URL = process.env.FRONTEND_URL || 'https://jmenichole.github.io/Justthetip';
 
 
 client.once('ready', async () => {
@@ -118,7 +118,7 @@ client.on(Events.InteractionCreate, async interaction => {
       const nonce = crypto.randomUUID();
       
       // Create registration URL with user info and nonce
-      const registrationUrl = `${API_BASE_URL}/sign.html?user=${encodeURIComponent(userId)}&username=${encodeURIComponent(username)}&nonce=${encodeURIComponent(nonce)}`;
+      const registrationUrl = `${FRONTEND_URL}/sign.html?user=${encodeURIComponent(userId)}&username=${encodeURIComponent(username)}&nonce=${encodeURIComponent(nonce)}`;
       
       const embed = new EmbedBuilder()
         .setTitle('🔐 Register Your Wallet')
