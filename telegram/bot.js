@@ -29,6 +29,10 @@ const tipCommand = require('./commands/tip');
 const walletCommand = require('./commands/wallet');
 const historyCommand = require('./commands/history');
 const priceCommand = require('./commands/price');
+const rainCommand = require('./commands/rain');
+const leaderboardCommand = require('./commands/leaderboard');
+const settingsCommand = require('./commands/settings');
+const { adminCommand, statsCommand, banCommand, unbanCommand } = require('./commands/admin');
 
 // Import services
 const NotificationService = require('./services/notificationService');
@@ -101,6 +105,17 @@ class JustTheTipTelegramBot {
     this.bot.command('history', authMiddleware.required, historyCommand);
     this.bot.command('price', priceCommand);
 
+    // Group commands
+    this.bot.command('rain', authMiddleware.required, rainCommand);
+    this.bot.command('leaderboard', leaderboardCommand);
+    this.bot.command('settings', settingsCommand);
+
+    // Admin commands
+    this.bot.command('admin', adminCommand);
+    this.bot.command('stats', statsCommand);
+    this.bot.command('ban', banCommand);
+    this.bot.command('unban', unbanCommand);
+
     // Text message handler (for reply-based tipping)
     this.bot.on('text', async (ctx) => {
       const text = ctx.message.text;
@@ -130,6 +145,18 @@ class JustTheTipTelegramBot {
     this.bot.action(/^cancel_(.+)$/, async (ctx) => {
       const txId = ctx.match[1];
       await this.handleCancelTransaction(ctx, txId);
+    });
+
+    // Sign rain callback
+    this.bot.action(/^sign_rain_(.+)$/, async (ctx) => {
+      const rainId = ctx.match[1];
+      await this.handleSignRain(ctx, rainId);
+    });
+
+    // Cancel rain callback
+    this.bot.action(/^cancel_rain_(.+)$/, async (ctx) => {
+      const rainId = ctx.match[1];
+      await this.handleCancelRain(ctx, rainId);
     });
 
     // View balance callback
@@ -240,11 +267,75 @@ class JustTheTipTelegramBot {
   }
 
   /**
+   * Handle sign rain callback
+   */
+  async handleSignRain(ctx, rainId) {
+    try {
+      await ctx.answerCbQuery('Processing rain...');
+
+      const rain = await db.getTelegramRainById(rainId);
+
+      if (!rain) {
+        await ctx.reply('❌ Rain not found or expired.');
+        return;
+      }
+
+      if (rain.sender_telegram_id !== ctx.from.id.toString()) {
+        await ctx.reply('❌ You are not authorized to sign this rain.');
+        return;
+      }
+
+      // Generate wallet connection link for signing
+      const walletUrl = this.generateWalletConnectionUrl(rainId, 'rain');
+
+      await ctx.reply(
+        '🌧️ *Sign Rain Transaction*\n\n' +
+        `Total: ${rain.total_amount} ${rain.currency}\n` +
+        `Recipients: ${rain.recipient_count} users\n` +
+        `Per user: ${rain.amount_per_recipient} ${rain.currency}\n\n` +
+        'Click below to sign in your wallet.',
+        {
+          parse_mode: 'Markdown',
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: '🔓 Open Wallet', url: walletUrl }],
+              [{ text: '❌ Cancel', callback_data: `cancel_rain_${rainId}` }]
+            ]
+          }
+        }
+      );
+    } catch (error) {
+      logger.error('Error handling sign rain:', error);
+      await ctx.answerCbQuery('Error processing rain');
+    }
+  }
+
+  /**
+   * Handle cancel rain callback
+   */
+  async handleCancelRain(ctx, rainId) {
+    try {
+      await ctx.answerCbQuery('Rain cancelled');
+
+      await db.updateTelegramRainStatus(rainId, 'cancelled');
+
+      await ctx.editMessageText(
+        '❌ *Rain Cancelled*\n\n' +
+        'The rain has been cancelled.',
+        { parse_mode: 'Markdown' }
+      );
+    } catch (error) {
+      logger.error('Error handling cancel rain:', error);
+      await ctx.answerCbQuery('Error cancelling rain');
+    }
+  }
+
+  /**
    * Generate wallet connection URL for signing
    */
-  generateWalletConnectionUrl(txId) {
+  generateWalletConnectionUrl(txId, type = 'tip') {
     const baseUrl = process.env.FRONTEND_URL || 'https://jmenichole.github.io/Justthetip';
-    return `${baseUrl}/sign.html?tx=${txId}&platform=telegram`;
+    return `${baseUrl}/sign.html?tx=${txId}&platform=telegram&type=${type}`;
   }
 
   /**
@@ -296,8 +387,12 @@ class JustTheTipTelegramBot {
         { command: 'wallet', description: 'View wallet info' },
         { command: 'balance', description: 'Check your balance' },
         { command: 'tip', description: 'Send a tip' },
+        { command: 'rain', description: 'Mass tip (groups only)' },
+        { command: 'leaderboard', description: 'View top tippers' },
         { command: 'history', description: 'View transaction history' },
-        { command: 'price', description: 'Check token prices' }
+        { command: 'price', description: 'Check token prices' },
+        { command: 'settings', description: 'Group settings (admin)' },
+        { command: 'stats', description: 'Group statistics' }
       ]);
       logger.info('Bot commands menu set');
     } catch (error) {

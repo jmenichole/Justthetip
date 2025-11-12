@@ -20,7 +20,11 @@ telegram/
 │   ├── tip.js
 │   ├── wallet.js
 │   ├── history.js
-│   └── price.js
+│   ├── price.js
+│   ├── rain.js              # Mass tipping (groups)
+│   ├── leaderboard.js       # Top tippers display
+│   ├── settings.js          # Group configuration
+│   └── admin.js             # Admin commands
 ├── middleware/               # Bot middleware
 │   ├── auth.js              # Authentication
 │   ├── rateLimit.js         # Rate limiting
@@ -45,19 +49,18 @@ telegram/
 - ✅ Rate limiting and security
 - ✅ Notification system
 - ✅ Database integration
-
-### 🚧 In Progress
-
-- 🚧 Group chat features
-- 🚧 Rain command (mass tipping)
-- 🚧 Leaderboards
-- 🚧 Admin commands
+- ✅ Group chat support with activity tracking
+- ✅ Rain command (mass tipping to random active users)
+- ✅ Leaderboards (group and global)
+- ✅ Admin commands (ban, unban, stats)
+- ✅ Group settings management
 
 ### 📋 Planned
 
 - 📋 Mini app (Telegram Web Apps)
 - 📋 Channel integration
 - 📋 Advanced analytics
+- 📋 Scheduled rain events
 
 ## Quick Start
 
@@ -111,6 +114,23 @@ telegram/
 | `/history` | View transaction history | `/history` |
 | `/price` | Check token prices | `/price SOL` |
 
+### Group Commands
+
+| Command | Description | Example |
+|---------|-------------|---------|
+| `/rain` | Mass tip random active users (groups only) | `/rain 100 BONK 10` |
+| `/leaderboard` | View top tippers with rankings | `/leaderboard 7d` |
+| `/settings` | Configure group settings (admin only) | `/settings` |
+| `/stats` | View group statistics | `/stats` |
+
+### Admin Commands
+
+| Command | Description | Example |
+|---------|-------------|---------|
+| `/admin` | Show admin panel (admin only) | `/admin` |
+| `/ban` | Ban user from bot in group | `/ban @spammer reason` |
+| `/unban` | Unban user from bot | `/unban @user` |
+
 ### Tipping Syntax
 
 **Mention a user:**
@@ -126,6 +146,105 @@ telegram/
 ```
 
 **Supported tokens:** SOL, USDC, BONK, USDT
+
+## Group Features
+
+### Rain Command
+
+Distribute tips to multiple random active users in a group:
+
+```
+/rain <amount> <token> [recipient_count]
+```
+
+**Examples:**
+- `/rain 100 BONK 10` - Send 100 BONK to 10 random active users
+- `/rain 5 SOL` - Send 5 SOL to 5 random users (default count)
+
+**Features:**
+- Only works in group chats
+- Selects from active users (last 24 hours)
+- Recipients must have registered wallets
+- Maximum 50 recipients per rain
+- Shows USD value if available
+- Displays all recipients before signing
+
+**Group Settings:**
+Admins can configure:
+- `max_rain_recipients` - Maximum recipients (1-100)
+- `enable_rain` - Enable/disable rain command
+
+### Leaderboards
+
+View top tippers with rankings and statistics:
+
+```
+/leaderboard [period]
+```
+
+**Periods:**
+- `24h` - Last 24 hours
+- `7d` - Last 7 days (default)
+- `30d` - Last 30 days
+- `all` - All time
+
+**Displays:**
+- 🥇🥈🥉 Top 3 with medals
+- Total USD volume tipped
+- Number of tips sent
+- Most used token
+- Ranking position
+
+**Scope:**
+- In groups: Shows group-specific leaderboard
+- In private chat: Shows global leaderboard
+
+### Group Settings
+
+Admins can configure group behavior:
+
+```
+/settings
+```
+
+**Configurable Options:**
+- `min_tip_amount` - Minimum tip amount (prevents spam)
+- `allowed_tokens` - Comma-separated token whitelist
+- `enable_tipping` - Enable/disable tipping in group
+- `enable_leaderboard` - Show/hide leaderboard
+- `enable_notifications` - Tip notifications
+- `enable_rain` - Enable/disable rain command
+- `max_rain_recipients` - Max users per rain (1-100)
+
+**Example Configuration:**
+```
+min_tip_amount: 1.0
+allowed_tokens: SOL,USDC,BONK
+enable_rain: true
+max_rain_recipients: 25
+```
+
+### Admin Commands
+
+**Statistics (`/stats`):**
+- Total tips and volume (all time, 24h, 7d)
+- Active users count
+- Registered users count
+- Most popular token
+- Top tipper
+
+**Ban Management:**
+```bash
+/ban @username [reason]    # Ban user from bot in group
+/unban @username           # Unban user
+```
+
+**Admin Panel (`/admin`):**
+Interactive menu with quick access to:
+- Group settings
+- Statistics dashboard
+- User management
+- System status
 
 ## Development
 
@@ -206,7 +325,27 @@ Telegram bot extends the existing database with additional tables:
 - Time-limited nonces for security
 - Single-use verification
 
-See `db/telegramExtensions.js` for details.
+**telegram_group_settings** - Group configuration
+- Per-group settings (min_tip, allowed_tokens, etc.)
+- Feature toggles (rain, leaderboard, notifications)
+- Max rain recipients configuration
+
+**telegram_user_activity** - Activity tracking
+- Tracks user messages per group
+- Used for rain command recipient selection
+- Last activity timestamps
+
+**telegram_rain** - Rain tip records
+- Mass tipping transaction history
+- Recipient lists and amounts
+- Status tracking (pending, signed, confirmed)
+
+**telegram_banned_users** - Ban management
+- Group-specific user bans
+- Ban reasons and admin attribution
+- Timestamp tracking
+
+See `db/telegramExtensions.js` and `db/telegramGroupExtensions.js` for implementation details.
 
 ## Security
 

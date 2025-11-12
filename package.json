@@ -72,8 +72,10 @@
     "rate-limiter-flexible": "^4.0.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "telegraf": "^4.15.0",
     "tronweb": "^6.0.2",
     "tweetnacl": "^1.0.3",
+    "uuid": "^9.0.1",
     "winston": "^3.11.0",
     "xrpl": "^4.4.1"
   },

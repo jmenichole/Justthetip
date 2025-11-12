@@ -251,6 +251,10 @@ function extendDatabaseWithTelegram(db) {
   // Add methods
   Object.assign(db, telegramMethods);
 
+  // Add group support
+  const { extendDatabaseWithGroups } = require('./telegramGroupExtensions');
+  extendDatabaseWithGroups(db);
+
   logger.info('Database extended with Telegram support');
 }
 
