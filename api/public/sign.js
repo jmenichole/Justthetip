@@ -34,6 +34,9 @@ if (discordUserId && discordUsername && nonce) {
     // Setup UI based on device type
     setupWalletButtons();
     
+    // Check if there's a pending wallet connection (user returned from wallet app)
+    checkPendingWalletConnection();
+    
     // Test API connectivity on page load
     testAPIConnectivity();
 } else {
@@ -95,6 +98,53 @@ function setupWalletButtons() {
     }
     if (!hasSolflare) {
         document.getElementById('solflareButton').style.display = 'none';
+    }
+}
+
+/**
+ * Check if user is returning from wallet app with a pending connection
+ * This allows automatic reconnection after deep link
+ */
+function checkPendingWalletConnection() {
+    const isPending = sessionStorage.getItem('walletConnectionPending');
+    const walletId = sessionStorage.getItem('walletIdPending');
+    
+    if (isPending === 'true' && walletId) {
+        // User returned from wallet app - attempt to auto-connect
+        let provider = null;
+        
+        switch (walletId) {
+            case 'phantom':
+                provider = window.solana?.isPhantom ? window.solana : null;
+                break;
+            case 'solflare':
+                provider = window.solflare;
+                break;
+            case 'backpack':
+                provider = window.backpack;
+                break;
+        }
+        
+        if (provider) {
+            // Wallet provider is now available - attempt automatic connection
+            showStatus('pending', '<span class="loading"></span>Wallet detected! Connecting automatically...');
+            
+            setTimeout(async () => {
+                try {
+                    await connectWallet(walletId.charAt(0).toUpperCase() + walletId.slice(1), provider);
+                } catch (error) {
+                    console.error('Auto-reconnect failed:', error);
+                    // Clear pending state and show normal UI
+                    sessionStorage.removeItem('walletConnectionPending');
+                    sessionStorage.removeItem('walletIdPending');
+                    showStatus('pending', 'Waiting for wallet connection...');
+                }
+            }, 1000); // Small delay to ensure wallet is fully loaded
+        } else {
+            // Wallet not detected yet - start polling
+            showStatus('pending', '<span class="loading"></span>Waiting for wallet to connect...');
+            startWalletProviderPolling(walletId);
+        }
     }
 }
 
@@ -516,27 +566,8 @@ async function connectSelectedWallet(walletId) {
         if (provider) {
             await connectWallet(walletId.charAt(0).toUpperCase() + walletId.slice(1), provider);
         } else if (deepLink && isMobile) {
-            // On mobile, try deep link
-            showStatus('pending', `
-                <div style="text-align: center; padding: 20px;">
-                    <h3 style="margin-bottom: 15px;">Opening Wallet App...</h3>
-                    <p style="margin-bottom: 15px;">
-                        If the wallet app doesn't open automatically, please:<br><br>
-                        1. Make sure the wallet app is installed<br>
-                        2. Open the wallet app manually<br>
-                        3. Return to this page to complete registration
-                    </p>
-                    <button onclick="window.location.href='${deepLink}'" class="button primary" style="max-width: 300px; margin: 20px auto;">
-                        Open Wallet App
-                    </button>
-                </div>
-            `);
-            
-            // Try to open the deep link
-            setTimeout(() => {
-                window.location.href = deepLink;
-            }, 500);
-            
+            // On mobile, initiate deep link flow with automatic signature capture
+            await connectViaMobileDeepLink(walletId, deepLink);
         } else {
             // No provider and not mobile - show install instructions
             const walletName = walletId.charAt(0).toUpperCase() + walletId.slice(1);
@@ -565,7 +596,106 @@ async function connectSelectedWallet(walletId) {
 }
 
 /**
- * Generic wallet connection function
+ * Connect via mobile deep link with automatic signature capture
+ * This function attempts to connect via deep link and then poll for wallet provider
+ */
+async function connectViaMobileDeepLink(walletId, deepLink) {
+    try {
+        // Create the message to sign before opening the wallet
+        const message = {
+            app: "JustTheTip",
+            discord_user: discordUsername,
+            discord_id: discordUserId,
+            timestamp: new Date().toISOString(),
+            nonce: nonce,
+            purpose: "Register this wallet for deposits & withdrawals"
+        };
+        const messageString = JSON.stringify(message, null, 2);
+        
+        // Store message in session storage for later use
+        sessionStorage.setItem('walletConnectMessage', messageString);
+        sessionStorage.setItem('walletConnectionPending', 'true');
+        sessionStorage.setItem('walletIdPending', walletId);
+        
+        showStatus('pending', `
+            <div style="text-align: center; padding: 20px;">
+                <h3 style="margin-bottom: 15px;">Opening Wallet App...</h3>
+                <p style="margin-bottom: 15px;">
+                    When your wallet app opens:<br><br>
+                    1. Connect your wallet<br>
+                    2. Sign the verification message<br>
+                    3. Return to this page - your signature will be captured automatically!
+                </p>
+                <div class="loading" style="margin: 20px auto;"></div>
+                <p style="font-size: 14px; margin-top: 15px; opacity: 0.8;">
+                    Waiting for wallet response...
+                </p>
+            </div>
+        `);
+        
+        // Try to open the deep link
+        setTimeout(() => {
+            window.location.href = deepLink;
+        }, 500);
+        
+        // Start polling for wallet provider (in case user returns to browser)
+        startWalletProviderPolling(walletId);
+        
+    } catch (error) {
+        console.error('Mobile deep link connection error:', error);
+        handleConnectionError(error);
+    }
+}
+
+/**
+ * Poll for wallet provider after deep link activation
+ * This helps detect when the user returns from the wallet app
+ */
+function startWalletProviderPolling(walletId) {
+    let pollCount = 0;
+    const maxPolls = 60; // Poll for up to 60 seconds
+    
+    const pollInterval = setInterval(async () => {
+        pollCount++;
+        
+        // Check if polling should stop
+        if (pollCount >= maxPolls || sessionStorage.getItem('walletConnectionPending') !== 'true') {
+            clearInterval(pollInterval);
+            return;
+        }
+        
+        // Check if wallet provider is now available
+        let provider = null;
+        switch (walletId) {
+            case 'phantom':
+                provider = window.solana?.isPhantom ? window.solana : null;
+                break;
+            case 'solflare':
+                provider = window.solflare;
+                break;
+            case 'backpack':
+                provider = window.backpack;
+                break;
+        }
+        
+        // If provider is now available, try to connect automatically
+        if (provider) {
+            clearInterval(pollInterval);
+            sessionStorage.removeItem('walletConnectionPending');
+            
+            try {
+                showStatus('pending', '<span class="loading"></span>Wallet detected! Connecting...');
+                await connectWallet(walletId.charAt(0).toUpperCase() + walletId.slice(1), provider);
+            } catch (error) {
+                console.error('Auto-connect after deep link failed:', error);
+                // Don't show error - user can still manually retry
+            }
+        }
+    }, 1000); // Poll every second
+}
+
+/**
+ * Generic wallet connection function with automatic signature capture
  */
 async function connectWallet(walletName, provider) {
     try {
@@ -592,13 +722,13 @@ async function connectWallet(walletName, provider) {
 
         showStatus('pending', '<span class="loading"></span>Please sign the message in your wallet...');
 
-        // Request signature
+        // Request signature - this is where the automatic capture happens
         const signedMessage = await provider.signMessage(encodedMessage, 'utf8');
         
-        // Convert signature to base64 for transmission
+        // Automatically convert signature to base64 for transmission
         const signatureBase64 = btoa(String.fromCharCode(...signedMessage.signature));
 
-        showStatus('pending', '<span class="loading"></span>Verifying signature...');
+        showStatus('pending', '<span class="loading"></span>Signature captured! Verifying...');
 
         // Send to backend for verification with retry logic
         const response = await fetchWithRetry(`${API_BASE_URL}/api/registerwallet/verify`, {
@@ -619,8 +749,13 @@ async function connectWallet(walletName, provider) {
         const result = await response.json();
 
         if (result.success) {
-            showStatus('success', `✅ Wallet registered successfully!<br><br>Wallet: ${publicKey.substring(0, 8)}...${publicKey.substring(publicKey.length - 8)}<br><br>You can now close this window and return to Discord.`);
+            showStatus('success', `✅ Wallet registered successfully!<br><br>Wallet: ${publicKey.substring(0, 8)}...${publicKey.substring(publicKey.length - 8)}<br><br>Your signature was automatically captured and verified.<br><br>You can now close this window and return to Discord.`);
             disableAllButtons();
+            
+            // Clear session storage
+            sessionStorage.removeItem('walletConnectMessage');
+            sessionStorage.removeItem('walletConnectionPending');
+            sessionStorage.removeItem('walletIdPending');
         } else {
             showStatus('error', `❌ Registration failed: ${result.error || 'Unknown error'}<br><br>Please try again or request a new registration link.`);
         }
