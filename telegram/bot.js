@@ -29,6 +29,7 @@ const tipCommand = require('./commands/tip');
 const walletCommand = require('./commands/wallet');
 const historyCommand = require('./commands/history');
 const priceCommand = require('./commands/price');
+const appCommand = require('./commands/app');
 const rainCommand = require('./commands/rain');
 const leaderboardCommand = require('./commands/leaderboard');
 const settingsCommand = require('./commands/settings');
@@ -104,6 +105,7 @@ class JustTheTipTelegramBot {
     this.bot.command('tip', authMiddleware.required, tipCommand);
     this.bot.command('history', authMiddleware.required, historyCommand);
     this.bot.command('price', priceCommand);
+    this.bot.command('app', appCommand);
 
     // Group commands
     this.bot.command('rain', authMiddleware.required, rainCommand);
@@ -384,6 +386,7 @@ class JustTheTipTelegramBot {
         { command: 'start', description: 'Start the bot' },
         { command: 'help', description: 'Show help message' },
         { command: 'register', description: 'Register your wallet' },
+        { command: 'app', description: 'Open wallet mini app' },
         { command: 'wallet', description: 'View wallet info' },
         { command: 'balance', description: 'Check your balance' },
         { command: 'tip', description: 'Send a tip' },

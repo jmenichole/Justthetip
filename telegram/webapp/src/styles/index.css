@@ -1,0 +1,122 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Fallback colors if Telegram theme is not available */
+    --tg-theme-bg-color: #ffffff;
+    --tg-theme-text-color: #000000;
+    --tg-theme-hint-color: #999999;
+    --tg-theme-link-color: #667eea;
+    --tg-theme-button-color: #667eea;
+    --tg-theme-button-text-color: #ffffff;
+    --tg-theme-secondary-bg-color: #f4f4f5;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: var(--tg-theme-bg-color);
+    color: var(--tg-theme-text-color);
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-brand-gradient hover:bg-brand-gradient-hover text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-lg active:scale-95;
+  }
+
+  .btn-secondary {
+    @apply bg-telegram-secondaryBg text-telegram-text font-semibold py-3 px-6 rounded-xl transition-all duration-200 active:scale-95;
+  }
+
+  .card {
+    @apply bg-telegram-secondaryBg rounded-2xl p-4 shadow-sm;
+  }
+
+  .input-field {
+    @apply w-full bg-telegram-bg border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 text-telegram-text focus:outline-none focus:ring-2 focus:ring-brand-purple transition-all;
+  }
+
+  .stat-card {
+    @apply bg-telegram-secondaryBg rounded-xl p-4 flex flex-col items-center justify-center text-center;
+  }
+
+  .token-badge {
+    @apply inline-flex items-center justify-center px-3 py-1 rounded-full text-sm font-medium bg-brand-gradient text-white;
+  }
+
+  .transaction-item {
+    @apply bg-telegram-secondaryBg rounded-xl p-4 mb-3 flex items-center justify-between transition-all active:scale-98;
+  }
+
+  /* Loading spinner */
+  .spinner {
+    @apply inline-block w-6 h-6 border-3 border-brand-purple border-t-transparent rounded-full animate-spin;
+  }
+
+  /* Skeleton loading */
+  .skeleton {
+    @apply bg-gray-200 dark:bg-gray-700 animate-pulse rounded;
+  }
+}
+
+@layer utilities {
+  .gradient-text {
+    @apply bg-clip-text text-transparent bg-brand-gradient;
+  }
+
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Animations */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-in {
+  animation: slideIn 0.3s ease-out;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --tg-theme-bg-color: #1a1a1a;
+    --tg-theme-text-color: #ffffff;
+    --tg-theme-hint-color: #888888;
+    --tg-theme-link-color: #667eea;
+    --tg-theme-button-color: #667eea;
+    --tg-theme-button-text-color: #ffffff;
+    --tg-theme-secondary-bg-color: #2a2a2a;
+  }
+}
