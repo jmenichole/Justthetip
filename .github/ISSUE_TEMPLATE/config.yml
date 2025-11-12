@@ -1,0 +1,14 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Community Discussion
+    url: https://github.com/jmenichole/Justthetip/discussions
+    about: Ask questions and discuss ideas with the community
+  - name: 🔐 Security Vulnerability
+    url: https://github.com/jmenichole/Justthetip/security/advisories/new
+    about: Report security vulnerabilities privately
+  - name: 📖 Documentation
+    url: https://jmenichole.github.io/Justthetip
+    about: Read the documentation
+  - name: 💡 Discord Support
+    url: https://discord.gg/justthetip
+    about: Get real-time help from the community

@@ -1,0 +1,46 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# JustTheTip Pre-Commit Hook
+# Runs linting and basic checks before allowing commit
+
+echo "🔍 Running pre-commit checks..."
+
+# Run linter
+echo "📝 Linting..."
+npm run lint || {
+  echo "❌ Linting failed. Fix errors before committing."
+  exit 1
+}
+
+# Check for console.log in production code (optional)
+if git diff --cached --name-only | grep -E '\.(js|ts|jsx|tsx)$' | xargs grep -n 'console\.log' > /dev/null; then
+  echo "⚠️  Warning: console.log statements detected"
+  echo "   Remove or replace with proper logging before commit to main"
+fi
+
+# Check for sensitive files
+if git diff --cached --name-only | grep -E '\.env$|id_rsa|credentials'; then
+  echo "❌ Attempting to commit sensitive files!"
+  echo "   Remove .env, keys, or credentials from commit"
+  exit 1
+fi
+
+# Check for large files
+MAX_FILE_SIZE=1048576  # 1MB in bytes
+large_files=$(git diff --cached --name-only | while read file; do
+  if [ -f "$file" ]; then
+    size=$(wc -c < "$file")
+    if [ $size -gt $MAX_FILE_SIZE ]; then
+      echo "$file ($((size / 1024))KB)"
+    fi
+  fi
+done)
+
+if [ -n "$large_files" ]; then
+  echo "⚠️  Warning: Large files detected:"
+  echo "$large_files"
+  echo "   Consider using Git LFS for large binary files"
+fi
+
+echo "✅ Pre-commit checks passed!"
