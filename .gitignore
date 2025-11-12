@@ -39,3 +39,7 @@ justthetip-contracts/test-ledger/
 !justthetip-contracts/target/deploy/*-keypair.json
 !justthetip-contracts/target/idl/
 !justthetip-contracts/target/types/
+
+# Rust backend artifacts
+rust-backend/target/
+rust-backend/Cargo.lock
