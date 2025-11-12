@@ -184,3 +184,46 @@ The previous version only required a wallet address without verification. Users 
 3. **Multi-signature Support**: Allow registration of multi-sig wallets
 4. **Hardware Wallet Support**: Add instructions for Ledger/Trezor users
 5. **QR Code Generation**: Generate QR codes for easier mobile wallet signing
+6. **Passkey Authentication**: Use WebAuthn/FIDO2 for biometric wallet verification (see [PASSKEY_AUTHENTICATION.md](./PASSKEY_AUTHENTICATION.md))
+
+## Alternative: Passkey Authentication
+
+JustTheTip now supports passkey-based wallet authentication as an alternative to traditional wallet signatures. This method allows users to verify wallet ownership using:
+
+- **Biometric authentication** (Touch ID, Face ID, Windows Hello)
+- **Hardware security keys** (YubiKey, Titan Keys)
+- **Platform authenticators** (built-in device security)
+
+### Benefits of Passkeys
+
+- **Phishing-resistant**: Cannot be stolen or phished
+- **Convenient**: Use fingerprint or face recognition
+- **No seed phrases**: Device-based security without memorizing keys
+- **Standards-based**: Built on WebAuthn/FIDO2 protocols
+
+### How to Use Passkeys
+
+1. Run `/register-wallet` command and select "Passkey" option
+2. Follow the registration link sent to your DMs
+3. Choose "Register with Passkey" on the web interface
+4. Authenticate with your device (fingerprint, Face ID, etc.)
+5. Your passkey is now registered and linked to your Discord account
+
+For detailed information about passkey authentication, including:
+- Registration and verification flows
+- Supported devices and browsers
+- Security considerations
+- API documentation
+- Troubleshooting
+
+See the complete guide: **[PASSKEY_AUTHENTICATION.md](./PASSKEY_AUTHENTICATION.md)**
+
+### Fallback to Traditional Methods
+
+If your device doesn't support passkeys, you can still use:
+- Phantom Wallet signatures (Ed25519)
+- Solflare Wallet signatures (Ed25519)  
+- Ledger/Trezor hardware wallets
+- Command-line signing with `solana-keygen`
+
+All methods provide equivalent security and proof of wallet ownership.
