@@ -23,7 +23,7 @@ const improvedCommands = [
 
   {
     name: 'tip',
-    description: '💸 Tip SOL to another user',
+    description: '💸 Tip USD to another user',
     options: [
       {
         name: 'user',
@@ -34,7 +34,7 @@ const improvedCommands = [
       {
         name: 'amount',
         type: 10, // NUMBER
-        description: 'Amount in SOL (0.001 - 1.0)',
+        description: 'Amount in USD ($0.10 - $100.00)',
         required: true
       }
     ]
@@ -42,12 +42,12 @@ const improvedCommands = [
 
   {
     name: 'airdrop',
-    description: '🎁 Request devnet/testnet SOL airdrop',
+    description: '🎁 Request devnet/testnet airdrop',
     options: [
       {
         name: 'amount',
         type: 10, // NUMBER
-        description: 'Amount in SOL (max 2.0)',
+        description: 'Amount in USD (max $20.00)',
         required: false
       }
     ]
@@ -97,22 +97,24 @@ const HELP_MESSAGES = {
 • Your wallet is registered automatically!
 
 **2️⃣ Tip Other Users**
-\`/tip @user 0.1\`
-• Tip SOL to other Discord users
-• Amount between 0.001 - 1.0 SOL
+\`/tip @user 10\`
+• Tip in USD to other Discord users
+• Amount between $0.10 - $100.00
 • Non-custodial - tips happen on-chain
+• Automatically converted to SOL at current price
 
 **3️⃣ Request Testnet Airdrop** (Devnet only)
-\`/airdrop 1.0\`
+\`/airdrop 5\`
 • Get free testnet SOL for testing
-• Max 2.0 SOL per request
+• Amount in USD (max $20.00)
+• Converted to SOL based on current price
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 **All Commands:**
 
 💸 **Tipping**
-\`/tip @user <amount>\` - Send SOL to another user
+\`/tip @user <amount>\` - Send USD to another user (e.g., /tip @user 10)
 \`/logs\` - View your transaction history (DM)
 
 🔐 **Wallet**
@@ -124,7 +126,7 @@ const HELP_MESSAGES = {
 \`/support <issue>\` - Contact support team
 
 🎁 **Testing** (Devnet only)
-\`/airdrop <amount>\` - Get testnet SOL
+\`/airdrop <amount>\` - Get testnet SOL (amount in USD)
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -145,8 +147,8 @@ const HELP_MESSAGES = {
 
 **Tip Not Working?**
 • Make sure recipient has registered their wallet
-• Check you have sufficient SOL balance
-• Verify amount is between 0.001 - 1.0 SOL
+• Check you have sufficient balance
+• Verify amount is between $0.10 - $100.00
 
 **Can't See Logs?**
 • Check your DMs (direct messages)

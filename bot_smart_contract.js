@@ -48,6 +48,7 @@ const crypto = require('crypto');
 const {
   createOnChainBalanceEmbed,
 } = require('./src/utils/embedBuilders');
+const priceService = require('./src/utils/priceService');
 
 const { commands: improvedCommands, helpMessages: HELP_MESSAGES } = require('./IMPROVED_SLASH_COMMANDS');
 
@@ -122,13 +123,13 @@ client.on(Events.InteractionCreate, async interaction => {
     // ===== TIP COMMAND =====
     } else if (commandName === 'tip') {
       const recipient = interaction.options.getUser('user');
-      const amount = interaction.options.getNumber('amount');
+      const usdAmount = interaction.options.getNumber('amount');
       const senderId = interaction.user.id;
       
-      // Validate amount
-      if (amount <= 0 || amount > 1) {
+      // Validate USD amount
+      if (usdAmount < 0.10 || usdAmount > 100) {
         return interaction.reply({ 
-          content: '❌ Amount must be between 0.001 and 1.0 SOL', 
+          content: '❌ Amount must be between $0.10 and $100.00 USD', 
           ephemeral: true 
         });
       }
@@ -151,13 +152,28 @@ client.on(Events.InteractionCreate, async interaction => {
         });
       }
       
+      // Convert USD to SOL
+      let solAmount;
+      let solPrice;
+      try {
+        solPrice = await priceService.getSolPrice();
+        solAmount = await priceService.convertUsdToSol(usdAmount);
+      } catch (error) {
+        console.error('Error converting USD to SOL:', error);
+        return interaction.reply({ 
+          content: '❌ Error fetching SOL price. Please try again later.', 
+          ephemeral: true 
+        });
+      }
+      
       // Check sender balance
       const balance = await getSolanaBalance(senderWallet);
       const balanceSOL = balance / 1000000000;
       
-      if (balanceSOL < amount) {
+      if (balanceSOL < solAmount) {
+        const balanceUSD = await priceService.convertSolToUsd(balanceSOL);
         return interaction.reply({ 
-          content: `❌ Insufficient balance. You have ${balanceSOL.toFixed(4)} SOL`, 
+          content: `❌ Insufficient balance. You have ${balanceSOL.toFixed(4)} SOL (~$${balanceUSD.toFixed(2)} USD)`, 
           ephemeral: true 
         });
       }
@@ -168,7 +184,9 @@ client.on(Events.InteractionCreate, async interaction => {
         .setDescription(
           `**From:** <@${interaction.user.id}>\n` +
           `**To:** <@${recipient.id}>\n` +
-          `**Amount:** ${amount} SOL\n\n` +
+          `**Amount:** $${usdAmount.toFixed(2)} USD\n` +
+          `**Equivalent:** ${solAmount.toFixed(4)} SOL\n` +
+          `**SOL Price:** $${solPrice.toFixed(2)}\n\n` +
           `**Status:** ⏳ Processing...\n\n` +
           `_Transaction will be confirmed on Solana blockchain_`
         )
@@ -178,18 +196,18 @@ client.on(Events.InteractionCreate, async interaction => {
         
       await interaction.reply({ embeds: [embed] });
       
-      console.log(`💸 Tip: ${interaction.user.tag} -> ${recipient.tag}: ${amount} SOL`);
+      console.log(`💸 Tip: ${interaction.user.tag} -> ${recipient.tag}: $${usdAmount.toFixed(2)} USD (${solAmount.toFixed(4)} SOL)`);
       
     // ===== AIRDROP COMMAND =====
     } else if (commandName === 'airdrop') {
-      const amount = interaction.options.getNumber('amount') || 1.0;
+      const usdAmount = interaction.options.getNumber('amount') || 5.0;
       const userId = interaction.user.id;
       const walletAddress = userWallets.get(userId);
       
-      // Validate amount
-      if (amount <= 0 || amount > 2.0) {
+      // Validate USD amount
+      if (usdAmount < 0.10 || usdAmount > 20.0) {
         return interaction.reply({ 
-          content: '❌ Airdrop amount must be between 0.1 and 2.0 SOL', 
+          content: '❌ Airdrop amount must be between $0.10 and $20.00 USD', 
           ephemeral: true 
         });
       }
@@ -201,11 +219,27 @@ client.on(Events.InteractionCreate, async interaction => {
         });
       }
       
+      // Convert USD to SOL
+      let solAmount;
+      let solPrice;
+      try {
+        solPrice = await priceService.getSolPrice();
+        solAmount = await priceService.convertUsdToSol(usdAmount);
+      } catch (error) {
+        console.error('Error converting USD to SOL:', error);
+        return interaction.reply({ 
+          content: '❌ Error fetching SOL price. Please try again later.', 
+          ephemeral: true 
+        });
+      }
+      
       const embed = new EmbedBuilder()
         .setTitle('🎁 Devnet Airdrop')
         .setDescription(
           `**Wallet:** \`${walletAddress.slice(0, 8)}...${walletAddress.slice(-8)}\`\n` +
-          `**Amount:** ${amount} SOL\n` +
+          `**Amount:** $${usdAmount.toFixed(2)} USD\n` +
+          `**Equivalent:** ${solAmount.toFixed(4)} SOL\n` +
+          `**SOL Price:** $${solPrice.toFixed(2)}\n` +
           `**Network:** Devnet/Testnet\n\n` +
           `**⚠️ Note:** This only works on devnet/testnet.\n` +
           `For mainnet, you need to purchase SOL from an exchange.`
@@ -214,6 +248,8 @@ client.on(Events.InteractionCreate, async interaction => {
         .setFooter({ text: 'Testnet airdrop only' });
         
       await interaction.reply({ embeds: [embed], ephemeral: true });
+      
+      console.log(`🎁 Airdrop: ${interaction.user.tag} requested $${usdAmount.toFixed(2)} USD (${solAmount.toFixed(4)} SOL)`);
       
     // ===== REGISTER WALLET COMMAND =====
     } else if (commandName === 'register-wallet') {
