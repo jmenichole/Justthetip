@@ -1607,3 +1607,11 @@ process.on('uncaughtException', (error) => {
 });
 
 module.exports = app;
+
+// WalletConnect Configuration Endpoint
+// Serves public WalletConnect project ID (safe to expose)
+app.get('/api/walletconnect/config', (req, res) => {
+    res.json({
+        projectId: process.env.WALLETCONNECT_PROJECT_ID || ''
+    });
+});

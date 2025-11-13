@@ -395,18 +395,70 @@ async function connectWalletExtension(walletType) {
 }
 
 /**
- * Connect via WalletConnect - Show wallet selection modal
- * Supports multiple Solana wallets with deep linking and extensions
+ * Connect via WalletConnect - Show QR code modal for any Solana wallet
+ * Uses official WalletConnect v2 protocol with QR codes and deep linking
  */
 async function connectWalletConnect() {
     try {
-        showStatus('pending', '<span class="loading"></span>Opening wallet selection...');
+        showStatus('pending', '<span class="loading"></span>Opening WalletConnect...');
         
-        // Show wallet selection modal
-        showWalletSelectionModal();
+        // Check if WalletConnect handler is available
+        if (!window.WalletConnectHandler || !window.WalletConnectHandler.isAvailable()) {
+            showStatus('error', '❌ WalletConnect not loaded. Please refresh the page and try again.');
+            return;
+        }
+        
+        // Initialize WalletConnect if needed
+        await window.WalletConnectHandler.initialize();
+        
+        // Show connecting status
+        showStatus('pending', '<span class="loading"></span>Opening wallet selection modal...<br><br>Scan QR code with your mobile wallet or click a wallet to connect.');
+        
+        // Connect wallet - this will show the WalletConnect modal with QR code
+        const { publicKey, provider } = await window.WalletConnectHandler.connect();
+        
+        if (!publicKey) {
+            throw new Error('No public key received from wallet');
+        }
+        
+        // Show signature request status
+        showStatus('pending', '<span class="loading"></span>Connected! Requesting signature...');
+        
+        // Create signature message
+        const message = {
+            app: "JustTheTip",
+            agent_type: "x402 Trustless Agent",
+            discord_user: discordUsername,
+            discord_id: discordUserId,
+            timestamp: new Date().toISOString(),
+            nonce: nonce,
+            purpose: "Cryptographic proof of wallet ownership - Sign once, tip forever",
+            verification: "This signature proves you control this Solana address and all tokens it holds"
+        };
+        const messageString = JSON.stringify(message, null, 2);
+        
+        // Request signature via WalletConnect
+        const { signature } = await window.WalletConnectHandler.signMessage(messageString, publicKey);
+        
+        // Convert signature to hex string
+        const signatureHex = Array.from(signature)
+            .map(b => b.toString(16).padStart(2, '0'))
+            .join('');
+        
+        // Submit to backend
+        await submitWalletRegistration(publicKey, signatureHex, messageString);
+        
+        // Disconnect WalletConnect session after successful registration
+        await window.WalletConnectHandler.disconnect();
         
     } catch (error) {
         console.error('WalletConnect error:', error);
+        
+        // Clean up WalletConnect session on error
+        if (window.WalletConnectHandler) {
+            await window.WalletConnectHandler.disconnect();
+        }
+        
         handleConnectionError(error);
     }
 }
