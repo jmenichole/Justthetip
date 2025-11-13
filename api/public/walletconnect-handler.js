@@ -1,10 +1,11 @@
 /**
- * WalletConnect v2 Integration for Solana Wallet Registration
- * Uses official WalletConnect protocol with QR codes and mobile deep linking
+ * WalletConnect AppKit Integration for Solana Wallet Registration
+ * Uses @reown/appkit for universal wallet connection with QR codes
  */
 
-// WalletConnect Project ID - fetched from backend
-let WALLETCONNECT_PROJECT_ID = null;
+// WalletConnect/Reown AppKit Configuration
+let appKit = null;
+let connectedAccount = null;
 
 /**
  * Fetch WalletConnect configuration from backend
@@ -13,204 +14,175 @@ async function fetchWalletConnectConfig() {
     try {
         const response = await fetch('/api/walletconnect/config');
         const config = await response.json();
-        WALLETCONNECT_PROJECT_ID = config.projectId;
-        return true;
+        return config.projectId;
     } catch (error) {
         console.error('Failed to fetch WalletConnect config:', error);
-        return false;
+        return null;
     }
 }
 
 /**
- * Initialize WalletConnect provider and modal
+ * Initialize AppKit modal
  */
-let wcProvider = null;
-let wcModal = null;
-let wcSession = null;
-
 async function initializeWalletConnect() {
     try {
-        // Fetch project ID from backend if not already loaded
-        if (!WALLETCONNECT_PROJECT_ID) {
-            const success = await fetchWalletConnectConfig();
-            if (!success || !WALLETCONNECT_PROJECT_ID) {
-                throw new Error('Failed to load WalletConnect configuration');
-            }
+        // Fetch project ID from backend
+        const projectId = await fetchWalletConnectConfig();
+        if (!projectId) {
+            throw new Error('Failed to load WalletConnect project ID');
         }
-        
-        // Initialize WalletConnect Universal Provider for Solana
-        wcProvider = await window.WalletConnectUniversalProvider.init({
-            projectId: WALLETCONNECT_PROJECT_ID,
-            metadata: {
-                name: 'JustTheTip',
-                description: 'Solana Trustless Tipping Agent',
-                url: window.location.origin,
-                icons: [`${window.location.origin}/logo.png`]
-            },
-            chains: ['solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp'], // Solana mainnet
-            methods: [
-                'solana_signMessage',
-                'solana_signTransaction'
-            ],
-            events: ['accountsChanged', 'chainChanged']
+
+        // Initialize AppKit with Solana configuration
+        const { createAppKit } = window.Reown.AppKit;
+        const { SolanaAdapter } = window.Reown.AppKitAdapterSolana;
+        const { solana, solanaTestnet, solanaDevnet } = window.Reown.AppKitNetworks;
+
+        // Create Solana adapter with mainnet
+        const solanaWeb3JsAdapter = new SolanaAdapter({
+            wallets: [] // Auto-detect all available wallets
         });
 
-        // Initialize WalletConnect Modal
-        wcModal = new window.WalletConnectModal.WalletConnectModal({
-            projectId: WALLETCONNECT_PROJECT_ID,
-            chains: ['solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp'],
+        // Create AppKit instance
+        appKit = createAppKit({
+            adapters: [solanaWeb3JsAdapter],
+            networks: [solana, solanaTestnet, solanaDevnet],
+            defaultNetwork: solana,
+            projectId: projectId,
+            features: {
+                analytics: false, // Disable analytics
+                email: false, // Disable email login
+                socials: false, // Disable social login
+                onramp: false // Disable onramp
+            },
             themeMode: 'dark',
             themeVariables: {
-                '--wcm-z-index': '9999'
+                '--w3m-z-index': 9999,
+                '--w3m-accent': '#667eea'
             }
         });
 
-        // Listen for session events
-        wcProvider.on('display_uri', (uri) => {
-            console.log('WalletConnect URI:', uri);
-            wcModal.openModal({ uri });
-        });
-
-        wcProvider.on('session_event', (event) => {
-            console.log('Session event:', event);
-        });
-
-        wcProvider.on('session_update', ({ topic, params }) => {
-            console.log('Session updated:', topic, params);
-            wcSession = wcProvider.session;
-        });
-
-        wcProvider.on('session_delete', () => {
-            console.log('Session deleted');
-            wcSession = null;
+        // Listen for account changes
+        appKit.subscribeAccount((account) => {
+            if (account && account.address) {
+                connectedAccount = account.address;
+                console.log('Account connected:', connectedAccount);
+            } else {
+                connectedAccount = null;
+            }
         });
 
         return true;
     } catch (error) {
-        console.error('WalletConnect initialization error:', error);
+        console.error('AppKit initialization error:', error);
         return false;
     }
 }
 
 /**
- * Connect wallet using WalletConnect protocol
- * @returns {Promise<{publicKey: string, provider: object}>}
+ * Connect wallet using AppKit modal
+ * @returns {Promise<{publicKey: string}>}
  */
 async function connectWalletConnect() {
     try {
         // Initialize if not already done
-        if (!wcProvider) {
+        if (!appKit) {
             const initialized = await initializeWalletConnect();
             if (!initialized) {
-                throw new Error('Failed to initialize WalletConnect');
+                throw new Error('Failed to initialize AppKit');
             }
         }
 
-        // If already connected, disconnect first
-        if (wcSession) {
-            await wcProvider.disconnect();
-            wcSession = null;
-        }
+        // Open the AppKit modal
+        await appKit.open();
 
-        // Connect and get accounts
-        const session = await wcProvider.connect({
-            namespaces: {
-                solana: {
-                    methods: ['solana_signMessage', 'solana_signTransaction'],
-                    chains: ['solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp'],
-                    events: ['accountsChanged', 'chainChanged']
+        // Wait for connection with timeout
+        const maxWaitTime = 120000; // 2 minutes
+        const startTime = Date.now();
+
+        return new Promise((resolve, reject) => {
+            const checkConnection = setInterval(() => {
+                if (connectedAccount) {
+                    clearInterval(checkConnection);
+                    appKit.close();
+                    resolve({ publicKey: connectedAccount });
+                } else if (Date.now() - startTime > maxWaitTime) {
+                    clearInterval(checkConnection);
+                    reject(new Error('Connection timeout'));
                 }
-            }
+            }, 500);
+
+            // Also listen for modal close without connection
+            const unsubscribe = appKit.subscribeState((state) => {
+                if (!state.open && !connectedAccount) {
+                    clearInterval(checkConnection);
+                    unsubscribe();
+                    reject(new Error('User closed modal without connecting'));
+                }
+            });
         });
 
-        wcSession = session;
-
-        // Get the connected account
-        const accounts = session.namespaces.solana.accounts;
-        if (!accounts || accounts.length === 0) {
-            throw new Error('No accounts returned from wallet');
-        }
-
-        // Extract public key from account string (format: "solana:chainId:publicKey")
-        const publicKey = accounts[0].split(':')[2];
-
-        console.log('WalletConnect connected:', publicKey);
-
-        return {
-            publicKey,
-            provider: wcProvider
-        };
-
     } catch (error) {
-        if (wcModal) {
-            wcModal.closeModal();
-        }
         throw error;
     }
 }
 
 /**
- * Sign message using WalletConnect
+ * Sign message using connected wallet
  * @param {string} message - Message to sign
  * @param {string} publicKey - Public key of the signer
  * @returns {Promise<{signature: Uint8Array, publicKey: string}>}
  */
 async function signMessageWalletConnect(message, publicKey) {
     try {
-        if (!wcProvider || !wcSession) {
-            throw new Error('WalletConnect not connected');
+        if (!appKit || !connectedAccount) {
+            throw new Error('Wallet not connected');
         }
 
-        // Encode message as base58
+        // Get the Solana provider from AppKit
+        const provider = appKit.getWalletProvider();
+        
+        if (!provider || !provider.signMessage) {
+            throw new Error('Wallet does not support message signing');
+        }
+
+        // Encode message to Uint8Array
         const messageBytes = new TextEncoder().encode(message);
-        const messageBase58 = bs58.encode(messageBytes);
 
-        // Request signature using WalletConnect protocol
-        const result = await wcProvider.request({
-            method: 'solana_signMessage',
-            params: {
-                pubkey: publicKey,
-                message: messageBase58
-            }
-        }, `solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp:${publicKey}`);
-
-        // Decode signature from base58
-        const signature = bs58.decode(result.signature);
-
+        // Request signature
+        const signatureResult = await provider.signMessage(messageBytes);
+        
+        // signatureResult.signature is already a Uint8Array
         return {
-            signature,
-            publicKey
+            signature: signatureResult.signature,
+            publicKey: publicKey
         };
 
     } catch (error) {
-        console.error('WalletConnect sign error:', error);
+        console.error('AppKit sign error:', error);
         throw error;
     }
 }
 
 /**
- * Disconnect WalletConnect session
+ * Disconnect wallet
  */
 async function disconnectWalletConnect() {
     try {
-        if (wcProvider && wcSession) {
-            await wcProvider.disconnect();
-            wcSession = null;
-        }
-        if (wcModal) {
-            wcModal.closeModal();
+        if (appKit) {
+            await appKit.disconnect();
+            connectedAccount = null;
         }
     } catch (error) {
-        console.error('WalletConnect disconnect error:', error);
+        console.error('AppKit disconnect error:', error);
     }
 }
 
 /**
- * Check if WalletConnect is available
+ * Check if AppKit is available
  */
 function isWalletConnectAvailable() {
-    return typeof window.WalletConnectUniversalProvider !== 'undefined' &&
-           typeof window.WalletConnectModal !== 'undefined';
+    return typeof window.Reown !== 'undefined' && 
+           typeof window.Reown.AppKit !== 'undefined';
 }
 
 // Export functions for use in sign.js

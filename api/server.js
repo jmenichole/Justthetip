@@ -1586,6 +1586,15 @@ if (require.main === module) {
     })();
 }
 
+
+// WalletConnect Configuration Endpoint
+// Serves public WalletConnect project ID (safe to expose to frontend)
+app.get('/api/walletconnect/config', (req, res) => {
+    res.json({
+        projectId: process.env.WALLETCONNECT_PROJECT_ID || ''
+    });
+});
+
 // Global error handlers for production stability
 process.on('unhandledRejection', (reason, promise) => {
     console.error('❌ Unhandled Rejection at:', promise);
@@ -1607,11 +1616,3 @@ process.on('uncaughtException', (error) => {
 });
 
 module.exports = app;
-
-// WalletConnect Configuration Endpoint
-// Serves public WalletConnect project ID (safe to expose)
-app.get('/api/walletconnect/config', (req, res) => {
-    res.json({
-        projectId: process.env.WALLETCONNECT_PROJECT_ID || ''
-    });
-});
