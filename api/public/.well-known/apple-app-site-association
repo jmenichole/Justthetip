@@ -13,6 +13,18 @@
       {
         "appID": "COINBASE.org.toshi",
         "paths": [ "/wc/*", "/link/*" ]
+      },
+      {
+        "appID": "EXODUS.exodusmovement.exodus",
+        "paths": [ "/m/*", "/connect/*" ]
+      },
+      {
+        "appID": "CWALLET.com.cwallet.app",
+        "paths": [ "/wc/*", "/connect/*" ]
+      },
+      {
+        "appID": "GEMINI.com.gemini.android.app",
+        "paths": [ "/wallet/*", "/wc/*" ]
       }
     ]
   },
@@ -20,7 +32,10 @@
     "apps": [
       "PHANTOM.app.phantom",
       "TRUST.com.trustwallet.app",
-      "COINBASE.org.toshi"
+      "COINBASE.org.toshi",
+      "EXODUS.exodusmovement.exodus",
+      "CWALLET.com.cwallet.app",
+      "GEMINI.com.gemini.android.app"
     ]
   }
 }

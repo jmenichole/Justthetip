@@ -165,3 +165,36 @@ function showDesktopOptions(wallet) {
 }
 
 export { WALLET_CONFIG };
+
+// Add Exodus wallet to configuration
+WALLET_CONFIG.exodus = {
+    name: 'Exodus',
+    icon: '💎',
+    universalLink: 'https://exodus.com/m/',
+    deepLink: 'exodus://',
+    iosScheme: 'exodus://',
+    androidPackage: 'exodusmovement.exodus',
+    detected: () => window.exodus?.solana
+};
+
+// Add CWallet
+WALLET_CONFIG.cwallet = {
+    name: 'CWallet',
+    icon: '🔶',
+    universalLink: 'https://cwallet.com/wc?uri=',
+    deepLink: 'cwallet://',
+    iosScheme: 'cwallet://',
+    androidPackage: 'com.cwallet.app',
+    detected: () => window.cwallet
+};
+
+// Add Gemini Wallet
+WALLET_CONFIG.gemini = {
+    name: 'Gemini Wallet',
+    icon: '♊',
+    universalLink: 'https://gemini.com/wallet/wc?uri=',
+    deepLink: 'gemini://',
+    iosScheme: 'gemini://',
+    androidPackage: 'com.gemini.android.app',
+    detected: () => window.gemini
+};
