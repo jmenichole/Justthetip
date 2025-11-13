@@ -443,6 +443,60 @@ function handleConnectionError(error) {
 }
 
 /**
+ * Submit wallet registration to backend
+ * @param {string} publicKey - Wallet public key
+ * @param {string} signature - Signature hex string
+ * @param {string} message - Original message that was signed
+ */
+async function submitWalletRegistration(publicKey, signature, message) {
+    try {
+        showStatus('pending', '<span class="loading"></span>Verifying signature...');
+        
+        const response = await fetchWithRetry(`${API_BASE_URL}/api/verify-signature`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                publicKey: publicKey,
+                signature: signature,
+                message: message,
+                userId: discordUserId,
+                username: discordUsername,
+                nonce: nonce
+            })
+        }, 2);
+
+        const result = await response.json();
+
+        if (result.success) {
+            showStatus('success', `✅ Wallet registered successfully!<br><br>Wallet: ${publicKey.substring(0, 8)}...${publicKey.substring(publicKey.length - 8)}<br><br>You can now close this window and return to Discord to start tipping!`);
+            disableAllButtons();
+        } else {
+            showStatus('error', `❌ Registration failed: ${result.error || 'Unknown error'}<br><br>Please try again by refreshing this page and requesting a new registration link from Discord.`);
+        }
+    } catch (error) {
+        console.error('Registration submission error:', error);
+        throw error; // Re-throw to be handled by caller
+    }
+}
+
+/**
+ * Disable all wallet connection buttons after successful registration
+ */
+function disableAllButtons() {
+    const buttons = ['connectButton', 'solflareButton', 'walletConnectButton', 'manualEntryButton'];
+    buttons.forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) {
+            btn.disabled = true;
+            btn.style.opacity = '0.5';
+            btn.style.cursor = 'not-allowed';
+        }
+    });
+}
+
+/**
  * Connect to wallet extension (legacy function for Phantom/Solflare buttons)
  */
 async function connectWalletExtension(walletType) {
