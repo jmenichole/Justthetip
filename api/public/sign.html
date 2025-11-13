@@ -548,8 +548,20 @@
 
     <!-- WalletConnect / Reown AppKit Dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@1.98.4/lib/index.iife.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@reown/appkit@latest/dist/appkit.umd.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@reown/appkit-adapter-solana@latest/dist/appkit-adapter-solana.umd.js"></script>
+    
+    <!-- Reown AppKit - Use CDN version with proper imports -->
+    <script type="module">
+        import { createAppKit } from 'https://cdn.jsdelivr.net/npm/@reown/appkit@1.8.14/+esm';
+        import { SolanaAdapter } from 'https://cdn.jsdelivr.net/npm/@reown/appkit-adapter-solana@1.8.14/+esm';
+        import { solana, solanaTestnet, solanaDevnet } from 'https://cdn.jsdelivr.net/npm/@reown/appkit@1.8.14/networks/+esm';
+        
+        // Make available globally
+        window.Reown = {
+            AppKit: { createAppKit },
+            AppKitAdapterSolana: { SolanaAdapter },
+            AppKitNetworks: { solana, solanaTestnet, solanaDevnet }
+        };
+    </script>
     
     <script src="walletconnect-handler.js"></script>
     <script type="module" src="wallet-connect-smart.js"></script>
