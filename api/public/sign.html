@@ -561,6 +561,9 @@
             AppKitAdapterSolana: { SolanaAdapter },
             AppKitNetworks: { solana, solanaTestnet, solanaDevnet }
         };
+        
+        // Signal that Reown is ready
+        window.dispatchEvent(new Event('reown-loaded'));
     </script>
     
     <script src="walletconnect-handler.js"></script>

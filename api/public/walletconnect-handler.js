@@ -185,9 +185,25 @@ function isWalletConnectAvailable() {
            typeof window.Reown.AppKit !== 'undefined';
 }
 
+/**
+ * Wait for Reown modules to load
+ */
+function waitForReown() {
+    return new Promise((resolve) => {
+        if (isWalletConnectAvailable()) {
+            resolve();
+        } else {
+            window.addEventListener('reown-loaded', () => resolve(), { once: true });
+        }
+    });
+}
+
 // Export functions for use in sign.js
 window.WalletConnectHandler = {
-    initialize: initializeWalletConnect,
+    initialize: async () => {
+        await waitForReown();
+        return initializeWalletConnect();
+    },
     connect: connectWalletConnect,
     signMessage: signMessageWalletConnect,
     disconnect: disconnectWalletConnect,
