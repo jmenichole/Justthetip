@@ -488,6 +488,50 @@ client.on(Events.InteractionCreate, async interaction => {
       }
     }
     
+    // ===== DISCONNECT WALLET COMMAND =====
+    } else if (commandName === 'disconnect-wallet') {
+      const userId = interaction.user.id;
+      const walletAddress = userWallets.get(userId);
+      
+      if (!walletAddress) {
+        return interaction.reply({ 
+          content: '❌ You don't have a wallet registered. Use `/register-wallet` to connect one.', 
+          ephemeral: true 
+        });
+      }
+      
+      // Remove from in-memory map
+      userWallets.delete(userId);
+      
+      // Try to remove from database if available
+      try {
+        // Check if db module has a method to remove wallet
+        if (db && typeof db.removeUserWallet === 'function') {
+          await db.removeUserWallet(userId);
+        }
+      } catch (dbError) {
+        console.warn('⚠️  Could not remove from database:', dbError);
+        // Continue anyway since in-memory is removed
+      }
+      
+      const embed = new EmbedBuilder()
+        .setTitle('🔓 Wallet Disconnected')
+        .setDescription(
+          `Your Solana wallet has been successfully disconnected.\n\n` +
+          `**Wallet Address:** \`\${walletAddress.slice(0, 8)}...\${walletAddress.slice(-8)}\`\n\n` +
+          `✅ Your wallet registration has been removed\n` +
+          `✅ You can no longer receive tips until you re-register\n` +
+          `✅ Your private keys remain secure in your wallet\n\n` +
+          `To reconnect, use \`/register-wallet\` anytime.`
+        )
+        .setColor(0x667eea)
+        .setFooter({ text: 'JustTheTip - x402 Trustless Agent' })
+        .setTimestamp();
+        
+      await interaction.reply({ embeds: [embed], ephemeral: true });
+      
+      console.log(`🔓 Wallet disconnected for user \${interaction.user.tag} (\${userId}): \${walletAddress}`);
+    
   } catch (error) {
     console.error('Command error:', error);
     

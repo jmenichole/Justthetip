@@ -18,23 +18,23 @@ const improvedCommands = [
   // ===== CORE COMMANDS =====
   {
     name: 'help',
-    description: '📚 View all commands and how to use the bot',
+    description: '📚 View all available commands and how to use JustTheTip',
   },
 
   {
     name: 'tip',
-    description: '💸 Tip USD to another user',
+    description: '💸 Send a tip in USD to another Discord user',
     options: [
       {
         name: 'user',
         type: 6, // USER
-        description: 'User to tip',
+        description: 'The user you want to tip',
         required: true
       },
       {
         name: 'amount',
         type: 10, // NUMBER
-        description: 'Amount in USD ($0.10 - $100.00)',
+        description: 'Amount in USD ($0.10 to $100.00)',
         required: true
       }
     ]
@@ -42,12 +42,12 @@ const improvedCommands = [
 
   {
     name: 'airdrop',
-    description: '🎁 Request devnet/testnet airdrop',
+    description: '🎁 Request testnet SOL for development and testing (devnet only)',
     options: [
       {
         name: 'amount',
         type: 10, // NUMBER
-        description: 'Amount in USD (max $20.00)',
+        description: 'Amount in USD (maximum $20.00)',
         required: false
       }
     ]
@@ -55,12 +55,17 @@ const improvedCommands = [
 
   {
     name: 'register-wallet',
-    description: '🔐 Register your Solana wallet with signature verification',
+    description: '🔐 Connect your Solana wallet - Sign once, tip forever',
+  },
+
+  {
+    name: 'disconnect-wallet',
+    description: '🔓 Disconnect your registered Solana wallet from JustTheTip',
   },
 
   {
     name: 'support',
-    description: '🎫 Get help or report an issue',
+    description: '🎫 Contact support team or report an issue',
     options: [
       {
         name: 'issue',
@@ -73,53 +78,55 @@ const improvedCommands = [
 
   {
     name: 'status',
-    description: '🔍 Check bot status and wallet registration status',
+    description: '🔍 Check bot status and your wallet connection status',
   },
 
   {
     name: 'logs',
-    description: '📋 View your transaction logs (sent via DM)',
+    description: '📋 View your recent transactions (sent via DM)',
   }
 ];
 
 // ===== COMMAND DESCRIPTIONS FOR /help =====
 const HELP_MESSAGES = {
   userGuide: `
-**🎯 JustTheTip - Solana Tipping Bot**
+**🎯 JustTheTip - x402 Trustless Agent**
+Sign once, tip forever—without compromising security.
 
 **Quick Start Guide:**
 
 **1️⃣ Register Your Wallet**
 \`/register-wallet\`
-• Generates a secure verification link
-• Connect your Solana wallet (Phantom, Solflare, etc.)
-• Sign a message to prove ownership
-• Your wallet is registered automatically!
+• Opens a secure verification link
+• Connect your Solana wallet (Phantom, Trust, Coinbase, etc.)
+• Sign one message to prove ownership
+• That's it! Your wallet is registered instantly
 
-**2️⃣ Tip Other Users**
-\`/tip @user 10\`
-• Tip in USD to other Discord users
-• Amount between $0.10 - $100.00
-• Non-custodial - tips happen on-chain
+**2️⃣ Send Tips**
+\`/tip @username 10\`
+• Tip other Discord users in USD
+• Amount between $0.10 and $100.00
+• 100% non-custodial - you control your wallet
 • Automatically converted to SOL at current price
 
-**3️⃣ Request Testnet Airdrop** (Devnet only)
+**3️⃣ Request Testnet Tokens** (For developers)
 \`/airdrop 5\`
 • Get free testnet SOL for testing
-• Amount in USD (max $20.00)
-• Converted to SOL based on current price
+• Amount in USD (maximum $20.00)
+• Works on devnet only
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 **All Commands:**
 
 💸 **Tipping**
-\`/tip @user <amount>\` - Send USD to another user (e.g., /tip @user 10)
-\`/logs\` - View your transaction history (DM)
+\`/tip @user <amount>\` - Send USD to another user
+\`/logs\` - View your transaction history (sent via DM)
 
-🔐 **Wallet**
-\`/register-wallet\` - Register your Solana wallet
-\`/status\` - Check bot & wallet status
+🔐 **Wallet Management**
+\`/register-wallet\` - Connect your Solana wallet
+\`/disconnect-wallet\` - Remove your wallet connection
+\`/status\` - Check bot and wallet status
 
 🆘 **Support**
 \`/help\` - Show this guide
@@ -128,10 +135,10 @@ const HELP_MESSAGES = {
 🎁 **Testing** (Devnet only)
 \`/airdrop <amount>\` - Get testnet SOL (amount in USD)
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 **⚡ Network:** Solana Mainnet
-**🛡️ Security:** Non-custodial, you control your keys
+**🛡️ Security:** x402 Trustless Agent - Non-custodial, you control your keys
 **💰 Fees:** Only network transaction fees
 `,
 
@@ -146,13 +153,16 @@ const HELP_MESSAGES = {
 • Try the registration link again
 
 **Tip Not Working?**
-• Make sure recipient has registered their wallet
-• Check you have sufficient balance
-• Verify amount is between $0.10 - $100.00
+• Verify recipient has registered their wallet
+• Check you have sufficient SOL balance
+• Amount must be between $0.10 and $100.00
 
 **Can't See Logs?**
 • Check your DMs (direct messages)
-• Make sure DMs are enabled in this server
+• Enable DMs from server members in privacy settings
+
+**Need to Disconnect?**
+Use \`/disconnect-wallet\` to remove your wallet registration.
 
 **Still Need Help?**
 Use \`/support <describe-your-issue>\`
@@ -171,6 +181,7 @@ const commandPermissions = {
     'tip',
     'airdrop',
     'register-wallet',
+    'disconnect-wallet',
     'support',
     'status',
     'logs'
@@ -180,6 +191,7 @@ const commandPermissions = {
 // ===== RATE LIMITS =====
 const rateLimits = {
   'register-wallet': { max: 5, window: 900000 }, // 5 per 15 minutes
+  'disconnect-wallet': { max: 3, window: 300000 }, // 3 per 5 minutes
   'tip': { max: 10, window: 60000 }, // 10 per minute
   'airdrop': { max: 2, window: 3600000 }, // 2 per hour
   'support': { max: 2, window: 300000 }, // 2 per 5 minutes
