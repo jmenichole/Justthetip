@@ -1,8 +1,6 @@
 /**
- * IMPROVED SLASH COMMANDS FOR JUSTTHETIP BOT
- * User-friendly, clear, and relevant to bot functions
- * 
- * Replace the commands array in bot.js with this configuration
+ * SIMPLIFIED SLASH COMMANDS FOR JUSTTHETIP BOT
+ * Core functionality only - tipping, wallet registration, support
  * 
  * Copyright (c) 2025 JustTheTip Bot
  * 
@@ -17,77 +15,47 @@
  */
 
 const improvedCommands = [
-  // ===== WALLET & BALANCE COMMANDS =====
+  // ===== CORE COMMANDS =====
   {
-    name: 'verify',
-    description: '✅ Complete Discord verification and get your NFT badge!',
-    options: [
-      {
-        name: 'wallet',
-        type: 3, // STRING
-        description: 'Your Solana wallet address',
-        required: true
-      }
-    ]
-  },
-  
-  {
-    name: 'balance',
-    description: '💰 Check your wallet balance and verification status',
-  },
-  
-  {
-    name: 'status',
-    description: '🔍 Check verification status and NFT badge details',
-  },
-
-  // ===== VERIFICATION & NFT COMMANDS =====
-  {
-    name: 'register-wallet',
-    description: '🔐 Register your Solana wallet with signature verification',
+    name: 'help',
+    description: '📚 View all commands and how to use the bot',
   },
 
   {
-    name: 'connect-wallet',
-    description: '🔗 Link your Solana wallet to your Discord account',
+    name: 'tip',
+    description: '💸 Tip SOL to another user',
     options: [
       {
-        name: 'wallet-address',
-        type: 3, // STRING
-        description: 'Your Solana wallet public key',
+        name: 'user',
+        type: 6, // USER
+        description: 'User to tip',
         required: true
       },
       {
-        name: 'signature',
-        type: 3, // STRING  
-        description: 'Signature to prove wallet ownership',
+        name: 'amount',
+        type: 10, // NUMBER
+        description: 'Amount in SOL (0.001 - 1.0)',
         required: true
       }
     ]
   },
 
   {
-    name: 'get-badge',
-    description: '🎖️ Mint your verification NFT badge (requires payment)',
-  },
-
-  {
-    name: 'check-payment',
-    description: '💳 Verify if your verification payment was received',
+    name: 'airdrop',
+    description: '🎁 Request devnet/testnet SOL airdrop',
     options: [
       {
-        name: 'wallet',
-        type: 3, // STRING
-        description: 'Wallet address that sent payment',
+        name: 'amount',
+        type: 10, // NUMBER
+        description: 'Amount in SOL (max 2.0)',
         required: false
       }
     ]
   },
 
-  // ===== SUPPORT & HELP COMMANDS =====
   {
-    name: 'help',
-    description: '📚 View all commands and how to use the bot',
+    name: 'register-wallet',
+    description: '🔐 Register your Solana wallet with signature verification',
   },
 
   {
@@ -104,143 +72,65 @@ const improvedCommands = [
   },
 
   {
-    name: 'pricing',
-    description: '💵 View verification costs and payment information',
-  },
-
-  // ===== INFO COMMANDS =====
-  {
-    name: 'info',
-    description: 'ℹ️ Learn about JustTheTip verification system',
+    name: 'status',
+    description: '🔍 Check bot status and wallet registration status',
   },
 
   {
-    name: 'stats',
-    description: '📊 View bot statistics and network status',
-  },
-
-  // ===== ADMIN COMMANDS (Optional) =====
-  {
-    name: 'admin-stats',
-    description: '👑 View detailed analytics (Admin only)',
-  },
-
-  {
-    name: 'admin-user',
-    description: '👑 Look up user verification details (Admin only)',
-    options: [
-      {
-        name: 'user',
-        type: 6, // USER
-        description: 'Discord user to look up',
-        required: true
-      }
-    ]
+    name: 'logs',
+    description: '📋 View your transaction logs (sent via DM)',
   }
 ];
 
 // ===== COMMAND DESCRIPTIONS FOR /help =====
 const HELP_MESSAGES = {
   userGuide: `
-**🎯 JustTheTip Verification Bot - Quick Start Guide**
+**🎯 JustTheTip - Solana Tipping Bot**
 
-**Getting Verified (3 Easy Steps):**
+**Quick Start Guide:**
 
-**Step 1: Register Your Wallet**
+**1️⃣ Register Your Wallet**
 \`/register-wallet\`
 • Generates a secure verification link
-• Opens your wallet for signature
-• Proves you own the wallet
+• Connect your Solana wallet (Phantom, Solflare, etc.)
+• Sign a message to prove ownership
+• Your wallet is registered automatically!
 
-**Step 2: Pay Verification Fee**
-• Send **0.02 SOL** to the bot's payment address
-• You'll receive this address after connecting
-• Fee covers NFT minting + platform costs
+**2️⃣ Tip Other Users**
+\`/tip @user 0.1\`
+• Tip SOL to other Discord users
+• Amount between 0.001 - 1.0 SOL
+• Non-custodial - tips happen on-chain
 
-**Step 3: Get Your Badge**
-\`/get-badge\`
-• Mints your verification NFT
-• Automatically checks payment
-• Badge appears in your wallet!
+**3️⃣ Request Testnet Airdrop** (Devnet only)
+\`/airdrop 1.0\`
+• Get free testnet SOL for testing
+• Max 2.0 SOL per request
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-**Other Useful Commands:**
+**All Commands:**
 
-🔍 **Check Status**
-\`/status\` - View your verification progress
-\`/balance\` - Check wallet balance
-\`/check-payment\` - Verify payment status
+💸 **Tipping**
+\`/tip @user <amount>\` - Send SOL to another user
+\`/logs\` - View your transaction history (DM)
 
-📚 **Get Help**
+🔐 **Wallet**
+\`/register-wallet\` - Register your Solana wallet
+\`/status\` - Check bot & wallet status
+
+🆘 **Support**
 \`/help\` - Show this guide
-\`/support <issue>\` - Contact support
-\`/pricing\` - View current costs
+\`/support <issue>\` - Contact support team
 
-📊 **Bot Info**
-\`/info\` - Learn about the system
-\`/stats\` - View network statistics
+🎁 **Testing** (Devnet only)
+\`/airdrop <amount>\` - Get testnet SOL
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-**💰 Pricing:** 0.02 SOL per verification
 **⚡ Network:** Solana Mainnet
-**🎖️ NFT Badge:** Permanent on-chain proof
-**🛡️ Security:** Non-custodial, you control your wallet
-`,
-
-  pricing: `
-**💵 Verification Pricing**
-
-**Verification Fee:** 0.02 SOL (~$3-4 USD)
-
-**What's Included:**
-✅ Permanent Discord verification
-✅ NFT badge minted to your wallet  
-✅ On-chain proof of verification
-✅ Lifetime access (no recurring fees)
-
-**Fee Breakdown:**
-• 0.01 SOL - NFT minting cost
-• 0.01 SOL - Platform fee
-
-**Why We Charge:**
-• Covers Solana network fees
-• Prevents spam and abuse
-• Sustainable bot operation
-• You own the NFT forever!
-
-**Payment Address:** 
-Will be provided after \`/connect-wallet\`
-`,
-
-  info: `
-**ℹ️ About JustTheTip Verification**
-
-**What We Do:**
-JustTheTip provides Discord verification through Solana blockchain NFT badges. When you verify, you receive a permanent, transferable NFT that proves your Discord identity on-chain.
-
-**How It Works:**
-1. You connect your wallet and sign a message
-2. You pay a small fee (0.02 SOL) 
-3. We mint an NFT badge to your wallet
-4. Your Discord gets verified status
-
-**Why Blockchain?**
-• **Permanent:** NFT can't be revoked
-• **Portable:** Use across platforms
-• **Secure:** Cryptographic proof
-• **Decentralized:** No central authority
-
-**Open Source:**
-Our code is public on GitHub
-Repository: github.com/jmenichole/Justthetip
-
-**Built With:**
-• Solana blockchain
-• Metaplex NFT standard
-• Node.js + Discord.js
-• MongoDB for records
+**🛡️ Security:** Non-custodial, you control your keys
+**💰 Fees:** Only network transaction fees
 `,
 
   support: `
@@ -248,28 +138,26 @@ Repository: github.com/jmenichole/Justthetip
 
 **Common Issues:**
 
-**Payment Not Detected?**
-• Wait 2-3 minutes for confirmation
-• Use \`/check-payment\` to verify
-• Ensure you sent exactly 0.02 SOL
-
 **Wallet Won't Connect?**
 • Double-check your wallet address
-• Make sure signature is correct
-• Try reconnecting with \`/connect-wallet\`
+• Make sure you signed the message
+• Try the registration link again
 
-**NFT Not Received?**
-• Check your wallet's collectibles tab
-• Verify on Solana Explorer
-• May take 5-10 minutes to appear
+**Tip Not Working?**
+• Make sure recipient has registered their wallet
+• Check you have sufficient SOL balance
+• Verify amount is between 0.001 - 1.0 SOL
+
+**Can't See Logs?**
+• Check your DMs (direct messages)
+• Make sure DMs are enabled in this server
 
 **Still Need Help?**
 Use \`/support <describe-your-issue>\`
+Your message will be sent to the support team.
 
 **Contact:**
-• Discord Support Server: [Add your server link]
-• Email: support@justthetip.bot
-• GitHub Issues: github.com/jmenichole/Justthetip/issues
+• GitHub: github.com/jmenichole/Justthetip/issues
 `
 };
 
@@ -277,34 +165,23 @@ Use \`/support <describe-your-issue>\`
 const commandPermissions = {
   // Public commands (everyone can use)
   public: [
-    'verify',
-    'balance',
-    'status',
-    'register-wallet',
-    'connect-wallet',
-    'get-badge',
-    'check-payment',
     'help',
+    'tip',
+    'airdrop',
+    'register-wallet',
     'support',
-    'pricing',
-    'info',
-    'stats'
-  ],
-  
-  // Admin-only commands
-  admin: [
-    'admin-stats',
-    'admin-user'
+    'status',
+    'logs'
   ]
 };
 
 // ===== RATE LIMITS =====
 const rateLimits = {
   'register-wallet': { max: 5, window: 900000 }, // 5 per 15 minutes
-  'connect-wallet': { max: 3, window: 60000 }, // 3 per minute
-  'get-badge': { max: 2, window: 60000 }, // 2 per minute
-  'check-payment': { max: 5, window: 60000 }, // 5 per minute
+  'tip': { max: 10, window: 60000 }, // 10 per minute
+  'airdrop': { max: 2, window: 3600000 }, // 2 per hour
   'support': { max: 2, window: 300000 }, // 2 per 5 minutes
+  'logs': { max: 5, window: 60000 }, // 5 per minute
   default: { max: 10, window: 60000 } // 10 per minute for others
 };
 
