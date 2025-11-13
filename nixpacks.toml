@@ -2,7 +2,8 @@
 # Discord Bot
 
 [phases.install]
-cmds = ["npm install"]
+# Use npm install instead of npm ci for Railway compatibility
+cmds = ["npm install --production=false"]
 
 [phases.build]
 cmds = []
