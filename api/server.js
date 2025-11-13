@@ -69,8 +69,9 @@ app.use(helmet({
             imgSrc: ["'self'", "data:", "https:", "https://tan-glamorous-porcupine-751.mypinata.cloud"],
             connectSrc: [
                 "'self'",
+                "https://mischief-manager.com",
+                "https://api.mischief-manager.com",
                 "https://jmenichole.github.io",
-                "https://justthetip.vercel.app",
                 "https://api.mainnet-beta.solana.com",
                 "https://api.devnet.solana.com",
                 "https://phantom.app",
@@ -87,6 +88,8 @@ app.use(helmet({
 
 app.use(cors({
     origin: [
+        'https://mischief-manager.com',
+        'https://api.mischief-manager.com',
         'https://jmenichole.github.io',
         'http://localhost:3000',
         'http://localhost:5500'
