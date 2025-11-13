@@ -1273,12 +1273,23 @@ async function submitSignature(walletAddress) {
     }
 }
 
-// Setup event listeners for desktop wallet buttons
-document.getElementById('connectButton').addEventListener('click', () => connectWalletExtension('phantom'));
-document.getElementById('solflareButton').addEventListener('click', () => connectWalletExtension('solflare'));
+// Initialize when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeEventListeners);
+} else {
+    initializeEventListeners();
+}
 
-// Setup event listener for WalletConnect button (mobile)
-document.getElementById('walletConnectButton').addEventListener('click', connectWalletConnect);
+function initializeEventListeners() {
+    // Setup event listeners for desktop wallet buttons
+    document.getElementById('connectButton')?.addEventListener('click', () => connectWalletExtension('phantom'));
+    document.getElementById('solflareButton')?.addEventListener('click', () => connectWalletExtension('solflare'));
 
-// Setup event listener for manual entry button
-document.getElementById('manualEntryButton').addEventListener('click', handleManualEntry);
+    // Setup event listener for WalletConnect button
+    document.getElementById('walletConnectButton')?.addEventListener('click', connectWalletConnect);
+
+    // Setup event listener for manual entry button
+    document.getElementById('manualEntryButton')?.addEventListener('click', handleManualEntry);
+    
+    console.log('✅ Event listeners initialized');
+}
