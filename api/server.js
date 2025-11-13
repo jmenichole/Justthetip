@@ -1508,6 +1508,14 @@ app.get('/api/x402/info', (req, res) => {
 // Admin dashboard routes
 app.use('/api/admin', adminRoutes);
 
+// WalletConnect Configuration Endpoint
+// Serves public WalletConnect project ID (safe to expose to frontend)
+app.get('/api/walletconnect/config', (req, res) => {
+    res.json({
+        projectId: process.env.WALLETCONNECT_PROJECT_ID || ''
+    });
+});
+
 // ===== 404 HANDLER =====
 // Catch-all for undefined routes
 app.use((req, res) => {
@@ -1585,15 +1593,6 @@ if (require.main === module) {
         }
     })();
 }
-
-
-// WalletConnect Configuration Endpoint
-// Serves public WalletConnect project ID (safe to expose to frontend)
-app.get('/api/walletconnect/config', (req, res) => {
-    res.json({
-        projectId: process.env.WALLETCONNECT_PROJECT_ID || ''
-    });
-});
 
 // Global error handlers for production stability
 process.on('unhandledRejection', (reason, promise) => {
