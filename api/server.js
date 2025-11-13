@@ -101,9 +101,10 @@ app.use(express.json({
 
 // Serve static files from public directory
 // Use path.join with __dirname to ensure the path works regardless of where node is executed from
-app.use(express.static(path.join(__dirname, 'public')));
+// Enable dotfiles to serve .well-known directory
+app.use(express.static(path.join(__dirname, 'public'), { dotfiles: 'allow' }));
 
-// Serve apple-app-site-association for iOS Universal Links
+// Serve apple-app-site-association for iOS Universal Links with correct content type
 app.get('/.well-known/apple-app-site-association', (req, res) => {
     res.type('application/json');
     res.sendFile(path.join(__dirname, 'public/.well-known/apple-app-site-association'));
