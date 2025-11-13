@@ -1,5 +1,5 @@
 # Nixpacks Configuration for Railway Deployment
-# Discord Bot with API Server
+# Discord Bot
 
 [phases.install]
 cmds = ["npm install"]
@@ -8,5 +8,5 @@ cmds = ["npm install"]
 cmds = []
 
 [start]
-# Start both the API server and Discord bot
-cmd = "npm run start:bot-railway"
+# Start Discord bot directly
+cmd = "node bot_smart_contract.js"
