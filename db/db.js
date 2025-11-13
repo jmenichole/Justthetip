@@ -140,7 +140,19 @@ function initDatabase() {
     db.exec('CREATE INDEX IF NOT EXISTS idx_pending_airdrops_airdrop ON pending_airdrops(airdrop_id)');
     db.exec('CREATE INDEX IF NOT EXISTS idx_pending_airdrops_expires ON pending_airdrops(expires_at)');
     db.exec('CREATE INDEX IF NOT EXISTS idx_pending_airdrops_credited ON pending_airdrops(credited)');
+    
+    // Registered wallets table
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS registered_wallets (
+        user_id TEXT PRIMARY KEY,
+        wallet_address TEXT NOT NULL UNIQUE,
+        registered_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        last_verified TEXT DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
 
+    db.exec('CREATE INDEX IF NOT EXISTS idx_wallets_address ON registered_wallets(wallet_address)');
+    
     console.log('✅ SQLite database ready');
   } catch (error) {
     console.error('Database initialization error:', error);
@@ -727,6 +739,79 @@ function creditPendingAirdrop(pendingId) {
   }
 }
 
+/**
+ * Save user wallet registration
+ * @param {string} userId - Discord user ID
+ * @param {string} walletAddress - Solana wallet address
+ * @returns {boolean} Success status
+ */
+function saveUserWallet(userId, walletAddress) {
+  try {
+    db.prepare(`
+      INSERT INTO registered_wallets (user_id, wallet_address)
+      VALUES (?, ?)
+      ON CONFLICT(user_id) DO UPDATE SET
+        wallet_address = excluded.wallet_address,
+        last_verified = CURRENT_TIMESTAMP
+    `).run(userId, walletAddress);
+    
+    // Also update the users table for compatibility
+    updateWallet(userId, walletAddress);
+    
+    return true;
+  } catch (error) {
+    console.error('Error saving user wallet:', error);
+    return false;
+  }
+}
+
+/**
+ * Get user's registered wallet
+ * @param {string} userId - Discord user ID
+ * @returns {string|null} Wallet address or null
+ */
+function getUserWallet(userId) {
+  try {
+    const result = db.prepare('SELECT wallet_address FROM registered_wallets WHERE user_id = ?').get(userId);
+    return result ? result.wallet_address : null;
+  } catch (error) {
+    console.error('Error getting user wallet:', error);
+    return null;
+  }
+}
+
+/**
+ * Remove user's wallet registration
+ * @param {string} userId - Discord user ID
+ * @returns {boolean} Success status
+ */
+function removeUserWallet(userId) {
+  try {
+    db.prepare('DELETE FROM registered_wallets WHERE user_id = ?').run(userId);
+    
+    // Also clear from users table
+    updateWallet(userId, null);
+    
+    return true;
+  } catch (error) {
+    console.error('Error removing user wallet:', error);
+    return false;
+  }
+}
+
+/**
+ * Get all registered wallets (for loading on startup)
+ * @returns {Array} Array of {user_id, wallet_address} objects
+ */
+function getAllWallets() {
+  try {
+    return db.prepare('SELECT user_id, wallet_address FROM registered_wallets').all();
+  } catch (error) {
+    console.error('Error getting all wallets:', error);
+    return [];
+  }
+}
+
 // Export functions
 module.exports = {
   getUser,
@@ -756,6 +841,11 @@ module.exports = {
   createPendingAirdrop,
   getPendingAirdropsForUser,
   creditPendingAirdrop,
+  // Wallet methods
+  saveUserWallet,
+  getUserWallet,
+  removeUserWallet,
+  getAllWallets,
   db, // Export for testing
 };
 

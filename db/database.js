@@ -118,6 +118,24 @@ class Database {
     return sqlite.getTrustBadgeByDiscordId(discordId);
   }
 
+  // ===== WALLET REGISTRATION METHODS =====
+  
+  async saveUserWallet(userId, walletAddress) {
+    return sqlite.saveUserWallet(userId, walletAddress);
+  }
+
+  async getUserWallet(userId) {
+    return sqlite.getUserWallet(userId);
+  }
+
+  async removeUserWallet(userId) {
+    return sqlite.removeUserWallet(userId);
+  }
+
+  async getAllWallets() {
+    return sqlite.getAllWallets();
+  }
+
   // Graceful shutdown
   async close() {
     // SQLite will close automatically when process exits

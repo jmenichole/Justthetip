@@ -706,23 +706,13 @@ app.post('/api/registerwallet/verify', walletRegistrationLimiter, async (req, re
         }
 
         // Check if wallet already registered to a different user
-        if (db) {
-            const existingWallet = await db.collection('wallet_registrations').findOne({ 
-                walletAddress: String(publicKey)
-            });
-            
-            if (existingWallet && existingWallet.discordUserId !== String(discordUserId)) {
-                return res.status(409).json({
-                    success: false,
-                    error: 'Wallet already registered to another user'
-                });
-            }
+        const existingWallet = sqlite.getUserWallet(discordUserId);
+        if (existingWallet && existingWallet !== String(publicKey)) {
+            // Different wallet for same user - update it
+            console.log(`Updating wallet for user ${discordUserId}: ${existingWallet} -> ${publicKey}`);
         }
 
-        // Mark nonce as used
-        await markNonceAsUsed(nonce);
-
-        // Store wallet registration
+        // Store wallet registration in SQLite
         const registration = {
             discordUserId: String(discordUserId),
             discordUsername: String(discordUsername || 'Unknown'),
@@ -732,14 +722,8 @@ app.post('/api/registerwallet/verify', walletRegistrationLimiter, async (req, re
             messageData
         };
 
-        if (db) {
-            // Upsert wallet registration in database
-            await db.collection('wallet_registrations').updateOne(
-                { discordUserId: String(discordUserId) },
-                { $set: registration },
-                { upsert: true }
-            );
-        }
+        // Save to SQLite database
+        await database.saveUserWallet(String(discordUserId), String(publicKey));
 
         console.log(`✅ Wallet registered: ${discordUserId} -> ${publicKey}`);
 
