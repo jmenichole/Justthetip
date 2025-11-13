@@ -62,8 +62,8 @@ const smartContractCommands = improvedCommands;
 // In-memory user wallet registry (in production, use a database)
 const userWallets = new Map();
 
-// Get frontend URL for wallet registration page
-const FRONTEND_URL = process.env.FRONTEND_URL || 'https://jmenichole.github.io/Justthetip';
+// Get API URL for wallet registration page (sign.html is served by API server)
+const API_URL = process.env.API_BASE_URL || 'https://api.mischief-manager.com';
 
 
 client.once('ready', async () => {
@@ -271,7 +271,7 @@ client.on(Events.InteractionCreate, async interaction => {
       const nonce = crypto.randomUUID();
       
       // Create registration URL with user info and nonce
-      const registrationUrl = `${FRONTEND_URL}/sign.html?user=${encodeURIComponent(userId)}&username=${encodeURIComponent(username)}&nonce=${encodeURIComponent(nonce)}`;
+      const registrationUrl = `${API_URL}/sign.html?user=${encodeURIComponent(userId)}&username=${encodeURIComponent(username)}&nonce=${encodeURIComponent(nonce)}`;
       
       const embed = new EmbedBuilder()
         .setTitle('🔐 Register Your Wallet - x402 Trustless Agent')
