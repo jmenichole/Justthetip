@@ -1,0 +1,26 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "PHANTOM.app.phantom",
+        "paths": [ "/ul/*", "/connect/*" ]
+      },
+      {
+        "appID": "TRUST.com.trustwallet.app",
+        "paths": [ "/wc/*", "/connect/*" ]
+      },
+      {
+        "appID": "COINBASE.org.toshi",
+        "paths": [ "/wc/*", "/link/*" ]
+      }
+    ]
+  },
+  "webcredentials": {
+    "apps": [
+      "PHANTOM.app.phantom",
+      "TRUST.com.trustwallet.app",
+      "COINBASE.org.toshi"
+    ]
+  }
+}
