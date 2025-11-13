@@ -105,9 +105,32 @@ app.use(express.json({
 app.use(express.static(path.join(__dirname, 'public'), { dotfiles: 'allow' }));
 
 // Serve apple-app-site-association for iOS Universal Links with correct content type
+// This must come BEFORE other routes to avoid being caught by 404 handler
 app.get('/.well-known/apple-app-site-association', (req, res) => {
-    res.type('application/json');
-    res.sendFile(path.join(__dirname, 'public/.well-known/apple-app-site-association'));
+    const config = {
+        "applinks": {
+            "apps": [],
+            "details": [
+                { "appID": "PHANTOM.app.phantom", "paths": ["/ul/*", "/connect/*"] },
+                { "appID": "TRUST.com.trustwallet.app", "paths": ["/wc/*", "/connect/*"] },
+                { "appID": "COINBASE.org.toshi", "paths": ["/wc/*", "/link/*"] },
+                { "appID": "EXODUS.exodusmovement.exodus", "paths": ["/m/*", "/connect/*"] },
+                { "appID": "CWALLET.com.cwallet.app", "paths": ["/wc/*", "/connect/*"] },
+                { "appID": "GEMINI.com.gemini.android.app", "paths": ["/wallet/*", "/wc/*"] }
+            ]
+        },
+        "webcredentials": {
+            "apps": [
+                "PHANTOM.app.phantom",
+                "TRUST.com.trustwallet.app",
+                "COINBASE.org.toshi",
+                "EXODUS.exodusmovement.exodus",
+                "CWALLET.com.cwallet.app",
+                "GEMINI.com.gemini.android.app"
+            ]
+        }
+    };
+    res.type('application/json').json(config);
 });
 
 // Rate limiting for wallet registration
