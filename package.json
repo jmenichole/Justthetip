@@ -13,6 +13,7 @@
     "build:passkey-backend": "cd rust-backend && cargo build --release",
     "test": "jest",
     "lint": "eslint .",
+    "lint-staged": "lint-staged",
     "audit": "npm audit",
     "demo:sdk": "node contracts/example.js",
     "verify-env": "node scripts/verify-env.js",
@@ -20,7 +21,22 @@
     "build:contracts": "cd justthetip-contracts && anchor build",
     "test:contracts": "cd justthetip-contracts && anchor test",
     "deploy:devnet": "cd justthetip-contracts && anchor deploy --provider.cluster devnet",
-    "deploy:mainnet": "cd justthetip-contracts && anchor deploy --provider.cluster mainnet"
+    "deploy:mainnet": "cd justthetip-contracts && anchor deploy --provider.cluster mainnet",
+    "clean": "node scripts/cleanup.js",
+    "clean:deep": "node scripts/cleanup.js --deep",
+    "security-check": "node scripts/security-check.js",
+    "version": "node scripts/version.js",
+    "version:patch": "node scripts/version.js patch",
+    "version:minor": "node scripts/version.js minor",
+    "version:major": "node scripts/version.js major",
+    "release": "node scripts/release.js",
+    "release:patch": "node scripts/release.js patch",
+    "release:minor": "node scripts/release.js minor",
+    "release:major": "node scripts/release.js major",
+    "organize-docs": "node scripts/organize-docs.js",
+    "setup-hooks": "node scripts/setup-hooks.js",
+    "kick-setup": "node scripts/kick-setup.js",
+    "validate": "npm run lint && npm test && npm run security-check"
   },
   "author": "",
   "license": "Custom",
@@ -91,5 +107,14 @@
     "lodash": "^4.17.21",
     "minimist": "^1.2.6",
     "ws": "^7.5.9"
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
   }
 }
