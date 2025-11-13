@@ -103,6 +103,12 @@ app.use(express.json({
 // Use path.join with __dirname to ensure the path works regardless of where node is executed from
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Serve apple-app-site-association for iOS Universal Links
+app.get('/.well-known/apple-app-site-association', (req, res) => {
+    res.type('application/json');
+    res.sendFile(path.join(__dirname, 'public/.well-known/apple-app-site-association'));
+});
+
 // Rate limiting for wallet registration
 const rateLimit = require('express-rate-limit');
 const walletRegistrationLimiter = rateLimit({
