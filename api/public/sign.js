@@ -604,11 +604,13 @@ async function connectViaMobileDeepLink(walletId, deepLink) {
         // Create the message to sign before opening the wallet
         const message = {
             app: "JustTheTip",
+            agent_type: "x402 Trustless Agent",
             discord_user: discordUsername,
             discord_id: discordUserId,
             timestamp: new Date().toISOString(),
             nonce: nonce,
-            purpose: "Register this wallet for deposits & withdrawals"
+            purpose: "Cryptographic proof of wallet ownership - Sign once, tip forever",
+            verification: "This signature proves you control this Solana address and all tokens it holds"
         };
         const messageString = JSON.stringify(message, null, 2);
         
@@ -710,11 +712,13 @@ async function connectWallet(walletName, provider) {
         // Create the message to sign
         const message = {
             app: "JustTheTip",
+            agent_type: "x402 Trustless Agent",
             discord_user: discordUsername,
             discord_id: discordUserId,
             timestamp: new Date().toISOString(),
             nonce: nonce,
-            purpose: "Register this wallet for deposits & withdrawals"
+            purpose: "Cryptographic proof of wallet ownership - Sign once, tip forever",
+            verification: "This signature proves you control this Solana address and all tokens it holds"
         };
 
         const messageString = JSON.stringify(message, null, 2);

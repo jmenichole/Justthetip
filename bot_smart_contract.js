@@ -263,24 +263,25 @@ client.on(Events.InteractionCreate, async interaction => {
       const registrationUrl = `${FRONTEND_URL}/sign.html?user=${encodeURIComponent(userId)}&username=${encodeURIComponent(username)}&nonce=${encodeURIComponent(nonce)}`;
       
       const embed = new EmbedBuilder()
-        .setTitle('🔐 Register Your Wallet')
+        .setTitle('🔐 Register Your Wallet - x402 Trustless Agent')
         .setDescription(
           `Click the link below to register your Solana wallet.\n\n` +
-          `**What happens next:**\n` +
-          `1. The link will open a secure verification page\n` +
+          `**How x402 Trustless Agent Works:**\n` +
+          `1. The link opens a secure verification page\n` +
           `2. Connect your Solana wallet (Phantom, Solflare, etc.)\n` +
-          `3. Sign a message to prove wallet ownership\n` +
-          `4. Your wallet will be registered automatically!\n\n` +
-          `**🔒 Security:**\n` +
+          `3. Sign one cryptographic message to prove ownership\n` +
+          `4. Sign once, tip forever—no repeated signatures needed!\n\n` +
+          `**🔒 Trustless Security:**\n` +
           `• Your private keys never leave your wallet\n` +
+          `• One signature proves ownership of all tokens (SOL, USDC, BONK, etc.)\n` +
           `• This link is unique to you and expires in 10 minutes\n` +
-          `• Only you can complete this registration\n\n` +
+          `• 100% non-custodial - you maintain full control\n\n` +
           `**🔗 Registration Link:**\n` +
           `${registrationUrl}\n\n` +
           `_Link expires in 10 minutes_`
         )
         .setColor(0x667eea)
-        .setFooter({ text: 'JustTheTip - Non-Custodial Wallet Registration' })
+        .setFooter({ text: 'JustTheTip - x402 Trustless Agent Technology' })
         .setTimestamp();
         
       // Create a button that opens the link
