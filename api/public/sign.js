@@ -8,6 +8,72 @@
  * @eslint-env browser
  */
 
+// Import WalletConnect/Reown AppKit modules
+import { createAppKit } from 'https://cdn.jsdelivr.net/npm/@reown/appkit@1.8.14/+esm';
+import { SolanaAdapter } from 'https://cdn.jsdelivr.net/npm/@reown/appkit-adapter-solana@1.8.14/+esm';
+import { solana, solanaTestnet, solanaDevnet } from 'https://cdn.jsdelivr.net/npm/@reown/appkit@1.8.14/networks/+esm';
+
+// WalletConnect state
+let appKit = null;
+let connectedAccount = null;
+
+/**
+ * Fetch WalletConnect configuration from backend
+ */
+async function fetchWalletConnectConfig() {
+    try {
+        const response = await fetch('/api/walletconnect/config');
+        const config = await response.json();
+        return config.projectId;
+    } catch (error) {
+        console.error('Failed to fetch WalletConnect config:', error);
+        return null;
+    }
+}
+
+/**
+ * Initialize AppKit modal
+ */
+async function initializeAppKit() {
+    try {
+        const projectId = await fetchWalletConnectConfig();
+        if (!projectId) {
+            throw new Error('Failed to load WalletConnect project ID');
+        }
+
+        const solanaWeb3JsAdapter = new SolanaAdapter({
+            wallets: [] // Auto-detect all available wallets
+        });
+
+        appKit = createAppKit({
+            adapters: [solanaWeb3JsAdapter],
+            networks: [solana, solanaTestnet, solanaDevnet],
+            defaultNetwork: solana,
+            projectId: projectId,
+            features: {
+                analytics: false,
+                email: false,
+                socials: false,
+                onramp: false
+            },
+            themeMode: 'dark',
+            themeVariables: {
+                '--w3m-z-index': 9999,
+                '--w3m-accent': '#667eea'
+            }
+        });
+
+        appKit.subscribeAccount((account) => {
+            connectedAccount = account?.address || null;
+        });
+
+        return true;
+    } catch (error) {
+        console.error('AppKit initialization error:', error);
+        return false;
+    }
+}
+
 // API Configuration - Backend URL for wallet registration
 // When running locally with npm start, the API is at the same origin
 // When deployed, the API backend should be on Vercel and frontend on GitHub Pages
@@ -402,24 +468,34 @@ async function connectWalletConnect() {
     try {
         showStatus('pending', '<span class="loading"></span>Opening WalletConnect...');
         
-        // Check if WalletConnect handler is available
-        if (!window.WalletConnectHandler || !window.WalletConnectHandler.isAvailable()) {
-            showStatus('error', '❌ WalletConnect not loaded. Please refresh the page and try again.');
-            return;
+        // Initialize AppKit if needed
+        if (!appKit) {
+            const initialized = await initializeAppKit();
+            if (!initialized) {
+                showStatus('error', '❌ Failed to initialize WalletConnect. Please refresh and try again.');
+                return;
+            }
         }
-        
-        // Initialize WalletConnect if needed
-        await window.WalletConnectHandler.initialize();
         
         // Show connecting status
         showStatus('pending', '<span class="loading"></span>Opening wallet selection modal...<br><br>Scan QR code with your mobile wallet or click a wallet to connect.');
         
-        // Connect wallet - this will show the WalletConnect modal with QR code
-        const { publicKey, provider } = await window.WalletConnectHandler.connect();
+        // Open the AppKit modal
+        await appKit.open();
         
-        if (!publicKey) {
-            throw new Error('No public key received from wallet');
+        // Wait for connection with timeout
+        const maxWaitTime = 120000; // 2 minutes
+        const startTime = Date.now();
+        
+        while (!connectedAccount && (Date.now() - startTime) < maxWaitTime) {
+            await sleep(500);
         }
+        
+        if (!connectedAccount) {
+            throw new Error('Connection timeout - wallet not connected');
+        }
+        
+        const publicKey = connectedAccount;
         
         // Show signature request status
         showStatus('pending', '<span class="loading"></span>Connected! Requesting signature...');
@@ -437,8 +513,16 @@ async function connectWalletConnect() {
         };
         const messageString = JSON.stringify(message, null, 2);
         
-        // Request signature via WalletConnect
-        const { signature } = await window.WalletConnectHandler.signMessage(messageString, publicKey);
+        // Request signature via AppKit
+        const messageBytes = new TextEncoder().encode(messageString);
+        const provider = appKit.getWalletProvider();
+        
+        if (!provider || !provider.signMessage) {
+            throw new Error('Wallet provider does not support message signing');
+        }
+        
+        const signatureResult = await provider.signMessage(messageBytes);
+        const signature = signatureResult.signature;
         
         // Convert signature to hex string
         const signatureHex = Array.from(signature)
@@ -448,15 +532,15 @@ async function connectWalletConnect() {
         // Submit to backend
         await submitWalletRegistration(publicKey, signatureHex, messageString);
         
-        // Disconnect WalletConnect session after successful registration
-        await window.WalletConnectHandler.disconnect();
+        // Disconnect AppKit session after successful registration
+        await appKit.disconnect();
         
     } catch (error) {
         console.error('WalletConnect error:', error);
         
-        // Clean up WalletConnect session on error
-        if (window.WalletConnectHandler) {
-            await window.WalletConnectHandler.disconnect();
+        // Clean up AppKit session on error
+        if (appKit) {
+            await appKit.disconnect();
         }
         
         handleConnectionError(error);
