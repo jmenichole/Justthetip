@@ -1002,7 +1002,7 @@ async function startServer() {
             console.log(`\n🚀 JustTheTip API Server Running`);
             console.log(`📍 Port: ${PORT}`);
             console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
-            console.log(`💾 Database: ${db ? 'Connected' : 'Not configured'}`);
+            console.log(`💾 Database: ${database ? 'Connected' : 'Not configured'}`);
             console.log(`🔗 Solana: ${connection ? 'Connected' : 'Not configured'}`);
             console.log(`🎨 NFT Minting: ${metaplex ? 'Enabled' : 'Disabled'}`);
             console.log(`📊 Admin API: /api/admin/* (requires authentication)\n`);
