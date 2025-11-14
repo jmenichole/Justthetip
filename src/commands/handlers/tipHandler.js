@@ -72,11 +72,67 @@ async function handleTipCommand(interaction, context) {
   // Check recipient wallet
   const recipientWallet = await database.getUserWallet(recipient.id);
   if (!recipientWallet) {
-    // TODO: Store as pending tip and notify recipient
-    return interaction.reply({ 
-      content: `❌ **${recipient.username}** hasn't registered their wallet yet.\n\nThey need to use \`/register-wallet\` to receive tips.`, 
-      ephemeral: true 
-    });
+    // Store tip intent and notify recipient
+    try {
+      // Convert USD to SOL for the intent
+      let solAmount, solPrice;
+      try {
+        solPrice = await priceService.getSolPrice();
+        solAmount = await priceService.convertUsdToSol(usdAmount);
+      } catch (error) {
+        console.error('Error converting USD to SOL:', error);
+        return interaction.reply({ 
+          content: '❌ Error fetching SOL price. Please try again later.', 
+          ephemeral: true 
+        });
+      }
+
+      // Create tip intent
+      await database.createTipIntent({
+        senderId: senderId,
+        recipientId: recipient.id,
+        solAmount: solAmount,
+        usdAmount: usdAmount
+      });
+
+      // Try to notify recipient via DM
+      try {
+        const notifyEmbed = new EmbedBuilder()
+          .setTitle('💰 Someone Wants to Tip You!')
+          .setDescription(
+            `**${interaction.user.username}** tried to send you **$${usdAmount.toFixed(2)} USD** (~${solAmount.toFixed(4)} SOL)!\n\n` +
+            `To receive tips, you need to register your Solana wallet first.\n\n` +
+            `Use the \`/register-wallet\` command to get started.\n\n` +
+            `_This tip intent will expire in 7 days._`
+          )
+          .setColor(0xfbbf24)
+          .setFooter({ text: '100% Free • No Fees • x402 Trustless Agent' })
+          .setTimestamp();
+
+        await recipient.send({ embeds: [notifyEmbed] });
+        
+        console.log(`📧 Notified ${recipient.tag} about pending tip from ${interaction.user.tag}`);
+      } catch (dmError) {
+        console.log(`Could not DM ${recipient.tag} about pending tip (DMs disabled)`);
+      }
+
+      // Respond to sender
+      return interaction.reply({ 
+        content: 
+          `💌 **${recipient.username}** hasn't registered their wallet yet.\n\n` +
+          `✅ We've sent them a notification about your tip!\n` +
+          `⏰ They have **7 days** to register and you can retry the tip.\n\n` +
+          `_They'll need to use \`/register-wallet\` to receive tips._`,
+        ephemeral: true 
+      });
+
+    } catch (error) {
+      console.error('Error handling unregistered recipient:', error);
+      return interaction.reply({ 
+        content: `❌ **${recipient.username}** hasn't registered their wallet yet.\n\nThey need to use \`/register-wallet\` to receive tips.`, 
+        ephemeral: true 
+      });
+    }
   }
   
   // Convert USD to SOL

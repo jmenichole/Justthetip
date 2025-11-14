@@ -360,3 +360,6 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
 });
 
 client.login(process.env.DISCORD_BOT_TOKEN);
+
+// Export client for use in other modules (e.g., pending tip notifications)
+module.exports = { client };
