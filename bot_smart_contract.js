@@ -209,59 +209,6 @@ client.on(Events.InteractionCreate, async interaction => {
       
       console.log(`💸 Tip: ${interaction.user.tag} -> ${recipient.tag}: $${usdAmount.toFixed(2)} USD (${solAmount.toFixed(4)} SOL)`);
       
-    // ===== AIRDROP COMMAND =====
-    } else if (commandName === 'airdrop') {
-      const usdAmount = interaction.options.getNumber('amount') || 5.0;
-      const userId = interaction.user.id;
-      const walletAddress = userWallets.get(userId);
-      
-      // Validate USD amount
-      if (usdAmount < 0.10 || usdAmount > 20.0) {
-        return interaction.reply({ 
-          content: '❌ Airdrop amount must be between $0.10 and $20.00 USD', 
-          ephemeral: true 
-        });
-      }
-      
-      if (!walletAddress) {
-        return interaction.reply({ 
-          content: '❌ Please register your wallet first using `/register-wallet`', 
-          ephemeral: true 
-        });
-      }
-      
-      // Convert USD to SOL
-      let solAmount;
-      let solPrice;
-      try {
-        solPrice = await priceService.getSolPrice();
-        solAmount = await priceService.convertUsdToSol(usdAmount);
-      } catch (error) {
-        console.error('Error converting USD to SOL:', error);
-        return interaction.reply({ 
-          content: '❌ Error fetching SOL price. Please try again later.', 
-          ephemeral: true 
-        });
-      }
-      
-      const embed = new EmbedBuilder()
-        .setTitle('🎁 Devnet Airdrop')
-        .setDescription(
-          `**Wallet:** \`${walletAddress.slice(0, 8)}...${walletAddress.slice(-8)}\`\n` +
-          `**Amount:** $${usdAmount.toFixed(2)} USD\n` +
-          `**Equivalent:** ${solAmount.toFixed(4)} SOL\n` +
-          `**SOL Price:** $${solPrice.toFixed(2)}\n` +
-          `**Network:** Devnet/Testnet\n\n` +
-          `**⚠️ Note:** This only works on devnet/testnet.\n` +
-          `For mainnet, you need to purchase SOL from an exchange.`
-        )
-        .setColor(0x10b981)
-        .setFooter({ text: 'Testnet airdrop only' });
-        
-      await interaction.reply({ embeds: [embed], ephemeral: true });
-      
-      console.log(`🎁 Airdrop: ${interaction.user.tag} requested $${usdAmount.toFixed(2)} USD (${solAmount.toFixed(4)} SOL)`);
-      
     // ===== REGISTER WALLET COMMAND =====
     } else if (commandName === 'register-wallet') {
       const userId = interaction.user.id;

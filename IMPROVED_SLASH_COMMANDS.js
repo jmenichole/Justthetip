@@ -41,17 +41,6 @@ const improvedCommands = [
   },
 
   {
-    name: 'airdrop',
-    description: '🎁 Request testnet SOL for development and testing (devnet only)',
-    options: [
-      {
-        name: 'amount',
-        type: 10, // NUMBER
-        description: 'Amount in USD (maximum $20.00)',
-        required: false
-      }
-    ]
-  },
 
   {
     name: 'register-wallet',
@@ -110,7 +99,6 @@ Sign once, tip forever—without compromising security.
 • Automatically converted to SOL at current price
 
 **3️⃣ Request Testnet Tokens** (For developers)
-\`/airdrop 5\`
 • Get free testnet SOL for testing
 • Amount in USD (maximum $20.00)
 • Works on devnet only
@@ -133,7 +121,6 @@ Sign once, tip forever—without compromising security.
 \`/support <issue>\` - Contact support team
 
 🎁 **Testing** (Devnet only)
-\`/airdrop <amount>\` - Get testnet SOL (amount in USD)
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -179,7 +166,6 @@ const commandPermissions = {
   public: [
     'help',
     'tip',
-    'airdrop',
     'register-wallet',
     'disconnect-wallet',
     'support',
@@ -193,7 +179,6 @@ const rateLimits = {
   'register-wallet': { max: 5, window: 900000 }, // 5 per 15 minutes
   'disconnect-wallet': { max: 3, window: 300000 }, // 3 per 5 minutes
   'tip': { max: 10, window: 60000 }, // 10 per minute
-  'airdrop': { max: 2, window: 3600000 }, // 2 per hour
   'support': { max: 2, window: 300000 }, // 2 per 5 minutes
   'logs': { max: 5, window: 60000 }, // 5 per minute
   default: { max: 10, window: 60000 } // 10 per minute for others
