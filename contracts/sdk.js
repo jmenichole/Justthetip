@@ -260,6 +260,104 @@ class JustTheTipSDK {
       return null;
     }
   }
+
+  /**
+   * Send and confirm a transaction on Solana
+   * 
+   * @param {Transaction} transaction - The transaction to send
+   * @param {Array<Keypair>} signers - Array of keypairs to sign the transaction
+   * @param {Object} options - Transaction options
+   * @returns {Promise<Object>} Result with signature and confirmation status
+   */
+  async sendAndConfirmTransaction(transaction, signers, options = {}) {
+    try {
+      const {
+        skipPreflight = false,
+        commitment = 'confirmed',
+        maxRetries = 3
+      } = options;
+
+      // Get recent blockhash
+      const { blockhash, lastValidBlockHeight } = await this.connection.getLatestBlockhash(commitment);
+      transaction.recentBlockhash = blockhash;
+      transaction.feePayer = signers[0].publicKey;
+
+      // Sign transaction
+      transaction.sign(...signers);
+
+      // Send transaction
+      const signature = await this.connection.sendRawTransaction(
+        transaction.serialize(),
+        {
+          skipPreflight,
+          maxRetries
+        }
+      );
+
+      console.log(`📤 Transaction sent: ${signature}`);
+
+      // Confirm transaction
+      const confirmation = await this.connection.confirmTransaction({
+        signature,
+        blockhash,
+        lastValidBlockHeight
+      }, commitment);
+
+      if (confirmation.value.err) {
+        throw new Error(`Transaction failed: ${JSON.stringify(confirmation.value.err)}`);
+      }
+
+      console.log(`✅ Transaction confirmed: ${signature}`);
+
+      return {
+        signature,
+        confirmed: true,
+        error: null
+      };
+
+    } catch (error) {
+      console.error('Error sending transaction:', error);
+      return {
+        signature: null,
+        confirmed: false,
+        error: error.message
+      };
+    }
+  }
+
+  /**
+   * Create and send a SOL tip transaction
+   * 
+   * @param {Keypair} senderKeypair - Sender's keypair for signing
+   * @param {string} recipientAddress - Recipient's public key as string
+   * @param {number} amount - Amount in SOL
+   * @returns {Promise<Object>} Result with signature and status
+   */
+  async sendTip(senderKeypair, recipientAddress, amount) {
+    try {
+      // Create transaction
+      const transaction = this.createTipInstruction(
+        senderKeypair.publicKey.toString(),
+        recipientAddress,
+        amount
+      );
+
+      if (!transaction) {
+        throw new Error('Failed to create tip transaction');
+      }
+
+      // Send and confirm
+      return await this.sendAndConfirmTransaction(transaction, [senderKeypair]);
+
+    } catch (error) {
+      console.error('Error sending tip:', error);
+      return {
+        signature: null,
+        confirmed: false,
+        error: error.message
+      };
+    }
+  }
 }
 
 module.exports = { JustTheTipSDK };
