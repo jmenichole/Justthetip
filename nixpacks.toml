@@ -1,6 +1,9 @@
 # Nixpacks Configuration for Railway Deployment
 # Runs both API server and Discord Bot
 
+[phases.setup]
+nixPkgs = ["python3", "nodejs_22"]
+
 [phases.install]
 # Use npm install instead of npm ci for Railway compatibility
 cmds = ["npm install --production=false"]
