@@ -11,7 +11,7 @@ const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('
 const crypto = require('crypto');
 
 // Import services
-const database = require('../../db/database');
+const database = require('../../../db/database');
 const priceService = require('../../utils/priceService');
 
 /**
