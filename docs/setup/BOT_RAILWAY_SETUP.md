@@ -33,6 +33,12 @@ SOLANA_RPC_URL=https://mainnet.helius-rpc.com/?api-key=074efb1f-0838-4334-839b-2
 SOL_RPC_URL=https://mainnet.helius-rpc.com/?api-key=074efb1f-0838-4334-839b-2f5780b43eca
 ```
 
+#### **Required WalletConnect Variables** ⚠️ (CRITICAL - Get from https://cloud.reown.com/)
+```
+WALLETCONNECT_PROJECT_ID=your_project_id_from_reown_cloud
+```
+**Important:** Without this, mobile wallet connections will fail and users will see raw `wc:...` URIs. Create a free account at https://cloud.reown.com/ and create a new project to get your Project ID.
+
 #### **Required Database Variables** ✅ (Already configured)
 ```
 MONGODB_URI=mongodb+srv://justthetip1:JWjwE7xgOmmc6k3O@justhetip.0z3jtr.mongodb.net/?retryWrites=true&w=majority

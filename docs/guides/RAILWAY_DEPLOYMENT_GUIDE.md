@@ -102,6 +102,9 @@ DISCORD_CLIENT_ID=1419742988128616479
 DISCORD_CLIENT_SECRET=YOUR_SECRET_FROM_DISCORD_PORTAL
 DISCORD_REDIRECT_URI=https://jmenichole.github.io/Justthetip/landing.html
 
+# WalletConnect (CRITICAL - Required for mobile wallet support)
+WALLETCONNECT_PROJECT_ID=YOUR_PROJECT_ID_FROM_CLOUD_REOWN_COM
+
 # Solana
 SOLANA_RPC_URL=https://api.mainnet-beta.solana.com
 MINT_AUTHORITY_KEYPAIR=[paste the array from Quick Setup step 2]
@@ -118,6 +121,8 @@ NODE_ENV=production
 # Optional but recommended
 CORS_ORIGIN=https://jmenichole.github.io
 ```
+
+> ⚠️ **IMPORTANT**: Without `WALLETCONNECT_PROJECT_ID`, users will see raw WalletConnect URIs (wc:...) instead of being able to connect their wallets. Get a free project ID at https://cloud.reown.com/ (no payment required).
 
 #### How to Add Variables in Railway
 

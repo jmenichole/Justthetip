@@ -80,7 +80,10 @@ DISCORD_CLIENT_SECRET=<from Discord Developer Portal>
 MONGODB_URI=<from MongoDB Atlas>
 MINT_AUTHORITY_KEYPAIR=<base58 from step 3>
 SOLANA_RPC_URL=https://api.mainnet-beta.solana.com
+WALLETCONNECT_PROJECT_ID=<from https://cloud.reown.com/>
 ```
+
+**Important:** The `WALLETCONNECT_PROJECT_ID` is required for mobile wallet support. Without it, users will see raw WalletConnect URIs instead of proper wallet connections. Get a free project ID at https://cloud.reown.com/ (no payment required).
 
 ### Step 5: Start Backend
 ```bash
