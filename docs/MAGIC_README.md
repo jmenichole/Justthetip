@@ -36,6 +36,9 @@ Choose the document that best fits your needs:
 
 ## 🚀 Quick Start
 
+> **✅ Note**: Magic API keys are already stored in GitHub secrets - no manual configuration needed!  
+> See: [MAGIC_WITH_GITHUB_SECRETS.md](./guides/MAGIC_WITH_GITHUB_SECRETS.md) for simplified setup.
+
 ### 1️⃣ Understand (5 minutes)
 ```bash
 # Read the summary
@@ -70,10 +73,12 @@ npm install magic-sdk @magic-ext/solana @magic-sdk/admin
 |----------|------|---------|----------|------|
 | **MAGIC_IMPLEMENTATION_SUMMARY.md** | 11KB | Executive overview & quick answer | Decision makers | 5 min |
 | **MAGIC_VS_X402_DECISION_GUIDE.md** | 11KB | Strategic comparison & recommendations | Decision makers, Tech leads | 15 min |
+| **MAGIC_WITH_GITHUB_SECRETS.md** ⭐ | 13KB | Simplified setup with existing secrets | Developers | 10 min |
 | **MAGIC_QUICKSTART_GUIDE.md** | 20KB | Practical implementation guide | Developers | 30-60 min |
 | **MAGIC_EMBEDDED_WALLETS_EVALUATION.md** | 24KB | Complete technical evaluation | Architects, Senior devs | 60 min |
 
-**Total**: 66KB of documentation / ~18,000 words
+**Total**: 79KB of documentation / ~21,000 words  
+⭐ = **Start here if you're implementing** (API keys already configured)
 
 ## 🎯 Common Questions → Best Document
 
@@ -107,7 +112,7 @@ npm install magic-sdk @magic-ext/solana @magic-sdk/admin
 **Outcome**: Understand technical implications and architecture
 
 ### Path 3: Developer (2 hours)
-1. MAGIC_IMPLEMENTATION_SUMMARY.md - Fast Implementation Path (10 min)
+1. **MAGIC_WITH_GITHUB_SECRETS.md** - Simplified setup with existing secrets (10 min) ⭐ START HERE
 2. MAGIC_QUICKSTART_GUIDE.md - Complete guide (40 min)
 3. Implement locally following guide (60 min)
 4. Test and validate (10 min)
