@@ -488,7 +488,8 @@ app.post('/api/mintBadge', async (req, res) => {
         }
 
         // Check if user already verified
-        if (db) {
+        // Note: MongoDB verification checks disabled - using SQLite with database module
+        /* if (db) {
             const existing = await db.collection('verifications').findOne({ discordId });
             if (existing) {
                 return res.status(409).json({
@@ -496,7 +497,7 @@ app.post('/api/mintBadge', async (req, res) => {
                     nftMintAddress: existing.nftMintAddress
                 });
             }
-        }
+        } */
 
         // Check if NFT minting is available
         if (!metaplex) {
@@ -512,9 +513,10 @@ app.post('/api/mintBadge', async (req, res) => {
                 createdAt: new Date()
             };
 
+            /* MongoDB disabled
             if (db) {
                 await db.collection('verifications').insertOne(verificationData);
-            }
+            } */
 
             return res.json({
                 success: true,
@@ -558,9 +560,10 @@ app.post('/api/mintBadge', async (req, res) => {
             createdAt: new Date()
         };
 
+        /* MongoDB disabled
         if (db) {
             await db.collection('verifications').insertOne(verificationData);
-        }
+        } */
 
         res.json({
             success: true,
@@ -655,6 +658,7 @@ app.post('/api/payments/coinbase/webhook', (req, res) => {
 
 // Check verification status
 app.get('/api/verification/:discordId', async (req, res) => {
+    /* MongoDB disabled - this endpoint is not functional with SQLite
     try {
         const { discordId } = req.params;
 
@@ -679,6 +683,8 @@ app.get('/api/verification/:discordId', async (req, res) => {
         console.error('Verification check error:', error);
         res.status(500).json({ error: error.message });
     }
+    */
+    return res.status(503).json({ error: 'Endpoint disabled - MongoDB removed' });
 });
 
 // Submit support ticket
@@ -710,10 +716,12 @@ app.post('/api/ticket', async (req, res) => {
             createdAt: new Date()
         };
 
+        /* MongoDB disabled
         // Save to database
         if (db) {
             await db.collection('tickets').insertOne(ticket);
         }
+        */
 
         // TODO: Send notification (Discord webhook, email, etc.)
         console.log('📝 New ticket:', ticketId, '-', issueType);
@@ -732,6 +740,7 @@ app.post('/api/ticket', async (req, res) => {
 
 // Get user's tickets
 app.get('/api/tickets/:discordId', async (req, res) => {
+    /* MongoDB disabled - this endpoint is not functional with SQLite
     try {
         const { discordId } = req.params;
 
@@ -750,6 +759,8 @@ app.get('/api/tickets/:discordId', async (req, res) => {
         console.error('Tickets fetch error:', error);
         res.status(500).json({ error: error.message });
     }
+    */
+    return res.status(503).json({ error: 'Endpoint disabled - MongoDB removed' });
 });
 
 // ===== X402 PAYMENT PROTOCOL ROUTES =====
