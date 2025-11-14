@@ -87,8 +87,31 @@ const discordUserId = urlParams.get('user');
 const discordUsername = urlParams.get('username');
 const nonce = urlParams.get('nonce');
 
-// Detect if user is on mobile device
-const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+// Enhanced mobile and OS detection
+const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
+const isAndroid = /Android/i.test(userAgent);
+const isDesktop = !isMobile;
+
+// Wallet deep link schemes
+const WALLET_DEEP_LINKS = {
+    phantom: {
+        ios: 'https://phantom.app/ul/v1/connect',
+        android: 'https://phantom.app/ul/v1/connect',
+        scheme: 'phantom://'
+    },
+    solflare: {
+        ios: 'https://solflare.com/ul/v1/connect',
+        android: 'https://solflare.com/ul/v1/connect',
+        scheme: 'solflare://'
+    },
+    backpack: {
+        ios: 'https://backpack.app/connect',
+        android: 'https://backpack.app/connect',
+        scheme: 'backpack://'
+    }
+};
 
 // Display user info and setup UI based on device
 if (discordUserId && discordUsername && nonce) {
@@ -887,6 +910,122 @@ function startWalletProviderPolling(walletId) {
 }
 
 /**
+ * Generate and display QR code for mobile wallet scanning (desktop users)
+ * @param {string} walletType - Type of wallet (phantom, solflare, etc)
+ */
+function showQRCodeForMobile(walletType) {
+    if (!isDesktop || !window.QRCode) {
+        return; // Only for desktop users with QR library loaded
+    }
+
+    const registrationUrl = window.location.href;
+    const qrContainer = document.createElement('div');
+    qrContainer.id = 'qrCodeModal';
+    qrContainer.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.9);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 10000;
+        padding: 20px;
+    `;
+
+    qrContainer.innerHTML = `
+        <div style="background: white; padding: 30px; border-radius: 20px; text-align: center; max-width: 400px;">
+            <h3 style="color: #1e293b; margin-bottom: 20px;">📱 Scan with Mobile Wallet</h3>
+            <canvas id="qrCanvas" style="margin: 20px auto; display: block;"></canvas>
+            <p style="color: #64748b; margin: 20px 0;">
+                Open your ${walletType} wallet app and scan this QR code to continue registration on your phone.
+            </p>
+            <button id="closeQR" style="
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border: none;
+                padding: 12px 24px;
+                border-radius: 8px;
+                font-size: 16px;
+                font-weight: bold;
+                cursor: pointer;
+                margin-top: 10px;
+            ">Close</button>
+        </div>
+    `;
+
+    document.body.appendChild(qrContainer);
+
+    // Generate QR code
+    const canvas = document.getElementById('qrCanvas');
+    QRCode.toCanvas(canvas, registrationUrl, {
+        width: 250,
+        margin: 2,
+        color: {
+            dark: '#1e293b',
+            light: '#ffffff'
+        }
+    });
+
+    // Close button
+    document.getElementById('closeQR').onclick = () => {
+        document.body.removeChild(qrContainer);
+    };
+}
+
+/**
+ * Open wallet app on mobile with deep link
+ * @param {string} walletType - Type of wallet (phantom, solflare, backpack)
+ */
+function openMobileWallet(walletType) {
+    if (!isMobile || !WALLET_DEEP_LINKS[walletType]) {
+        return;
+    }
+
+    const deepLinkConfig = WALLET_DEEP_LINKS[walletType];
+    const deepLinkUrl = isIOS ? deepLinkConfig.ios : deepLinkConfig.android;
+    
+    // Show a helpful prompt
+    showStatus('pending', `
+        <span class="loading"></span>
+        <strong>Opening ${walletType.charAt(0).toUpperCase() + walletType.slice(1)}...</strong><br><br>
+        ${isIOS ? '🍎 iOS Detected' : '🤖 Android Detected'}<br>
+        If the app doesn't open:<br>
+        1. Make sure ${walletType.charAt(0).toUpperCase() + walletType.slice(1)} is installed<br>
+        2. Return to this page after connecting<br>
+        3. Your connection will be saved automatically
+    `);
+
+    // Store connection attempt in session
+    sessionStorage.setItem('walletConnectionAttempt', JSON.stringify({
+        wallet: walletType,
+        timestamp: Date.now(),
+        url: window.location.href
+    }));
+
+    // Try to open the deep link
+    window.location.href = deepLinkUrl;
+    
+    // Fallback: Show app store links if deep link fails
+    setTimeout(() => {
+        const appStoreUrl = isIOS 
+            ? `https://apps.apple.com/search?term=${walletType}+solana+wallet`
+            : `https://play.google.com/store/search?q=${walletType}+solana+wallet`;
+        
+        const installPrompt = confirm(
+            `Having trouble opening ${walletType}?\n\nClick OK to install from the app store.`
+        );
+        
+        if (installPrompt) {
+            window.open(appStoreUrl, '_blank');
+        }
+    }, 3000);
+}
+
+/**
  * Generic wallet connection function with automatic signature capture
  */
 async function connectWallet(walletName, provider) {
@@ -1282,14 +1421,38 @@ if (document.readyState === 'loading') {
 
 function initializeEventListeners() {
     // Setup event listeners for desktop wallet buttons
-    document.getElementById('connectButton')?.addEventListener('click', () => connectWalletExtension('phantom'));
-    document.getElementById('solflareButton')?.addEventListener('click', () => connectWalletExtension('solflare'));
+    // Enhanced wallet connection with mobile deep linking and QR codes
+    document.getElementById('connectButton')?.addEventListener('click', () => {
+        if (isMobile) {
+            openMobileWallet('phantom');
+        } else {
+            // Desktop: Try extension first, fallback to QR code
+            if (window.solana && window.solana.isPhantom) {
+                connectWalletExtension('phantom');
+            } else {
+                showQRCodeForMobile('phantom');
+            }
+        }
+    });
+    
+    document.getElementById('solflareButton')?.addEventListener('click', () => {
+        if (isMobile) {
+            openMobileWallet('solflare');
+        } else {
+            if (window.solflare) {
+                connectWalletExtension('solflare');
+            } else {
+                showQRCodeForMobile('solflare');
+            }
+        }
+    });
 
     // Setup event listener for WalletConnect button
     document.getElementById('walletConnectButton')?.addEventListener('click', connectWalletConnect);
 
     // Setup event listener for manual entry button
     document.getElementById('manualEntryButton')?.addEventListener('click', handleManualEntry);
-    
+
     console.log('✅ Event listeners initialized');
+    console.log(`📱 Device: ${isMobile ? (isIOS ? 'iOS' : isAndroid ? 'Android' : 'Mobile') : 'Desktop'}`);
 }
