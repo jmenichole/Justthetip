@@ -2,7 +2,8 @@
 # Runs both API server and Discord Bot
 
 [phases.setup]
-nixPkgs = ["python3", "nodejs_22"]
+nixPkgs = ["python3", "nodejs_22", "gcc", "gnumake"]
+aptPkgs = ["libudev-dev", "libusb-1.0-0-dev"]
 
 [phases.install]
 # Use npm install instead of npm ci for Railway compatibility
