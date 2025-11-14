@@ -11,8 +11,8 @@ const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('
 const crypto = require('crypto');
 
 // Import services
-const database = require('../../../db/database');
-const priceService = require('../../../src/services/priceService');
+const database = require('../../db/database');
+const priceService = require('../../utils/priceService');
 
 /**
  * Parse expiration string to milliseconds
