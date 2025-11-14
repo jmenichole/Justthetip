@@ -93,6 +93,7 @@ Define configuration in a `.env` file (or your hosting provider). Key variables 
 | `SOLANA_CLUSTER` | Optional | Target cluster (`mainnet-beta`, `devnet`, etc.). Defaults to `mainnet-beta`. |
 | `SOLANA_RPC_URL` | Optional | Custom RPC endpoint for the primary cluster. |
 | `SOLANA_DEVNET_RPC_URL` | Optional | Overrides devnet RPC when using developer tools or airdrops. |
+| `WALLETCONNECT_PROJECT_ID` | **Required** | Project ID from https://cloud.reown.com/ for mobile wallet support. Without this, users will see raw WalletConnect URIs. See [WalletConnect Setup Guide](./docs/WALLETCONNECT_SETUP.md). |
 | `MINT_AUTHORITY_KEYPAIR` | Recommended | Base58 secret key enabling NFT minting via Metaplex. |
 | `VERIFIED_COLLECTION_ADDRESS` | Optional | Collection address to group verification NFTs. |
 | `NFT_STORAGE_API_KEY` | Optional | Enables Arweave uploads via Metaplex irys storage adapter. |

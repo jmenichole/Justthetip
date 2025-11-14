@@ -143,6 +143,27 @@ If everything is correct:
 - Try using Phantom or Solflare (they handle longer messages)
 - Or use a desktop computer for registration
 
+### Seeing Raw WalletConnect URI (wc:...)
+
+**Problem**: Instead of a QR code or wallet connection button, you see a long text string starting with `wc:` followed by random characters.
+
+**Root Cause**: The server's `WALLETCONNECT_PROJECT_ID` environment variable is not configured.
+
+**Solution for Server Administrators**:
+1. Go to https://cloud.reown.com/ (formerly WalletConnect Cloud)
+2. Sign up for a free account
+3. Create a new project
+4. Copy the "Project ID" from your project dashboard
+5. Add it to your `.env` file or hosting platform's environment variables:
+   ```
+   WALLETCONNECT_PROJECT_ID=your_project_id_here
+   ```
+6. Restart the API server
+
+**Solution for Users**:
+- Contact the server administrator to configure WalletConnect properly
+- In the meantime, you may be able to use desktop browser extensions (Phantom/Solflare) if available
+
 ## Desktop vs Mobile vs WalletConnect
 
 ### Desktop with Browser Extension
