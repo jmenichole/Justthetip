@@ -57,6 +57,7 @@ const { handleTipCommand } = require('./src/commands/handlers/tipHandler');
 const { handleRegisterWalletCommand, handleDisconnectWalletCommand } = require('./src/commands/handlers/walletHandler');
 const { handleSupportCommand } = require('./src/commands/handlers/supportHandler');
 const { handleDonateCommand, handleCopyWalletButton } = require('./src/commands/handlers/donateHandler');
+const { handleRegisterMagicCommand } = require('./src/commands/handlers/magicHandler');
 const { handleStatusCommand, handleLogsCommand } = require('./src/commands/handlers/statusHandler');
 const { handleAirdropCommand, handleMyAirdropsCommand } = require('./src/commands/handlers/airdropHandler');
 
@@ -148,6 +149,10 @@ client.on(Events.InteractionCreate, async interaction => {
         await handleDisconnectWalletCommand(interaction, context);
         break;
         
+
+      case 'register-magic':
+        await handleRegisterMagicCommand(interaction, context);
+        break;
       case 'support':
         await handleSupportCommand(interaction, context);
         break;

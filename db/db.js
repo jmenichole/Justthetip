@@ -153,6 +153,43 @@ function initDatabase() {
 
     db.exec('CREATE INDEX IF NOT EXISTS idx_wallets_address ON registered_wallets(wallet_address)');
     
+
+    // Add Magic authentication columns to users table
+    const magicColumns = [
+      { name: 'email', type: 'TEXT' },
+      { name: 'magic_issuer', type: 'TEXT UNIQUE' },
+      { name: 'auth_method', type: 'TEXT DEFAULT "walletconnect"' }
+    ];
+    
+    for (const col of magicColumns) {
+      try {
+        db.exec(`ALTER TABLE users ADD COLUMN ${col.name} ${col.type}`);
+        console.log(`✅ Added column ${col.name} to users table`);
+      } catch (error) {
+        if (!String(error.message).includes('duplicate column name')) {
+          throw error;
+        }
+      }
+    }
+
+    // Pending Magic registrations table
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS pending_magic_registrations (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        email TEXT NOT NULL,
+        wallet_address TEXT NOT NULL,
+        magic_issuer TEXT NOT NULL UNIQUE,
+        registration_token TEXT NOT NULL UNIQUE,
+        token_expiry INTEGER NOT NULL,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    db.exec('CREATE INDEX IF NOT EXISTS idx_magic_registrations_token ON pending_magic_registrations(registration_token)');
+    db.exec('CREATE INDEX IF NOT EXISTS idx_magic_registrations_issuer ON pending_magic_registrations(magic_issuer)');
+    db.exec('CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)');
+    db.exec('CREATE INDEX IF NOT EXISTS idx_users_magic_issuer ON users(magic_issuer)');
+
     console.log('✅ SQLite database ready');
   } catch (error) {
     console.error('Database initialization error:', error);

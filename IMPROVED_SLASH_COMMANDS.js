@@ -46,6 +46,19 @@ const improvedCommands = [
   },
 
   {
+
+  {
+    name: 'register-magic',
+    description: '✨ Link your Magic wallet to Discord using registration token',
+    options: [
+      {
+        name: 'token',
+        type: 3, // STRING
+        description: 'Registration token from Magic wallet page',
+        required: true
+      }
+    ]
+  },
     name: 'disconnect-wallet',
     description: '🔓 Disconnect your registered Solana wallet from JustTheTip',
   },

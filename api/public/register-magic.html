@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register with Magic - JustTheTip</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo h1 {
+            color: #667eea;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .logo p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .step {
+            display: none;
+        }
+
+        .step.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .info-box {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+
+        .info-box p {
+            color: #555;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        #magic-auth-container {
+            margin: 20px 0;
+        }
+
+        .button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .wallet-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .wallet-info label {
+            display: block;
+            color: #666;
+            font-size: 12px;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .wallet-info .address {
+            color: #333;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            word-break: break-all;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+            margin-top: 5px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #fee;
+            border-left: 4px solid #f44;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+            color: #d33;
+        }
+
+        .success {
+            background: #efe;
+            border-left: 4px solid #4f4;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+            color: #363;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .footer p {
+            color: #999;
+            font-size: 12px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 30px 20px;
+            }
+
+            .logo h1 {
+                font-size: 24px;
+            }
+
+            h2 {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <h1>✨ JustTheTip</h1>
+            <p>Register with Magic - Instant Solana Wallet</p>
+        </div>
+
+        <!-- Step 1: Email Authentication -->
+        <div class="step active" id="step1">
+            <h2>Create Your Wallet</h2>
+            <div class="info-box">
+                <p>🎉 Get an instant Solana wallet with just your email!</p>
+                <p>• No app installation required<br>
+                   • No seed phrases to remember<br>
+                   • Secure cryptographic authentication</p>
+            </div>
+            <div id="magic-auth-container"></div>
+        </div>
+
+        <!-- Step 2: Wallet Created -->
+        <div class="step" id="step2">
+            <h2>Wallet Created! 🎉</h2>
+            <div class="wallet-info">
+                <label>Your Solana Wallet Address:</label>
+                <div class="address" id="wallet-address"></div>
+                <label style="margin-top: 15px;">Email:</label>
+                <div class="address" id="user-email"></div>
+            </div>
+            <div class="info-box">
+                <p>Your wallet has been created successfully! Now link it to your Discord account to start receiving tips.</p>
+            </div>
+            <button class="button" onclick="linkDiscord()">Link Discord Account</button>
+        </div>
+
+        <!-- Step 3: Discord Linking -->
+        <div class="step" id="step3">
+            <h2>Link Discord Account</h2>
+            <div class="info-box">
+                <p>Use this command in the Discord server to complete registration:</p>
+            </div>
+            <div class="wallet-info">
+                <label>Discord Command:</label>
+                <div class="address" id="discord-command"></div>
+            </div>
+            <div id="status-message"></div>
+            <button class="button" onclick="copyCommand()">Copy Command</button>
+        </div>
+
+        <!-- Loading State -->
+        <div class="loading" id="loading" style="display: none;">
+            <div class="spinner"></div>
+            <p>Processing...</p>
+        </div>
+
+        <div class="footer">
+            <p>Powered by Magic • Secure • No seed phrases</p>
+        </div>
+    </div>
+
+    <script src="https://auth.magic.link/sdk"></script>
+    <script>
+        // Magic SDK initialization with publishable key from server
+        const MAGIC_PUBLISHABLE_KEY = '{{MAGIC_PUBLISHABLE_KEY}}';
+        const API_BASE_URL = window.location.origin;
+
+        let walletAddress = '';
+        let registrationToken = '';
+        let userEmail = '';
+
+        // Initialize Magic
+        const magic = new Magic(MAGIC_PUBLISHABLE_KEY, {
+            extensions: {
+                solana: {
+                    rpcUrl: 'https://api.mainnet-beta.solana.com'
+                }
+            }
+        });
+
+        // Render Magic email form
+        magic.preload().then(() => {
+            const loginForm = document.getElementById('magic-auth-container');
+            loginForm.innerHTML = `
+                <input type="email" 
+                       id="email-input" 
+                       placeholder="Enter your email" 
+                       style="width: 100%; padding: 15px; border: 2px solid #ddd; border-radius: 10px; font-size: 16px; margin-bottom: 15px;">
+                <button class="button" onclick="authenticateWithMagic()">Create Wallet</button>
+            `;
+        });
+
+        async function authenticateWithMagic() {
+            const email = document.getElementById('email-input').value;
+            
+            if (!email || !email.includes('@')) {
+                showError('Please enter a valid email address');
+                return;
+            }
+
+            showLoading(true);
+
+            try {
+                // Authenticate with Magic
+                const didToken = await magic.auth.loginWithEmailOTP({ email });
+
+                // Get user metadata
+                const metadata = await magic.user.getMetadata();
+                walletAddress = metadata.publicAddress;
+                userEmail = metadata.email;
+
+                // Send to backend for validation and user creation
+                const response = await fetch(`${API_BASE_URL}/api/magic/auth`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ didToken })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    if (data.requiresDiscordLink) {
+                        registrationToken = data.registrationToken;
+                        showStep(2);
+                    } else {
+                        showSuccess('Wallet already linked to Discord!');
+                    }
+                } else {
+                    showError(data.error || 'Authentication failed');
+                }
+
+            } catch (error) {
+                console.error('Magic auth error:', error);
+                showError('Failed to create wallet: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function linkDiscord() {
+            document.getElementById('wallet-address').textContent = walletAddress;
+            document.getElementById('user-email').textContent = userEmail;
+            document.getElementById('discord-command').textContent = 
+                `/register-magic ${registrationToken}`;
+            showStep(3);
+        }
+
+        function copyCommand() {
+            const command = document.getElementById('discord-command').textContent;
+            navigator.clipboard.writeText(command).then(() => {
+                showSuccess('Command copied! Paste it in Discord to complete registration.');
+            }).catch(err => {
+                showError('Failed to copy command. Please copy it manually.');
+            });
+        }
+
+        function showStep(stepNumber) {
+            document.querySelectorAll('.step').forEach(step => {
+                step.classList.remove('active');
+            });
+            document.getElementById(`step${stepNumber}`).classList.add('active');
+        }
+
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+            document.querySelectorAll('.step').forEach(step => {
+                step.style.display = show ? 'none' : (step.classList.contains('active') ? 'block' : 'none');
+            });
+        }
+
+        function showError(message) {
+            const statusDiv = document.getElementById('status-message') || createStatusDiv();
+            statusDiv.className = 'error';
+            statusDiv.textContent = message;
+        }
+
+        function showSuccess(message) {
+            const statusDiv = document.getElementById('status-message') || createStatusDiv();
+            statusDiv.className = 'success';
+            statusDiv.textContent = message;
+        }
+
+        function createStatusDiv() {
+            const div = document.createElement('div');
+            div.id = 'status-message';
+            document.querySelector('.step.active').appendChild(div);
+            return div;
+        }
+    </script>
+</body>
+</html>

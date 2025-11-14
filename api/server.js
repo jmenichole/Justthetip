@@ -25,6 +25,7 @@ const adminRoutes = require('./adminRoutes');
 const walletRoutes = require('./walletRoutes');
 const tipsRoutes = require('./tipsRoutes');
 const healthRoutes = require('./healthRoutes');
+const magicRoutes = require('./routes/magicRoutes');
 const solanaDevTools = require('../src/utils/solanaDevTools');
 const coinbaseClient = require('../src/utils/coinbaseClient');
 const X402PaymentHandler = require('../src/utils/x402PaymentHandler');
@@ -976,11 +977,34 @@ app.use('/api', tipsRoutes);
 // Health and diagnostics routes
 app.use('/api', healthRoutes);
 
+// Magic embedded wallet routes
+app.use('/api/magic', magicRoutes);
+
 // WalletConnect Configuration Endpoint
 // Serves public WalletConnect project ID (safe to expose to frontend)
 app.get('/api/walletconnect/config', (req, res) => {
     res.json({
         projectId: process.env.WALLETCONNECT_PROJECT_ID || ''
+    });
+});
+
+// Magic Registration Page - Inject publishable key
+app.get('/register-magic.html', (req, res) => {
+    const fs = require('fs');
+    const htmlPath = path.join(__dirname, 'public', 'register-magic.html');
+    
+    fs.readFile(htmlPath, 'utf8', (err, html) => {
+        if (err) {
+            return res.status(500).send('Failed to load registration page');
+        }
+        
+        // Inject Magic publishable key
+        const injectedHtml = html.replace(
+            '{{MAGIC_PUBLISHABLE_KEY}}', 
+            process.env.MAGIC_PUBLISHABLE_KEY || ''
+        );
+        
+        res.send(injectedHtml);
     });
 });
 

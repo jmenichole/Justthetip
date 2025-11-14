@@ -45,6 +45,8 @@
   },
   "dependencies": {
     "@bitcoinerlab/secp256k1": "^1.2.0",
+    "@magic-ext/solana": "^28.2.0",
+    "@magic-sdk/admin": "^2.8.2",
     "@metaplex-foundation/js": "^0.20.1",
     "@payai/x402-solana": "^0.1.0",
     "@solana/spl-token": "^0.1.8",
@@ -67,6 +69,7 @@
     "express": "^5.1.0",
     "express-rate-limit": "^7.1.5",
     "helmet": "^7.1.0",
+    "magic-sdk": "^31.2.0",
     "pm2": "^6.0.10",
     "rate-limiter-flexible": "^4.0.0",
     "react": "^19.1.1",

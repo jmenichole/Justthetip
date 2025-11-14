@@ -474,6 +474,156 @@ class Database {
     }
   }
 
+  // ===== MAGIC AUTHENTICATION METHODS =====
+
+  async getUserByEmail(email) {
+    try {
+      const result = sqlite.db.prepare(`
+        SELECT * FROM users WHERE email = ? LIMIT 1
+      `).get(email);
+      return result || null;
+    } catch (error) {
+      console.error('Error getting user by email:', error);
+      return null;
+    }
+  }
+
+  async getUserByMagicIssuer(issuer) {
+    try {
+      const result = sqlite.db.prepare(`
+        SELECT * FROM users WHERE magic_issuer = ? LIMIT 1
+      `).get(issuer);
+      return result || null;
+    } catch (error) {
+      console.error('Error getting user by Magic issuer:', error);
+      return null;
+    }
+  }
+
+  async createUser(userData) {
+    try {
+      const stmt = sqlite.db.prepare(`
+        INSERT INTO users (discord_id, wallet_address, email, magic_issuer, auth_method, balance, created_at)
+        VALUES (?, ?, ?, ?, ?, 0, ?)
+      `);
+      
+      stmt.run(
+        userData.discordId || null,
+        userData.walletAddress,
+        userData.email || null,
+        userData.magicIssuer || null,
+        userData.authMethod || 'walletconnect',
+        Date.now()
+      );
+      
+      return { success: true };
+    } catch (error) {
+      console.error('Error creating user:', error);
+      throw error;
+    }
+  }
+
+  async updateUser(userId, updates) {
+    try {
+      const updateFields = [];
+      const values = [];
+      
+      if (updates.discordId !== undefined) {
+        updateFields.push('discord_id = ?');
+        values.push(updates.discordId);
+      }
+      if (updates.walletAddress !== undefined) {
+        updateFields.push('wallet_address = ?');
+        values.push(updates.walletAddress);
+      }
+      if (updates.email !== undefined) {
+        updateFields.push('email = ?');
+        values.push(updates.email);
+      }
+      if (updates.magicIssuer !== undefined) {
+        updateFields.push('magic_issuer = ?');
+        values.push(updates.magicIssuer);
+      }
+      if (updates.authMethod !== undefined) {
+        updateFields.push('auth_method = ?');
+        values.push(updates.authMethod);
+      }
+      
+      if (updateFields.length === 0) {
+        return { success: true };
+      }
+      
+      values.push(userId);
+      
+      const stmt = sqlite.db.prepare(`
+        UPDATE users SET ${updateFields.join(', ')} WHERE discord_id = ?
+      `);
+      
+      stmt.run(...values);
+      return { success: true };
+    } catch (error) {
+      console.error('Error updating user:', error);
+      throw error;
+    }
+  }
+
+  async storePendingMagicRegistration(data) {
+    try {
+      // Clean up expired tokens first
+      sqlite.db.prepare(`
+        DELETE FROM pending_magic_registrations WHERE token_expiry < ?
+      `).run(Date.now());
+      
+      // Store new registration
+      const stmt = sqlite.db.prepare(`
+        INSERT INTO pending_magic_registrations 
+        (email, wallet_address, magic_issuer, registration_token, token_expiry)
+        VALUES (?, ?, ?, ?, ?)
+      `);
+      
+      stmt.run(
+        data.email,
+        data.walletAddress,
+        data.magicIssuer,
+        data.registrationToken,
+        data.tokenExpiry
+      );
+      
+      return { success: true };
+    } catch (error) {
+      console.error('Error storing pending Magic registration:', error);
+      throw error;
+    }
+  }
+
+  async getPendingMagicRegistration(token) {
+    try {
+      const result = sqlite.db.prepare(`
+        SELECT * FROM pending_magic_registrations 
+        WHERE registration_token = ? AND token_expiry > ?
+        LIMIT 1
+      `).get(token, Date.now());
+      
+      return result || null;
+    } catch (error) {
+      console.error('Error getting pending Magic registration:', error);
+      return null;
+    }
+  }
+
+  async deletePendingMagicRegistration(token) {
+    try {
+      sqlite.db.prepare(`
+        DELETE FROM pending_magic_registrations WHERE registration_token = ?
+      `).run(token);
+      
+      return { success: true };
+    } catch (error) {
+      console.error('Error deleting pending Magic registration:', error);
+      throw error;
+    }
+  }
+
   // Graceful shutdown
   async close() {
     // SQLite will close automatically when process exits
