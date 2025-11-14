@@ -41,8 +41,6 @@ const improvedCommands = [
   },
 
   {
-
-  {
     name: 'register-wallet',
     description: '🔐 Connect your Solana wallet - Sign once, tip forever',
   },
@@ -73,6 +71,68 @@ const improvedCommands = [
   {
     name: 'logs',
     description: '📋 View your recent transactions (sent via DM)',
+  },
+
+  {
+    name: 'donate',
+    description: '☕ Support the developer with an optional donation',
+  },
+
+  {
+    name: 'airdrop',
+    description: '💝 Share the love - create a claimable SOL airdrop',
+    options: [
+      {
+        name: 'amount',
+        type: 10, // NUMBER
+        description: 'Amount in USD per claim (e.g., 5 for $5, 20 for $20)',
+        required: true,
+        min_value: 0.10,
+        max_value: 100.00
+      },
+      {
+        name: 'total_claims',
+        type: 4, // INTEGER
+        description: 'Max users who can claim (leave empty for unlimited within time)',
+        required: false,
+        min_value: 1,
+        max_value: 1000
+      },
+      {
+        name: 'expires_in',
+        type: 3, // STRING
+        description: 'How long available (leave empty for unlimited users within 2min)',
+        required: false,
+        choices: [
+          { name: '2 minutes', value: '2m' },
+          { name: '5 minutes', value: '5m' },
+          { name: '15 minutes', value: '15m' },
+          { name: '30 minutes', value: '30m' },
+          { name: '1 hour', value: '1h' },
+          { name: '6 hours', value: '6h' },
+          { name: '24 hours (1 day)', value: '24h' },
+          { name: '7 days (1 week)', value: '7d' }
+        ]
+      },
+      {
+        name: 'message',
+        type: 3, // STRING
+        description: 'Custom message to show claimers (optional)',
+        required: false,
+        max_length: 200
+      },
+      {
+        name: 'require_server',
+        type: 5, // BOOLEAN
+        description: 'Only allow claims from users in this server? (default: false)',
+        required: false
+      }
+    ]
+  },
+
+  {
+    name: 'my-airdrops',
+    description: '📊 View and manage your active airdrops',
   }
 ];
 

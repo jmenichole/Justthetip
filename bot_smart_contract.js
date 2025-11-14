@@ -56,13 +56,18 @@ const { handleHelpCommand } = require('./src/commands/handlers/helpHandler');
 const { handleTipCommand } = require('./src/commands/handlers/tipHandler');
 const { handleRegisterWalletCommand, handleDisconnectWalletCommand } = require('./src/commands/handlers/walletHandler');
 const { handleSupportCommand } = require('./src/commands/handlers/supportHandler');
+const { handleDonateCommand, handleCopyWalletButton } = require('./src/commands/handlers/donateHandler');
 const { handleStatusCommand, handleLogsCommand } = require('./src/commands/handlers/statusHandler');
+const { handleAirdropCommand, handleMyAirdropsCommand } = require('./src/commands/handlers/airdropHandler');
 
-const client = new Client({ 
-  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] 
-});
-
-// Use improved commands from IMPROVED_SLASH_COMMANDS.js
+const client = new Client({
+  intents: [
+    GatewayIntentBits.Guilds, 
+    GatewayIntentBits.GuildMessages, 
+    GatewayIntentBits.MessageContent,
+    GatewayIntentBits.GuildMessageReactions
+  ]
+});// Use improved commands from IMPROVED_SLASH_COMMANDS.js
 const smartContractCommands = improvedCommands;
 
 // In-memory user wallet registry (in production, use a database)
@@ -147,12 +152,24 @@ client.on(Events.InteractionCreate, async interaction => {
         await handleSupportCommand(interaction, context);
         break;
         
+      case 'donate':
+        await handleDonateCommand(interaction, context);
+        break;
+        
       case 'status':
         await handleStatusCommand(interaction, context);
         break;
         
       case 'logs':
         await handleLogsCommand(interaction, context);
+        break;
+        
+      case 'airdrop':
+        await handleAirdropCommand(interaction, context);
+        break;
+        
+      case 'my-airdrops':
+        await handleMyAirdropsCommand(interaction, context);
         break;
         
       default:
@@ -206,8 +223,8 @@ client.on(Events.InteractionCreate, async interaction => {
     const walletAddress = await db.getUserWallet(userId);
     
     if (!walletAddress) {
-      return interaction.update({ 
-        content: '❌ Wallet not found. Please register again.', 
+      return interaction.update({
+        content: '❌ Wallet not found. Please register again.',
         embeds: [], 
         components: [] 
       });
@@ -216,8 +233,129 @@ client.on(Events.InteractionCreate, async interaction => {
     const balance = await getSolanaBalance(walletAddress);
     
     const embed = createOnChainBalanceEmbed(walletAddress, balance, true);
-      
+    
     await interaction.update({ embeds: [embed] });
+  } else if (interaction.customId === 'copy_dev_wallet') {
+    await handleCopyWalletButton(interaction);
+  }
+});// Handle reaction-based airdrop claims
+client.on(Events.MessageReactionAdd, async (reaction, user) => {
+  // Ignore bot reactions
+  if (user.bot) return;
+  
+  // Only handle 🎁 reactions
+  if (reaction.emoji.name !== '🎁') return;
+  
+  // Fetch partial reactions
+  if (reaction.partial) {
+    try {
+      await reaction.fetch();
+    } catch (error) {
+      console.error('Error fetching reaction:', error);
+      return;
+    }
+  }
+  
+  try {
+    // Find airdrop by message ID
+    const airdrop = await db.getAirdropByMessageId(reaction.message.id);
+    
+    if (!airdrop) return; // Not an airdrop message
+    
+    // Check if airdrop is still active
+    if (!airdrop.active) {
+      try {
+        await user.send('❌ This airdrop has ended.');
+      } catch (error) {
+        // User has DMs disabled
+      }
+      return;
+    }
+    
+    // Check if expired
+    if (airdrop.expires_at && Date.now() > airdrop.expires_at) {
+      await db.updateAirdrop(airdrop.airdrop_id, { active: 0 });
+      try {
+        await user.send('❌ This airdrop has expired.');
+      } catch (error) {
+        // User has DMs disabled
+      }
+      return;
+    }
+    
+    // Check if user already claimed
+    const claimedUsers = JSON.parse(airdrop.claimed_users || '[]');
+    if (claimedUsers.includes(user.id)) {
+      try {
+        await user.send('❌ You have already claimed this airdrop.');
+      } catch (error) {
+        // User has DMs disabled
+      }
+      return;
+    }
+    
+    // Check if max claims reached
+    if (airdrop.max_recipients && airdrop.claimed_count >= airdrop.max_recipients) {
+      await db.updateAirdrop(airdrop.airdrop_id, { active: 0 });
+      try {
+        await user.send('❌ This airdrop has reached its claim limit.');
+      } catch (error) {
+        // User has DMs disabled
+      }
+      return;
+    }
+    
+    // Check if server-locked
+    if (airdrop.guild_id) {
+      const member = await reaction.message.guild?.members.fetch(user.id).catch(() => null);
+      if (!member) {
+        try {
+          await user.send('❌ This airdrop is only available to server members.');
+        } catch (error) {
+          // User has DMs disabled
+        }
+        return;
+      }
+    }
+    
+    // Check if user has registered wallet
+    const userWallet = await db.getUserWallet(user.id);
+    if (!userWallet) {
+      try {
+        await user.send('❌ Please register your wallet first using `/register-wallet` to claim airdrops.');
+      } catch (error) {
+        // User has DMs disabled
+      }
+      return;
+    }
+    
+    // TODO: Execute actual SOL transfer from creator to claimer
+    // For now, just mark as claimed
+    
+    // Update claimed users
+    claimedUsers.push(user.id);
+    await db.updateAirdrop(airdrop.airdrop_id, {
+      claimed_users: JSON.stringify(claimedUsers),
+      claimed_count: airdrop.claimed_count + 1
+    });
+    
+    // Check if this was the last claim
+    if (airdrop.max_recipients && (airdrop.claimed_count + 1) >= airdrop.max_recipients) {
+      await db.updateAirdrop(airdrop.airdrop_id, { active: 0 });
+    }
+    
+    // Send success message
+    try {
+      await user.send(`✅ Claimed! You'll receive $${airdrop.amount_per_user.toFixed(2)} USD in SOL once transactions are processed.`);
+    } catch (error) {
+      // User has DMs disabled
+      console.log(`Could not DM claim confirmation to ${user.tag}`);
+    }
+    
+    console.log(`🎁 Airdrop claimed: ${user.tag} claimed from ${airdrop.airdrop_id}`);
+    
+  } catch (error) {
+    console.error('Error handling airdrop claim:', error);
   }
 });
 
