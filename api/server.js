@@ -30,14 +30,6 @@ const sqlite = require('../db/db');
 const database = require('../db/database');
 require('dotenv').config();
 
-// Try to load MongoDB if available (optional dependency)
-let MongoClient;
-try {
-    MongoClient = require('mongodb').MongoClient;
-} catch (error) {
-    console.log('⚠️  MongoDB module not found - MongoDB features will be disabled');
-}
-
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -46,7 +38,6 @@ const CONFIG = {
     SOLANA_CLUSTER: process.env.SOLANA_CLUSTER || 'mainnet-beta',
     SOLANA_RPC_URL: process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com',
     SOLANA_DEVNET_RPC_URL: process.env.SOLANA_DEVNET_RPC_URL,
-    MONGODB_URI: process.env.MONGODB_URI,
     DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID || '1419742988128616479',
     DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET, // Required
     DISCORD_REDIRECT_URI: process.env.DISCORD_REDIRECT_URI || 'https://jmenichole.github.io/Justthetip/landing.html',
@@ -147,47 +138,13 @@ const walletRegistrationLimiter = rateLimit({
 });
 
 // ===== DATABASE =====
-let db;
 let connection;
 let metaplex;
-const useSQLiteFallback = !process.env.DATABASE_URL;
 
 async function initializeDatabase() {
-    try {
-        if (!CONFIG.MONGODB_URI) {
-            if (useSQLiteFallback) {
-                console.warn('⚠️  No MongoDB URI or DATABASE_URL - using in-memory SQLite storage');
-            }
-            return;
-        }
-
-        if (!MongoClient) {
-            console.warn('⚠️  MongoDB module not available - using in-memory storage');
-            return;
-        }
-
-        const client = new MongoClient(CONFIG.MONGODB_URI);
-        await client.connect();
-        db = client.db('justthetip');
-        
-        // Create indexes
-        await db.collection('verifications').createIndex({ discordId: 1 }, { unique: true });
-        await db.collection('verifications').createIndex({ walletAddress: 1 });
-        await db.collection('verifications').createIndex({ nftMintAddress: 1 });
-        await db.collection('tickets').createIndex({ discordId: 1 });
-        await db.collection('tickets').createIndex({ createdAt: -1 });
-        await db.collection('wallet_registrations').createIndex({ discordUserId: 1 }, { unique: true });
-        await db.collection('wallet_registrations').createIndex({ walletAddress: 1 });
-        await db.collection('registration_nonces').createIndex({ nonce: 1 }, { unique: true });
-        await db.collection('registration_nonces').createIndex({ createdAt: 1 }, { expireAfterSeconds: 600 }); // Auto-expire after 10 minutes
-        await db.collection('trust_badges').createIndex({ discordId: 1 }, { unique: true });
-        await db.collection('trust_badges').createIndex({ walletAddress: 1 });
-        
-        console.log('✅ MongoDB connected');
-    } catch (error) {
-        console.error('❌ MongoDB connection failed:', error.message);
-        console.log('⚠️  Continuing with in-memory storage');
-    }
+    // SQLite is automatically initialized in db/db.js
+    // No setup required - zero-config database
+    console.log('✅ Database ready (SQLite)');
 }
 
 async function initializeSolana() {
@@ -284,18 +241,6 @@ async function createNFTMetadata(discordId, discordUsername, walletAddress, term
 
 async function storeTipRecord({ senderId, receiverId, amount, currency, signature, timestamp = new Date() }) {
     try {
-        if (db) {
-            await db.collection('tips').insertOne({
-                sender: String(senderId),
-                receiver: String(receiverId),
-                amount,
-                currency,
-                signature: signature || null,
-                createdAt: new Date(timestamp),
-            });
-            return;
-        }
-
         sqlite.recordTip(String(senderId), String(receiverId), amount, currency, signature || null);
     } catch (error) {
         console.error('Failed to store tip record:', error);
@@ -304,24 +249,6 @@ async function storeTipRecord({ senderId, receiverId, amount, currency, signatur
 
 async function fetchTipHistory(limit = 20) {
     const safeLimit = Math.min(Math.max(limit, 1), 100);
-
-    if (db) {
-        const tips = await db.collection('tips')
-            .find({})
-            .sort({ createdAt: -1 })
-            .limit(safeLimit)
-            .toArray();
-
-        return tips.map((tip) => ({
-            sender: tip.sender,
-            receiver: tip.receiver,
-            amount: tip.amount,
-            currency: tip.currency,
-            timestamp: tip.createdAt,
-            signature: tip.signature || null,
-        }));
-    }
-
     return sqlite.getRecentTips(safeLimit).map((tip) => ({
         sender: tip.sender,
         receiver: tip.receiver,
@@ -333,53 +260,14 @@ async function fetchTipHistory(limit = 20) {
 }
 
 async function findTrustBadgeByDiscordId(discordId) {
-    if (db) {
-        const record = await db.collection('trust_badges').findOne({ discordId: String(discordId) });
-        if (record) {
-            return {
-                discord_id: record.discordId,
-                wallet_address: record.walletAddress,
-                mint_address: record.mintAddress,
-                reputation_score: record.reputationScore || 0,
-            };
-        }
-    }
-
     return sqlite.getTrustBadgeByDiscordId(String(discordId));
 }
 
 async function upsertTrustBadgeRecord(discordId, walletAddress, mintAddress, discordUsername, reputationScore = 0) {
-    if (db) {
-        await db.collection('trust_badges').updateOne(
-            { discordId: String(discordId) },
-            {
-                $set: {
-                    discordId: String(discordId),
-                    walletAddress: walletAddress,
-                    mintAddress,
-                    reputationScore,
-                    discordUsername: discordUsername || null,
-                    updatedAt: new Date(),
-                },
-            },
-            { upsert: true },
-        );
-    }
-
     await database.saveTrustBadge(String(discordId), walletAddress, mintAddress, reputationScore);
 }
 
 async function adjustReputation(discordId, delta) {
-    if (db) {
-        await db.collection('trust_badges').updateOne(
-            { discordId: String(discordId) },
-            {
-                $inc: { reputationScore: delta },
-                $set: { updatedAt: new Date() },
-            },
-        );
-    }
-
     return database.updateReputation(String(discordId), delta);
 }
 
@@ -409,7 +297,7 @@ async function mintTrustBadgeNft({ discordUserId, discordUsername, walletAddress
 }
 
 // ===== WALLET REGISTRATION STORAGE =====
-// In-memory fallback for nonces when database is unavailable
+// In-memory nonce tracking (expires after 10 minutes)
 const registrationNoncesMemory = new Map();
 
 // Helper function to clean up expired nonces from memory
@@ -424,25 +312,8 @@ function cleanupExpiredNoncesMemory() {
     }
 }
 
-// Helper function to clean up expired nonces from database
-async function cleanupExpiredNoncesDB() {
-    if (!db) return;
-    
-    try {
-        const TEN_MINUTES_AGO = new Date(Date.now() - 10 * 60 * 1000);
-        await db.collection('registration_nonces').deleteMany({
-            createdAt: { $lt: TEN_MINUTES_AGO }
-        });
-    } catch (error) {
-        console.error('Error cleaning up nonces:', error);
-    }
-}
-
 // Run cleanup every 5 minutes
-setInterval(() => {
-    cleanupExpiredNoncesMemory();
-    cleanupExpiredNoncesDB();
-}, 5 * 60 * 1000);
+setInterval(cleanupExpiredNoncesMemory, 5 * 60 * 1000);
 
 // Helper function to check and store nonce
 async function checkAndStoreNonce(nonce, discordUserId, discordUsername) {
@@ -451,39 +322,20 @@ async function checkAndStoreNonce(nonce, discordUserId, discordUsername) {
         throw new Error('Invalid parameter types');
     }
     
-    if (db) {
-        // Use database for persistent storage
-        const existing = await db.collection('registration_nonces').findOne({ nonce: String(nonce) });
-        if (existing) {
-            return { valid: false, used: existing.used };
-        }
-        
-        // Store nonce in database
-        await db.collection('registration_nonces').insertOne({
-            nonce: String(nonce),
-            discordUserId: String(discordUserId),
-            discordUsername: String(discordUsername),
-            createdAt: new Date(),
-            used: false
-        });
-        
-        return { valid: true, used: false };
-    } else {
-        // Fallback to in-memory storage
-        if (registrationNoncesMemory.has(nonce)) {
-            const data = registrationNoncesMemory.get(nonce);
-            return { valid: false, used: data.used };
-        }
-        
-        registrationNoncesMemory.set(nonce, {
-            discordUserId,
-            discordUsername,
-            createdAt: Date.now(),
-            used: false
-        });
-        
-        return { valid: true, used: false };
+    // Check in-memory storage
+    if (registrationNoncesMemory.has(nonce)) {
+        const data = registrationNoncesMemory.get(nonce);
+        return { valid: false, used: data.used };
     }
+    
+    registrationNoncesMemory.set(nonce, {
+        discordUserId,
+        discordUsername,
+        createdAt: Date.now(),
+        used: false
+    });
+    
+    return { valid: true, used: false };
 }
 
 // Helper function to mark nonce as used
@@ -493,17 +345,10 @@ async function markNonceAsUsed(nonce) {
         throw new Error('Invalid nonce type');
     }
     
-    if (db) {
-        await db.collection('registration_nonces').updateOne(
-            { nonce: String(nonce) },
-            { $set: { used: true, usedAt: new Date() } }
-        );
-    } else {
-        const data = registrationNoncesMemory.get(nonce);
-        if (data) {
-            data.used = true;
-            registrationNoncesMemory.set(nonce, data);
-        }
+    const data = registrationNoncesMemory.get(nonce);
+    if (data) {
+        data.used = true;
+        registrationNoncesMemory.set(nonce, data);
     }
 }
 
@@ -756,18 +601,9 @@ app.get('/api/registerwallet/status/:discordUserId', walletRegistrationLimiter, 
             });
         }
 
-        if (!db) {
-            return res.status(503).json({
-                success: false,
-                error: 'Database not available'
-            });
-        }
+        const walletAddress = await database.getUserWallet(String(discordUserId));
 
-        const registration = await db.collection('wallet_registrations').findOne({ 
-            discordUserId: String(discordUserId)
-        });
-
-        if (!registration) {
+        if (!walletAddress) {
             return res.json({
                 success: true,
                 registered: false
@@ -777,8 +613,7 @@ app.get('/api/registerwallet/status/:discordUserId', walletRegistrationLimiter, 
         res.json({
             success: true,
             registered: true,
-            walletAddress: registration.walletAddress,
-            verifiedAt: registration.verifiedAt
+            walletAddress: walletAddress
         });
 
     } catch (error) {
@@ -796,7 +631,7 @@ app.get('/api/health', (req, res) => {
     res.json({
         status: 'ok',
         timestamp: new Date().toISOString(),
-        database: db ? 'connected' : 'disconnected',
+        database: 'connected (SQLite)',
         solana: connection ? 'connected' : 'disconnected',
         nftMinting: metaplex ? 'enabled' : 'disabled',
         solanaCluster: CONFIG.SOLANA_CLUSTER,
