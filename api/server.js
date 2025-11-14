@@ -22,6 +22,9 @@ const { PublicKey } = require('@solana/web3.js');
 const nacl = require('tweetnacl');
 const bs58 = require('bs58');
 const adminRoutes = require('./adminRoutes');
+const walletRoutes = require('./walletRoutes');
+const tipsRoutes = require('./tipsRoutes');
+const healthRoutes = require('./healthRoutes');
 const solanaDevTools = require('../src/utils/solanaDevTools');
 const coinbaseClient = require('../src/utils/coinbaseClient');
 const X402PaymentHandler = require('../src/utils/x402PaymentHandler');
@@ -125,16 +128,6 @@ app.get('/.well-known/apple-app-site-association', (req, res) => {
         }
     };
     res.type('application/json').json(config);
-});
-
-// Rate limiting for wallet registration
-const rateLimit = require('express-rate-limit');
-const walletRegistrationLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 5, // Limit each IP to 5 requests per windowMs
-    message: 'Too many registration attempts, please try again later.',
-    standardHeaders: true,
-    legacyHeaders: false,
 });
 
 // ===== DATABASE =====
@@ -296,394 +289,6 @@ async function mintTrustBadgeNft({ discordUserId, discordUsername, walletAddress
     return mintAddress.toBase58();
 }
 
-// ===== WALLET REGISTRATION STORAGE =====
-// In-memory nonce tracking (expires after 10 minutes)
-const registrationNoncesMemory = new Map();
-
-// Helper function to clean up expired nonces from memory
-function cleanupExpiredNoncesMemory() {
-    const now = Date.now();
-    const TEN_MINUTES = 10 * 60 * 1000;
-    
-    for (const [nonce, data] of registrationNoncesMemory.entries()) {
-        if (now - data.createdAt > TEN_MINUTES) {
-            registrationNoncesMemory.delete(nonce);
-        }
-    }
-}
-
-// Run cleanup every 5 minutes
-setInterval(cleanupExpiredNoncesMemory, 5 * 60 * 1000);
-
-// Helper function to check and store nonce
-async function checkAndStoreNonce(nonce, discordUserId, discordUsername) {
-    // Validate input parameters to prevent injection
-    if (typeof nonce !== 'string' || typeof discordUserId !== 'string') {
-        throw new Error('Invalid parameter types');
-    }
-    
-    // Check in-memory storage
-    if (registrationNoncesMemory.has(nonce)) {
-        const data = registrationNoncesMemory.get(nonce);
-        return { valid: false, used: data.used };
-    }
-    
-    registrationNoncesMemory.set(nonce, {
-        discordUserId,
-        discordUsername,
-        createdAt: Date.now(),
-        used: false
-    });
-    
-    return { valid: true, used: false };
-}
-
-// Helper function to mark nonce as used
-async function markNonceAsUsed(nonce) {
-    // Validate input parameter
-    if (typeof nonce !== 'string') {
-        throw new Error('Invalid nonce type');
-    }
-    
-    const data = registrationNoncesMemory.get(nonce);
-    if (data) {
-        data.used = true;
-        registrationNoncesMemory.set(nonce, data);
-    }
-}
-
-// ===== API ENDPOINTS =====
-
-app.get('/api/tips', async (req, res) => {
-    try {
-        const limit = req.query.limit ? Number.parseInt(req.query.limit, 10) : 20;
-        const tips = await fetchTipHistory(Number.isNaN(limit) ? 20 : limit);
-        res.json({ success: true, tips });
-    } catch (error) {
-        console.error('Failed to fetch tip history:', error);
-        res.status(500).json({ success: false, error: 'Unable to load tip history' });
-    }
-});
-
-app.post('/api/verifyWallet', async (req, res) => {
-    try {
-        const { discordUserId, discordUsername, walletAddress, message, signature } = req.body;
-
-        if (!discordUserId || !walletAddress || !message || !signature) {
-            return res.status(400).json({ success: false, error: 'discordUserId, walletAddress, message and signature are required.' });
-        }
-
-        if (!/^\d+$/.test(String(discordUserId))) {
-            return res.status(400).json({ success: false, error: 'Invalid Discord user id' });
-        }
-
-        const signatureValid = verifySignature(message, signature, walletAddress);
-        if (!signatureValid) {
-            return res.status(401).json({ success: false, error: 'Invalid wallet signature' });
-        }
-
-        const existing = await findTrustBadgeByDiscordId(discordUserId);
-        if (existing && existing.wallet_address === walletAddress) {
-            return res.json({
-                success: true,
-                alreadyVerified: true,
-                mintAddress: existing.mint_address,
-                reputationScore: existing.reputation_score || 0,
-            });
-        }
-
-        const mintAddress = await mintTrustBadgeNft({
-            discordUserId,
-            discordUsername,
-            walletAddress,
-        });
-
-        const previousScore = existing ? existing.reputation_score || 0 : 0;
-        await upsertTrustBadgeRecord(discordUserId, walletAddress, mintAddress, discordUsername, previousScore);
-
-        res.json({
-            success: true,
-            mintAddress,
-            reputationScore: previousScore,
-            alreadyVerified: Boolean(existing),
-        });
-    } catch (error) {
-        console.error('Wallet verification failed:', error);
-        res.status(500).json({ success: false, error: error.message || 'Wallet verification failed' });
-    }
-});
-
-// Verify wallet signature and register wallet
-app.post('/api/registerwallet/verify', walletRegistrationLimiter, async (req, res) => {
-    try {
-        const {
-            message,
-            publicKey,
-            signature,
-            discordUserId,
-            discordUsername,
-            nonce
-        } = req.body;
-
-        // Validate required fields
-        if (!message || !publicKey || !signature || !discordUserId || !nonce) {
-            return res.status(400).json({
-                success: false,
-                error: 'Missing required fields'
-            });
-        }
-        
-        // Validate field types to prevent injection
-        if (typeof message !== 'string' || typeof publicKey !== 'string' || 
-            typeof signature !== 'string' || typeof discordUserId !== 'string' || 
-            typeof nonce !== 'string') {
-            return res.status(400).json({
-                success: false,
-                error: 'Invalid field types'
-            });
-        }
-        
-        // Validate Discord user ID format (should be numeric string)
-        if (!/^\d+$/.test(discordUserId)) {
-            return res.status(400).json({
-                success: false,
-                error: 'Invalid Discord user ID format'
-            });
-        }
-        
-        // Validate nonce format (UUID v4)
-        if (!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(nonce)) {
-            return res.status(400).json({
-                success: false,
-                error: 'Invalid nonce format'
-            });
-        }
-
-        // Check and store nonce
-        const nonceCheck = await checkAndStoreNonce(nonce, discordUserId, discordUsername);
-        if (!nonceCheck.valid) {
-            if (nonceCheck.used) {
-                return res.status(400).json({
-                    success: false,
-                    error: 'Nonce already used. Please request a new registration link.'
-                });
-            }
-            return res.status(400).json({
-                success: false,
-                error: 'Invalid nonce. Please request a new registration link.'
-            });
-        }
-
-        // Parse and validate the message
-        let messageData;
-        try {
-            messageData = JSON.parse(message);
-        } catch (error) {
-            return res.status(400).json({
-                success: false,
-                error: 'Invalid message format'
-            });
-        }
-
-        // Verify message timestamp (not older than 10 minutes)
-        const messageTime = new Date(messageData.timestamp).getTime();
-        const now = Date.now();
-        const TEN_MINUTES = 10 * 60 * 1000;
-
-        if (now - messageTime > TEN_MINUTES) {
-            return res.status(400).json({
-                success: false,
-                error: 'Registration link expired. Please request a new one.'
-            });
-        }
-
-        // Verify the signature
-        try {
-            const messageBytes = new TextEncoder().encode(message);
-            let signatureBytes;
-            
-            // Try to decode signature - support both base64 and base58 formats
-            try {
-                // First try base64 (standard format)
-                signatureBytes = Buffer.from(signature, 'base64');
-                
-                // Validate the decoded signature length (should be 64 bytes for ed25519)
-                if (signatureBytes.length !== 64) {
-                    throw new Error('Invalid base64 signature length');
-                }
-            } catch (base64Error) {
-                // If base64 fails, try base58 (common in Solana wallets)
-                try {
-                    signatureBytes = bs58.decode(signature);
-                    
-                    if (signatureBytes.length !== 64) {
-                        throw new Error('Invalid base58 signature length');
-                    }
-                } catch (base58Error) {
-                    console.error('Signature decode error:', { base64Error, base58Error });
-                    return res.status(401).json({
-                        success: false,
-                        error: 'Invalid signature format. Please provide signature in base64 or base58 format.'
-                    });
-                }
-            }
-            
-            const publicKeyBytes = new PublicKey(publicKey).toBytes();
-            
-            const isValid = nacl.sign.detached.verify(
-                messageBytes,
-                signatureBytes,
-                publicKeyBytes
-            );
-
-            if (!isValid) {
-                return res.status(401).json({
-                    success: false,
-                    error: 'Invalid signature'
-                });
-            }
-        } catch (error) {
-            console.error('Signature verification error:', error);
-            return res.status(401).json({
-                success: false,
-                error: 'Signature verification failed'
-            });
-        }
-
-        // Check if wallet already registered to a different user
-        const existingWallet = sqlite.getUserWallet(discordUserId);
-        if (existingWallet && existingWallet !== String(publicKey)) {
-            // Different wallet for same user - update it
-            console.log(`Updating wallet for user ${discordUserId}: ${existingWallet} -> ${publicKey}`);
-        }
-
-        // Store wallet registration in SQLite
-        const registration = {
-            discordUserId: String(discordUserId),
-            discordUsername: String(discordUsername || 'Unknown'),
-            walletAddress: String(publicKey),
-            verifiedAt: new Date().toISOString(),
-            nonce: String(nonce),
-            messageData
-        };
-
-        // Save to SQLite database
-        await database.saveUserWallet(String(discordUserId), String(publicKey));
-
-        console.log(`✅ Wallet registered: ${discordUserId} -> ${publicKey}`);
-
-        res.json({
-            success: true,
-            message: 'Wallet registered successfully',
-            walletAddress: publicKey
-        });
-
-    } catch (error) {
-        console.error('Wallet registration error:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Internal server error',
-            message: error.message
-        });
-    }
-});
-
-// Get wallet registration status
-app.get('/api/registerwallet/status/:discordUserId', walletRegistrationLimiter, async (req, res) => {
-    try {
-        const { discordUserId } = req.params;
-        
-        // Validate Discord user ID format
-        if (!/^\d+$/.test(discordUserId)) {
-            return res.status(400).json({
-                success: false,
-                error: 'Invalid Discord user ID format'
-            });
-        }
-
-        const walletAddress = await database.getUserWallet(String(discordUserId));
-
-        if (!walletAddress) {
-            return res.json({
-                success: true,
-                registered: false
-            });
-        }
-
-        res.json({
-            success: true,
-            registered: true,
-            walletAddress: walletAddress
-        });
-
-    } catch (error) {
-        console.error('Status check error:', error);
-        res.status(500).json({
-            success: false,
-            error: error.message
-        });
-    }
-});
-
-// Health check
-app.get('/api/health', (req, res) => {
-    const devStatus = solanaDevTools.getStatus();
-    res.json({
-        status: 'ok',
-        timestamp: new Date().toISOString(),
-        database: 'connected (SQLite)',
-        solana: connection ? 'connected' : 'disconnected',
-        nftMinting: metaplex ? 'enabled' : 'disabled',
-        solanaCluster: CONFIG.SOLANA_CLUSTER,
-        coinbasePayments: {
-            apiKeyConfigured: Boolean(CONFIG.COINBASE_COMMERCE_API_KEY),
-            webhookConfigured: Boolean(CONFIG.COINBASE_COMMERCE_WEBHOOK_SECRET)
-        },
-        x402Payments: {
-            enabled: Boolean(x402Handler),
-            treasuryConfigured: Boolean(CONFIG.X402_TREASURY_WALLET),
-            network: CONFIG.SOLANA_CLUSTER
-        },
-        devTools: {
-            defaultCluster: devStatus.defaultCluster,
-            connections: devStatus.connections.length,
-            mintAuthorities: devStatus.mintAuthorities.map((item) => item.publicKey)
-        },
-        // Debug fields (sanitized)
-        hasMintKey: Boolean(CONFIG.MINT_AUTHORITY_KEYPAIR),
-        mintKeyLength: CONFIG.MINT_AUTHORITY_KEYPAIR ? CONFIG.MINT_AUTHORITY_KEYPAIR.length : 0,
-        metaplexInitialized: Boolean(metaplex),
-        version: '2025-11-07-x402'
-    });
-});
-
-// Diagnostics (sanitized) - no secrets exposed
-app.get('/api/diag', (req, res) => {
-    try {
-        const key = CONFIG.MINT_AUTHORITY_KEYPAIR || '';
-        const preview = key ? `${key.substring(0, 8)}...${key.substring(key.length - 6)}` : null;
-        let rpcHost = null;
-        try {
-            const url = new URL(CONFIG.SOLANA_RPC_URL);
-            rpcHost = url.hostname;
-        } catch (_) {
-            rpcHost = CONFIG.SOLANA_RPC_URL;
-        }
-
-        res.json({
-            status: 'ok',
-            solanaRpcHost: rpcHost,
-            hasMintKey: Boolean(key),
-            mintKeyLength: key ? key.length : 0,
-            mintKeyPreview: preview,
-            metaplexInitialized: Boolean(metaplex),
-            coinbaseConfigured: Boolean(CONFIG.COINBASE_COMMERCE_API_KEY),
-            coinbaseWebhookConfigured: Boolean(CONFIG.COINBASE_COMMERCE_WEBHOOK_SECRET)
-        });
-    } catch (error) {
-        res.status(500).json({ status: 'error', message: error.message });
-    }
-});
 
 // Solana dev tools status
 app.get('/api/solana/devtools/status', (req, res) => {
@@ -1157,6 +762,14 @@ try {
         treasuryAddress: CONFIG.X402_TREASURY_WALLET
     });
     console.log('✅ x402 Payment Handler initialized');
+    
+    // Initialize health routes with server context
+    healthRoutes.initialize({
+        CONFIG,
+        connection,
+        metaplex,
+        x402Handler
+    });
 } catch (error) {
     console.warn('⚠️  x402 Payment Handler initialization failed:', error.message);
 }
@@ -1342,6 +955,15 @@ app.get('/api/x402/info', (req, res) => {
 // ===== MOUNT ROUTES =====
 // Admin dashboard routes
 app.use('/api/admin', adminRoutes);
+
+// Wallet registration routes
+app.use('/api', walletRoutes);
+
+// Tips routes
+app.use('/api', tipsRoutes);
+
+// Health and diagnostics routes
+app.use('/api', healthRoutes);
 
 // WalletConnect Configuration Endpoint
 // Serves public WalletConnect project ID (safe to expose to frontend)

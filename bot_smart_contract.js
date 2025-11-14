@@ -67,7 +67,6 @@ const smartContractCommands = improvedCommands;
 
 // In-memory user wallet registry (in production, use a database)
 // Note: This is being phased out in favor of database-only storage
-const userWallets = new Map();
 
 // Get API URL for wallet registration page (sign.html is served by API server)
 const API_URL = process.env.API_BASE_URL || 'https://api.mischief-manager.com';
@@ -79,16 +78,6 @@ client.once('ready', async () => {
   // Connect to database (optional)
   await db.connectDB();
   
-  // Load all registered wallets from database
-  try {
-    const wallets = await db.getAllWallets();
-    wallets.forEach(({ user_id, wallet_address }) => {
-      userWallets.set(user_id, wallet_address);
-    });
-    console.log(`✅ Loaded ${wallets.length} registered wallets from database`);
-  } catch (error) {
-    console.error('⚠️  Error loading wallets from database:', error);
-  }
   
   // Register smart contract commands
   const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_BOT_TOKEN);
@@ -132,8 +121,7 @@ client.on(Events.InteractionCreate, async interaction => {
     sdk,
     database: db,
     priceService,
-    client,
-    userWallets  // For backward compatibility, will be removed
+    client
   };
   
   try {
@@ -197,7 +185,7 @@ client.on(Events.InteractionCreate, async interaction => {
   
   if (interaction.customId === 'refresh_sc_balance') {
     const userId = interaction.user.id;
-    const walletAddress = userWallets.get(userId);
+    const walletAddress = await db.getUserWallet(userId);
     
     if (!walletAddress) {
       return interaction.update({ 
@@ -215,7 +203,7 @@ client.on(Events.InteractionCreate, async interaction => {
     
   } else if (interaction.customId === 'refresh_balance') {
     const userId = interaction.user.id;
-    const walletAddress = userWallets.get(userId);
+    const walletAddress = await db.getUserWallet(userId);
     
     if (!walletAddress) {
       return interaction.update({ 
