@@ -26,7 +26,7 @@ const SUPPORTED_WALLETS = [
         icon: '🟠',
         description: 'Secure Solana wallet',
         downloadUrl: 'https://solflare.com/',
-        mobileDeepLink: (uri) => `https://solflare.com/ul/v1/connect?ref=${encodeURIComponent(window.location.href)}&cluster=mainnet`,
+        mobileDeepLink: (_uri) => `https://solflare.com/ul/v1/connect?ref=${encodeURIComponent(window.location.href)}&cluster=mainnet`,
         desktopExtension: window.solflare
     },
     {

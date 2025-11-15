@@ -17,9 +17,7 @@ const {
   isValidSolanaAddress,
   isValidAmount,
   isSupportedCoin,
-  isValidAddress,
   sanitizeString,
-  verifySignature,
 } = require('../src/utils/validation');
 
 const rateLimiter = require('../src/utils/rateLimiter');

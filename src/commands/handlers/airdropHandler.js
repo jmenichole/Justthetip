@@ -14,6 +14,9 @@ const crypto = require('crypto');
 const database = require('../../../db/database');
 const priceService = require('../../utils/priceService');
 
+// API URL for claim links
+const API_URL = process.env.API_BASE_URL || 'https://api.mischief-manager.com';
+
 /**
  * Parse expiration string to milliseconds
  * @param {string} expiresIn - Format: "2m", "1h", "24h", "7d", etc.

@@ -19,8 +19,6 @@ const cors = require('cors');
 const helmet = require('helmet');
 const path = require('path');
 const { PublicKey } = require('@solana/web3.js');
-const nacl = require('tweetnacl');
-const bs58 = require('bs58');
 const adminRoutes = require('./adminRoutes');
 const walletRoutes = require('./walletRoutes');
 const tipsRoutes = require('./tipsRoutes');
@@ -233,7 +231,7 @@ async function createNFTMetadata(discordId, discordUsername, walletAddress, term
     return metadata;
 }
 
-async function storeTipRecord({ senderId, receiverId, amount, currency, signature, timestamp = new Date() }) {
+async function storeTipRecord({ senderId, receiverId, amount, currency, signature, timestamp: _timestamp = new Date() }) {
     try {
         sqlite.recordTip(String(senderId), String(receiverId), amount, currency, signature || null);
     } catch (error) {
@@ -549,7 +547,7 @@ app.post('/api/mintBadge', async (req, res) => {
         const nftMintAddress = nft.address.toString();
         console.log('✅ NFT minted:', nftMintAddress);
 
-        // Save verification to database
+        /* MongoDB disabled - verification data not saved
         const verificationData = {
             discordId,
             discordUsername,
@@ -561,10 +559,10 @@ app.post('/api/mintBadge', async (req, res) => {
             createdAt: new Date()
         };
 
-        /* MongoDB disabled
         if (db) {
             await db.collection('verifications').insertOne(verificationData);
-        } */
+        }
+        */
 
         res.json({
             success: true,
@@ -705,6 +703,7 @@ app.post('/api/ticket', async (req, res) => {
             return res.status(400).json({ error: 'Missing required fields' });
         }
 
+        /* MongoDB disabled - ticket data not saved
         const ticket = {
             ticketId,
             discordId,
@@ -717,8 +716,6 @@ app.post('/api/ticket', async (req, res) => {
             createdAt: new Date()
         };
 
-        /* MongoDB disabled
-        // Save to database
         if (db) {
             await db.collection('tickets').insertOne(ticket);
         }

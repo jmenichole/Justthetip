@@ -17,7 +17,7 @@ const DEVELOPER_WALLET = process.env.DEVELOPER_WALLET || 'YOUR_SOLANA_WALLET_ADD
  * @param {Interaction} interaction - Discord interaction
  * @param {Object} context - Command context
  */
-async function handleDonateCommand(interaction, context) {
+async function handleDonateCommand(interaction, _context) {
   try {
     const embed = new EmbedBuilder()
       .setTitle('☕ Support JustTheTip Development')

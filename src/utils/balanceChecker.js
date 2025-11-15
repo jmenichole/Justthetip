@@ -46,7 +46,7 @@ async function getSolBalance(connection, walletAddress) {
  * @param {number} decimals - Token decimals
  * @returns {Promise<number>} Token balance
  */
-async function getSplTokenBalance(connection, walletAddress, mintAddress, decimals) {
+async function getSplTokenBalance(connection, walletAddress, mintAddress, _decimals) {
   try {
     const walletPubkey = new PublicKey(walletAddress);
     const mintPubkey = new PublicKey(mintAddress);
