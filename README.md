@@ -1,209 +1,291 @@
-# JustTheTip - Solana Trustless Agent for Discord
+# JustTheTip - Discord Solana Tipping Bot
 
-**x402 Hackathon 2025 Entry**
+A Discord bot that enables seamless Solana (SOL) tipping and airdrops with automatic wallet creation for users.
 
-Non-custodial Discord tipping bot powered by Solana. Sign once, tip forever with SOL, USDC, BONK, and more. Works on mobile and desktop with full WalletConnect support.
+## 🚀 Features
 
-## 🚀 Quick Start
+- **On-Demand Wallet Creation** - Automatically creates Solana wallets when users receive their first tip or airdrop
+- **Secure Encryption** - Private keys encrypted with AES-256-GCM
+- **Discord Integration** - Slash commands for tipping, airdrops, and wallet management
+- **User-Friendly** - No complex setup required for recipients
+- **Transaction Tracking** - Full transaction history and verification
 
-**Users:** Add the bot to Discord and run `/register-wallet` to get started.  
-**Developers:** See [Getting Started](#getting-started) below.
+## 🏗️ Architecture
 
----
+### Core Components
 
-## 🌟 Key Features
-
-### Trustless Agent Technology
-- **Sign Once, Tip Forever** – One wallet signature enables tipping with all tokens
-- **Multi-Token Support** – SOL (live), USDC, BONK, USDT (coming soon)
-- **100% Non-Custodial** – Your keys never leave your wallet
-- **Mobile & Desktop** – WalletConnect, Phantom, Solflare support
-
-### Platform Capabilities
-- **Solana Smart Contracts** – Anchor-based programs for on-chain state tracking
-- **x402 Payment Protocol** – USDC micropayments for premium API features
-- **Wallet Registration** – Cryptographic signature verification (base58 & base64)
-- **NFT Verification** – Metaplex integration for verification badges
-- **Developer Tools** – RPC health checks, devnet airdrops, metadata inspection
-- **Coinbase Commerce** – Fiat on-ramp for crypto purchases
-
----
-
-## Platform Overview
-
-JustTheTip is a **Solana Trustless Agent** that enables friction-free cryptocurrency tipping in Discord communities. Users register their wallet once with a cryptographic signature, then tip with any supported token without signing again. The bot never holds user funds—all transactions are non-custodial and verifiable on-chain.
-
----
-
-## System Architecture
 ```
-┌─────────────────────┐     ┌────────────────────────┐
-│ Discord Slash Bot   │ --> │ Express REST API        │ --> Solana RPC (mainnet/devnet)
-│ (bot_smart_contract)│     │ (api/server.js)         │ --> Metaplex NFT tooling
-└─────────────────────┘     │                        │
-        ↑                   │                        │
-        │                   │                        │ --> Coinbase Commerce (fiat)
-        │                   └────────────────────────┘
-        │                                ↓
-        │                          SQLite (local storage, tips, transactions)
-        │                                ↓
-        └───────── Front-end / Docs (GitHub Pages deployment)
+├── db/
+│   ├── db.js                 # SQLite database connection
+│   └── walletManager.js      # On-demand wallet creation & management
+├── utils/
+│   └── walletHelper.js       # Helper functions for tip/airdrop commands
+├── examples/
+│   └── tipCommandIntegration.js  # Example command implementation
+└── scripts/
+    └── migrateToOnDemand.js  # Migration from pre-gen system
 ```
 
----
+### Database Schema
 
-## Repository Layout
-| Path | Description |
-|------|-------------|
-| `api/` | Express REST API for OAuth, NFT minting, Solana tooling, and Coinbase Commerce webhooks. |
-| `bot_smart_contract.js` | Non-custodial Discord bot using Solana smart contracts instead of wallet custody. This is the main bot implementation. |
-| `deprecated/` | Archived legacy code no longer in use (including old custodial bot). |
-| `contracts/` | TypeScript SDK examples and helpers that interact with the on-chain programs. |
-| `justthetip-contracts/` | Anchor workspace containing the Solana programs and test suite. |
-| `src/utils/` | Shared utilities including logging, Solana dev tools, and Coinbase Commerce client helpers. |
-| `docs/` & guides | Deployment, infrastructure, and quick-start documentation for multiple hosting targets. |
+```sql
+-- User wallets with encrypted private keys
+CREATE TABLE user_wallets (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id TEXT UNIQUE NOT NULL,           -- Discord user ID
+    wallet_address TEXT NOT NULL,           -- Solana public key
+    wallet_id TEXT UNIQUE NOT NULL,         -- Internal wallet UUID
+    private_key_encrypted TEXT NOT NULL,    -- AES-256-GCM encrypted private key
+    network TEXT DEFAULT 'solana',
+    auth_method TEXT DEFAULT 'auto-generated',
+    created_at INTEGER NOT NULL,
+    created_trigger TEXT DEFAULT 'manual',  -- 'tip', 'airdrop', 'manual'
+    discord_username TEXT,
+    user_email TEXT,
+    last_used_at INTEGER
+);
+```
 
----
+## 🔧 Setup
 
-## Getting Started
 ### Prerequisites
-- Node.js 18+ and npm 9+
-- Anchor CLI (`anchor --version`) for building Solana programs
-- Solana CLI configured with access to the desired cluster
-- SQLite database (auto-created, zero configuration required)
+- Node.js 16+
+- Discord Bot Token
+- Solana RPC endpoint
+- SQLite3
 
 ### Installation
+
 ```bash
+# Clone repository
+git clone https://github.com/jmenichole/Justthetip.git
+cd Justthetip
+
+# Install dependencies
 npm install
+
+# Set environment variables
+cp .env.example .env
+# Edit .env with your configuration
 ```
 
-### Environment Bootstrap
-Verify that the minimum set of environment variables is present before running any services:
+### Environment Variables
+
+```env
+# Discord
+DISCORD_TOKEN=your_discord_bot_token
+CLIENT_ID=your_discord_client_id
+
+# Solana
+SOLANA_RPC_URL=https://api.mainnet-beta.solana.com
+SOLANA_NETWORK=mainnet-beta
+
+# Security
+WALLET_ENCRYPTION_KEY=your_32_byte_encryption_key_here
+
+# Database
+DATABASE_PATH=./data/bot.db
+```
+
+### Migration (if upgrading from pre-gen system)
+
 ```bash
-npm run verify-env -- --smart-contract
+node scripts/migrateToOnDemand.js
 ```
 
+## 💡 Usage
+
+### For Bot Developers
+
+#### Basic Tip Command Integration
+
+```javascript
+const walletHelper = require('./utils/walletHelper');
+
+// In your tip command
+async function handleTip(interaction, recipient, amount) {
+    // Ensure recipient has wallet (creates if needed)
+    const walletResult = await walletHelper.ensureWalletForTip(recipient.id, {
+        username: recipient.username
+    });
+
+    if (!walletResult.success) {
+        return interaction.reply(walletResult.message);
+    }
+
+    // Process transaction to walletResult.wallet.wallet_address
+    const txResult = await processTransaction(amount, walletResult.wallet.wallet_address);
+    
+    // Notify user if wallet was auto-created
+    if (walletResult.created) {
+        await notifyNewWallet(recipient, walletResult.wallet);
+    }
+}
+```
+
+#### Airdrop Integration
+
+```javascript
+// For airdrop commands
+const walletResult = await walletHelper.ensureWalletForAirdrop(userId, userData);
+```
+
+#### Wallet Management
+
+```javascript
+const walletManager = require('./db/walletManager');
+
+// Check if user has wallet
+const wallet = walletManager.getUserWallet(userId);
+
+// Get private key for transactions (be careful!)
+const privateKey = walletManager.getUserPrivateKey(userId);
+
+// Get wallet statistics
+const stats = walletManager.getWalletStats();
+```
+
+### For End Users
+
+#### Discord Commands
+
+```
+/tip @user 0.1          # Tip user 0.1 SOL (creates wallet if needed)
+/airdrop @user 0.05     # Airdrop 0.05 SOL to user
+/wallet balance         # Check your wallet balance
+/wallet address         # Get your wallet address
+/wallet send 0.1 <addr> # Send SOL to external address
+```
+
+## 🔒 Security Features
+
+### Encryption
+- **AES-256-GCM** encryption for private keys
+- **Unique IV** for each encryption operation
+- **Authentication tags** prevent tampering
+- **Environment-based keys** for production security
+
+### Best Practices
+- Private keys never stored in plaintext
+- Automatic wallet creation reduces user error
+- Transaction verification and logging
+- Rate limiting on wallet operations
+
+## 🛠️ Development
+
+### Key Classes
+
+#### WalletManager (`db/walletManager.js`)
+```javascript
+class WalletManager {
+    // Create wallet when user receives tip/airdrop
+    async createWalletForUser(userId, userData, trigger)
+    
+    // Check if user has existing wallet
+    getUserWallet(userId)
+    
+    // Get decrypted private key for transactions
+    getUserPrivateKey(userId)
+    
+    // Generate new Solana keypair
+    generateSolanaWallet()
+}
+```
+
+#### WalletHelper (`utils/walletHelper.js`)
+```javascript
+class WalletHelper {
+    // Ensure wallet exists for tip recipient
+    async ensureWalletForTip(userId, userData)
+    
+    // Ensure wallet exists for airdrop recipient  
+    async ensureWalletForAirdrop(userId, userData)
+    
+    // Get formatted wallet info
+    getUserWalletInfo(userId)
+}
+```
+
+### Testing
+
+```bash
+# Run tests
+npm test
+
+# Test wallet creation
+node -e "
+const wm = require('./db/walletManager');
+wm.initializeWalletTables();
+console.log('Tables initialized');
+"
+
+# Test encryption/decryption
+node -e "
+const wm = require('./db/walletManager');
+const key = 'test_private_key_here';
+const encrypted = wm.encryptPrivateKey(key);
+const decrypted = wm.decryptPrivateKey(encrypted);
+console.log('Encryption test:', key === decrypted ? 'PASS' : 'FAIL');
+"
+```
+
+## 📊 Monitoring
+
+### Wallet Statistics
+```javascript
+const stats = walletManager.getWalletStats();
+// Returns: { total, tipCreated, airdropCreated, createdToday }
+```
+
+### Database Queries
+```sql
+-- Check wallet creation triggers
+SELECT created_trigger, COUNT(*) FROM user_wallets GROUP BY created_trigger;
+
+-- Recent wallet activity
+SELECT * FROM user_wallets WHERE created_at > datetime('now', '-7 days');
+```
+
+## 🚨 Important Notes
+
+### Migration from Pre-Generation System
+If upgrading from the old pre-generation wallet system:
+1. Run `node scripts/migrateToOnDemand.js`
+2. Update all tip/airdrop commands to use `walletHelper`
+3. Remove old `pregenWalletDb.js` references
+
+### Production Deployment
+- Set strong `WALLET_ENCRYPTION_KEY` (32 bytes)
+- Use secure Solana RPC endpoint
+- Enable database backups
+- Monitor wallet creation rates
+- Implement transaction fee management
+
+### User Experience Flow
+1. User receives tip/airdrop without wallet
+2. Bot automatically creates encrypted wallet
+3. User gets notification with wallet address
+4. Bot sends transaction to new wallet
+5. User can manage wallet with Discord commands
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open Pull Request
+
+## 📝 License
+
+This software is proprietary and confidential. Unauthorized copying, distribution, or use is strictly prohibited.
+
+## 🔗 Links
+
+- **Website**: [mischiefmanager.org](https://mischiefmanager.org)
+- **Discord**: [Join our server](#)
+- **Documentation**: [Full API docs](#)
+
 ---
 
-## Configuration
-Define configuration in a `.env` file (or your hosting provider). Key variables consumed by `api/server.js` include:
-
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `SOLANA_CLUSTER` | Optional | Target cluster (`mainnet-beta`, `devnet`, etc.). Defaults to `mainnet-beta`. |
-| `SOLANA_RPC_URL` | Optional | Custom RPC endpoint for the primary cluster. |
-| `SOLANA_DEVNET_RPC_URL` | Optional | Overrides devnet RPC when using developer tools or airdrops. |
-| `WALLETCONNECT_PROJECT_ID` | **Required** | Project ID from https://cloud.reown.com/ for mobile wallet support. Without this, users will see raw WalletConnect URIs. See [WalletConnect Setup Guide](./docs/WALLETCONNECT_SETUP.md). |
-| `MINT_AUTHORITY_KEYPAIR` | Recommended | Base58 secret key enabling NFT minting via Metaplex. |
-| `VERIFIED_COLLECTION_ADDRESS` | Optional | Collection address to group verification NFTs. |
-| `NFT_STORAGE_API_KEY` | Optional | Enables Arweave uploads via Metaplex irys storage adapter. |
-| `DISCORD_CLIENT_ID` | Required | OAuth client used for the Discord login flow. |
-| `DISCORD_CLIENT_SECRET` | Required | Secret for exchanging OAuth codes. |
-| `DISCORD_REDIRECT_URI` | Required | Redirect URL registered with Discord. |
-| `COINBASE_COMMERCE_API_KEY` | Optional | Enables fiat charge creation and retrieval. |
-| `COINBASE_COMMERCE_WEBHOOK_SECRET` | Optional | Required to validate Coinbase webhook signatures. |
-
-Additional blockchain-specific guides live in the `/docs` and root-level `*_GUIDE.md` files.
-
----
-
-## Running the Stack
-| Command | Purpose |
-|---------|---------|
-| `npm run start` | Launches the Express API (`api/server.js`). |
-| `npm run start:bot` | Starts the non-custodial Discord bot after verifying environment requirements. |
-| `npm run start:smart-contract` | Alternative command to start the non-custodial Discord bot. |
-| `npm run demo:sdk` | Demonstrates Solana SDK usage via `contracts/example.js`. |
-| `npm run build:contracts` | Builds the Anchor programs in `justthetip-contracts`. |
-| `npm run test:contracts` | Executes Anchor integration tests. |
-| `npm run deploy:devnet` / `deploy:mainnet` | Deploys the Solana program to the respective cluster. |
-
-Services expect Solana RPC endpoints to be reachable from the execution environment. Database is stored locally using SQLite.
-
----
-
-## Solana Developer Toolkit
-`src/utils/solanaDevTools.js` centralizes Solana connectivity, Metaplex configuration, and diagnostics used by the API:
-- Connection pooling per cluster with `getStatus()` observability exposed at `GET /api/solana/devtools/status`.
-- Program account introspection via `GET /api/solana/devtools/program/:programId/accounts`.
-- Devnet/testnet airdrops through `POST /api/solana/devtools/airdrop` (guarded against mainnet usage).
-- NFT metadata retrieval with `GET /api/solana/devtools/nft/:mintAddress`.
-
-These helpers can be imported into scripts or bots to reuse the same RPC session and mint authority caching logic.
-
----
-
-## Coinbase Commerce Integration
-Enable fiat onboarding with Coinbase Commerce credentials:
-- `POST /api/payments/coinbase/charges` creates charges for premium features or NFT mints.
-- `GET /api/payments/coinbase/charges/:id` polls payment state.
-- `POST /api/payments/coinbase/webhook` validates webhook signatures using the shared secret before processing events.
-
-`src/utils/coinbaseClient.js` wraps Axios with Coinbase headers, performs timing-safe webhook verification, and is reusable for other services.
-
----
-
-## Discord Bot Operations
-- **Smart Contract Bot:** `bot_smart_contract.js` exposes slash commands such as `/register-wallet`, `/balance`, `/sc-tip`, `/sc-balance`, `/support`, and `/generate-pda` using on-chain state instead of custodial balances.
-- **Command Registration:** Run `node register-commands.js` after updating slash commands to sync them with your Discord application.
-
-Refer to `QUICKSTART_SOLANA.md`, `BOT_RAILWAY_SETUP.md`, and related guides for deployment targets like Railway or Docker.
-
----
-
-## REST API Endpoints
-The Express API (see `api/server.js`) provides:
-- `GET /api/health` – Overall system health, Solana connection status, and Coinbase configuration hints.
-- `GET /api/diag` – Sanitized diagnostics confirming RPC hosts and mint authority previews.
-- `POST /api/discord/token` – Exchanges Discord OAuth codes for access tokens and user identity.
-- `POST /api/mintBadge` – Mints verification NFTs after signature validation.
-- `GET /api/verification/:discordId` – Retrieves verification status.
-- `POST /api/ticket` & `GET /api/tickets/:discordId` – Minimal support ticket intake and history.
-- Solana developer tooling and Coinbase Commerce routes described above.
-
-Each handler is written with explicit validation and produces JSON responses suitable for front-end integration.
-
----
-
-## Testing & Quality
-| Command | Description |
-|---------|-------------|
-| `npm test` | Runs Jest unit tests. |
-| `npm run lint` | Executes ESLint using the repository's security-focused configuration. |
-| `npm run audit` | Audits npm dependencies for vulnerabilities. |
-| `npm run test:contracts` | Runs Anchor-based integration tests for the Solana programs. |
-
-CI/CD pipelines should run linting, unit tests, and contract tests before deployment.
-
----
-
-## Deployment Notes
-
-### Discord Bot Deployment
-- **Quick Start**: See [RAILWAY_QUICK_REFERENCE.md](./RAILWAY_QUICK_REFERENCE.md) for fast Railway deployment
-- **Complete Guide**: [RAILWAY_DEPLOYMENT_INSTRUCTIONS.md](./RAILWAY_DEPLOYMENT_INSTRUCTIONS.md) has step-by-step instructions
-- **Troubleshooting**: [RAILWAY_BOT_CHECKLIST.md](./RAILWAY_BOT_CHECKLIST.md) includes verification checklist
-- **Fix Guide**: [FIX_SUMMARY.md](./FIX_SUMMARY.md) documents common issues and solutions
-
-### API Server Deployment
-- The API can be hosted on services like Railway, Vercel, or Heroku; see `RAILWAY_*.md` and `DEPLOY_BACKEND.md` for environment-specific steps.
-- For Vercel deployment, the repository includes a `vercel.json` configuration file that handles API routing and static file serving.
-- Front-end assets are published via GitHub Pages (see `DOCUMENTATION_INDEX.md`).
-
-### Smart Contracts
-- Anchor deployments require cluster-specific keypairs and RPC URLs; consult `SOLANA_PROGRAM_GUIDE.md` and `MAINNET_DEPLOYMENT_GUIDE.md`.
-
-### Security
-- Production environments must secure secrets through managed secret stores and restrict webhook endpoints to HTTPS.
-- Use Railway environment variables for all secrets (DISCORD_BOT_TOKEN, DISCORD_CLIENT_ID, etc.)
-
----
-
-## Additional Resources
-- [GitHub Pages Landing Page](https://jmenichole.github.io/Justthetip/landing.html) – Live marketing site, verification walkthrough, and documentation portal.
-- [COMPLETE_SETUP_GUIDE.md](./COMPLETE_SETUP_GUIDE.md) – End-to-end bot and API provisioning.
-- [IMPLEMENTATION_SUMMARY_SOLANA.md](./IMPLEMENTATION_SUMMARY_SOLANA.md) – Program architecture and PDA design decisions.
-- [CRYPTO_SUPPORT_GUIDE.md](./CRYPTO_SUPPORT_GUIDE.md) – Multi-chain wallet support notes.
-- [USER_PAID_MINTING_SUMMARY.md](./USER_PAID_MINTING_SUMMARY.md) – Token-gated minting flows and UX considerations.
-
-For further assistance, open an issue or contact the maintainers listed in `CONTRIBUTING.md`.
+*Built with ❤️ for the Solana community*
