@@ -1,7 +1,15 @@
 #!/usr/bin/env node
 /**
- * Documentation Organization Script for JustTheTip
+ * JustTheTip - Documentation Organization Script
  *
+ * Copyright (c) 2025 JustTheTip Bot. All rights reserved.
+ * 
+ * This file is part of JustTheTip.
+ * 
+ * This software is proprietary and confidential.
+ * Unauthorized copying, distribution, or use is strictly prohibited.
+ * See LICENSE file in the project root for full license information.
+ * 
  * Organizes and validates all documentation files
  * Creates a comprehensive documentation index
  * Identifies orphaned or duplicate docs

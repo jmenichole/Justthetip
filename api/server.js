@@ -2,16 +2,13 @@
  * JustTheTip Backend API - NFT Verification System
  * Express server for Discord OAuth, NFT minting, and ticket management
  * 
- * Copyright (c) 2025 JustTheTip Bot
+ * Copyright (c) 2025 JustTheTip Bot. All rights reserved.
  * 
  * This file is part of JustTheTip.
  * 
- * Licensed under the JustTheTip Custom License (Based on MIT).
+ * This software is proprietary and confidential.
+ * Unauthorized copying, distribution, or use is strictly prohibited.
  * See LICENSE file in the project root for full license information.
- * 
- * SPDX-License-Identifier: MIT
- * 
- * This software may not be sold commercially without permission.
  */
 
 const express = require('express');

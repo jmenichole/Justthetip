@@ -1,7 +1,15 @@
 #!/usr/bin/env node
 /**
- * Kick Integration Setup Script
+ * JustTheTip - Kick Integration Setup Script
  *
+ * Copyright (c) 2025 JustTheTip Bot. All rights reserved.
+ * 
+ * This file is part of JustTheTip.
+ * 
+ * This software is proprietary and confidential.
+ * Unauthorized copying, distribution, or use is strictly prohibited.
+ * See LICENSE file in the project root for full license information.
+ * 
  * This script helps developers set up the Kick integration by:
  * 1. Checking environment variables
  * 2. Running database migrations

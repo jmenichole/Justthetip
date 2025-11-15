@@ -1,7 +1,15 @@
 #!/usr/bin/env node
 /**
- * Git Hooks Setup Script for JustTheTip
+ * JustTheTip - Git Hooks Setup Script
  *
+ * Copyright (c) 2025 JustTheTip Bot. All rights reserved.
+ * 
+ * This file is part of JustTheTip.
+ * 
+ * This software is proprietary and confidential.
+ * Unauthorized copying, distribution, or use is strictly prohibited.
+ * See LICENSE file in the project root for full license information.
+ * 
  * Sets up pre-commit hooks for:
  * - Code linting
  * - Security checks

@@ -1,7 +1,15 @@
 #!/usr/bin/env node
 /**
- * Security Check Script for JustTheTip
+ * JustTheTip - Security Check Script
  *
+ * Copyright (c) 2025 JustTheTip Bot. All rights reserved.
+ * 
+ * This file is part of JustTheTip.
+ * 
+ * This software is proprietary and confidential.
+ * Unauthorized copying, distribution, or use is strictly prohibited.
+ * See LICENSE file in the project root for full license information.
+ * 
  * Performs comprehensive security checks:
  * - NPM audit for vulnerabilities
  * - Secret scanning in code

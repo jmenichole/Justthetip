@@ -1,7 +1,15 @@
 #!/usr/bin/env node
 /**
- * Cleanup Script for JustTheTip
+ * JustTheTip - Cleanup Script
  *
+ * Copyright (c) 2025 JustTheTip Bot. All rights reserved.
+ * 
+ * This file is part of JustTheTip.
+ * 
+ * This software is proprietary and confidential.
+ * Unauthorized copying, distribution, or use is strictly prohibited.
+ * See LICENSE file in the project root for full license information.
+ * 
  * Removes temporary files, logs, cache, and outdated artifacts
  * Usage: npm run clean
  */

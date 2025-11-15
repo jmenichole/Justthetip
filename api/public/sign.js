@@ -1,6 +1,14 @@
 /**
- * JustTheTip Wallet Registration - Client-side JavaScript
+ * JustTheTip - Wallet Registration Client-side JavaScript
  * Handles wallet connection, signature verification, and registration
+ * 
+ * Copyright (c) 2025 JustTheTip Bot. All rights reserved.
+ * 
+ * This file is part of JustTheTip.
+ * 
+ * This software is proprietary and confidential.
+ * Unauthorized copying, distribution, or use is strictly prohibited.
+ * See LICENSE file in the project root for full license information.
  * 
  * This file is loaded by sign.html for CSP compliance (no inline scripts)
  * Supports both desktop browser extensions and mobile wallets via WalletConnect
