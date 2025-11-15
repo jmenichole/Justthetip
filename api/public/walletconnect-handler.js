@@ -1,6 +1,14 @@
 /**
- * WalletConnect AppKit Integration for Solana Wallet Registration
+ * JustTheTip - WalletConnect AppKit Integration
  * Uses @reown/appkit for universal wallet connection with QR codes
+ * 
+ * Copyright (c) 2025 JustTheTip Bot. All rights reserved.
+ * 
+ * This file is part of JustTheTip.
+ * 
+ * This software is proprietary and confidential.
+ * Unauthorized copying, distribution, or use is strictly prohibited.
+ * See LICENSE file in the project root for full license information.
  */
 
 // WalletConnect/Reown AppKit Configuration

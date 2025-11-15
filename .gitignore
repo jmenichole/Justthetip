@@ -7,10 +7,21 @@ data/
 .DS_Store
 RAILWAY_ENV_VARS.txt
 
+# Sensitive keypair and secret files
+*-keypair.txt
+*.keypair.txt
+mint-keypair.txt
+*-private-key.txt
+*-secret.txt
+
 # SQLite database files
+*.db
+*.sqlite
+*.sqlite3
 db/*.db
 db/*.db-shm
 db/*.db-wal
+database.sqlite
 
 # Build artifacts
 dist/

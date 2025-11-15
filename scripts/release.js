@@ -1,7 +1,15 @@
 #!/usr/bin/env node
 /**
- * Release Workflow Script for JustTheTip
+ * JustTheTip - Release Workflow Script
  *
+ * Copyright (c) 2025 JustTheTip Bot. All rights reserved.
+ * 
+ * This file is part of JustTheTip.
+ * 
+ * This software is proprietary and confidential.
+ * Unauthorized copying, distribution, or use is strictly prohibited.
+ * See LICENSE file in the project root for full license information.
+ * 
  * Automated release process:
  * 1. Run tests
  * 2. Run linting

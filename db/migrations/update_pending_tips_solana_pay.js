@@ -1,5 +1,13 @@
 /**
- * Migration: Update pending_tips table for Solana Pay tracking
+ * JustTheTip - Database Migration: Update pending_tips table for Solana Pay tracking
+ * 
+ * Copyright (c) 2025 JustTheTip Bot. All rights reserved.
+ * 
+ * This file is part of JustTheTip.
+ * 
+ * This software is proprietary and confidential.
+ * Unauthorized copying, distribution, or use is strictly prohibited.
+ * See LICENSE file in the project root for full license information.
  */
 
 const sqlite = require('../db');

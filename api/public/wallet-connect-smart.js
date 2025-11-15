@@ -1,6 +1,14 @@
 /**
- * Smart Wallet Connection with iOS/Android App Suggestions
+ * JustTheTip - Smart Wallet Connection Module
  * Uses Universal Links and Intent URLs to trigger OS-level app suggestions
+ * 
+ * Copyright (c) 2025 JustTheTip Bot. All rights reserved.
+ * 
+ * This file is part of JustTheTip.
+ * 
+ * This software is proprietary and confidential.
+ * Unauthorized copying, distribution, or use is strictly prohibited.
+ * See LICENSE file in the project root for full license information.
  */
 
 // Enhanced wallet configuration with proper deep links

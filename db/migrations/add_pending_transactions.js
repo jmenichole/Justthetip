@@ -1,6 +1,14 @@
 /**
- * Migration: Add pending_transactions table
+ * JustTheTip - Database Migration: Add pending_transactions table
  * For storing unsigned transactions awaiting user signatures (x402 Trustless Agent)
+ * 
+ * Copyright (c) 2025 JustTheTip Bot. All rights reserved.
+ * 
+ * This file is part of JustTheTip.
+ * 
+ * This software is proprietary and confidential.
+ * Unauthorized copying, distribution, or use is strictly prohibited.
+ * See LICENSE file in the project root for full license information.
  */
 
 const sqlite = require('../db');

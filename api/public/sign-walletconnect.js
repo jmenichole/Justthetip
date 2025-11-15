@@ -1,6 +1,14 @@
 /**
- * WalletConnect Integration Module for JustTheTip
+ * JustTheTip - WalletConnect Integration Module
  * Provides universal wallet connection support using deep links and WalletConnect protocol
+ * 
+ * Copyright (c) 2025 JustTheTip Bot. All rights reserved.
+ * 
+ * This file is part of JustTheTip.
+ * 
+ * This software is proprietary and confidential.
+ * Unauthorized copying, distribution, or use is strictly prohibited.
+ * See LICENSE file in the project root for full license information.
  * 
  * This module handles:
  * - WalletConnect v2 protocol for QR code scanning
