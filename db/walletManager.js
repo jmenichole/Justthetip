@@ -22,7 +22,7 @@ class WalletManager {
      */
     encryptPrivateKey(privateKey) {
         const iv = crypto.randomBytes(16);
-        const cipher = crypto.createCipherGCM(ALGORITHM, ENCRYPTION_KEY, iv);
+        const cipher = crypto.createCipheriv(ALGORITHM, ENCRYPTION_KEY, iv);
         
         let encrypted = cipher.update(privateKey, 'utf8', 'hex');
         encrypted += cipher.final('hex');
@@ -43,7 +43,7 @@ class WalletManager {
             const authTag = Buffer.from(parts[1], 'hex');
             const encrypted = parts[2];
             
-            const decipher = crypto.createDecipherGCM(ALGORITHM, ENCRYPTION_KEY, iv);
+            const decipher = crypto.createDecipheriv(ALGORITHM, ENCRYPTION_KEY, iv);
             decipher.setAuthTag(authTag);
             
             let decrypted = decipher.update(encrypted, 'hex', 'utf8');

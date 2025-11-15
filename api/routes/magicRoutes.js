@@ -8,11 +8,11 @@ const router = express.Router();
 // Initialize Magic Admin SDK with secret from GitHub secrets
 const magic = new Magic(process.env.MAGIC_SECRET_KEY);
 
-// Utility function to generate registration token
-function generateRegistrationToken(discordId, email) {
+// Utility function to generate registration token (Discord-based)
+function generateRegistrationToken(discordId, discordUsername) {
   const payload = {
     discordId,
-    email,
+    discordUsername,
     timestamp: Date.now(),
     nonce: crypto.randomBytes(16).toString('hex')
   };
