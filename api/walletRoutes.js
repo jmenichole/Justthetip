@@ -205,7 +205,7 @@ router.post('/registerwallet/verify', walletRegistrationLimiter, async (req, res
             console.log(`Updating wallet for user ${discordUserId}: ${existingWallet} -> ${publicKey}`);
         }
 
-        // Store wallet registration in SQLite
+        /* Registration object not currently used - data saved directly via database.saveUserWallet
         const registration = {
             discordUserId: String(discordUserId),
             discordUsername: String(discordUsername || 'Unknown'),
@@ -214,6 +214,7 @@ router.post('/registerwallet/verify', walletRegistrationLimiter, async (req, res
             nonce: String(nonce),
             messageData
         };
+        */
 
         // Save to SQLite database
         await database.saveUserWallet(String(discordUserId), String(publicKey));

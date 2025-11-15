@@ -16,7 +16,7 @@
  */
 
 const { JustTheTipSDK } = require('../contracts/sdk');
-const { Connection, PublicKey, Transaction, LAMPORTS_PER_SOL } = require('@solana/web3.js');
+const { Transaction, PublicKey } = require('@solana/web3.js');
 
 // Mock Solana web3.js
 jest.mock('@solana/web3.js', () => {
