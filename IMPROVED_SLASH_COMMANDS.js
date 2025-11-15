@@ -44,12 +44,12 @@ const improvedCommands = [
 
   {
     name: 'register-magic',
-    description: '✨ Link your Magic wallet to Discord using registration token',
+    description: '✨ Create wallet with Magic (email login - easiest method)',
     options: [
       {
-        name: 'token',
+        name: 'email',
         type: 3, // STRING
-        description: 'Registration token from Magic wallet page',
+        description: 'Your email address for Magic wallet creation',
         required: true
       }
     ]
@@ -155,11 +155,20 @@ Sign once, tip forever—without compromising security.
 **Quick Start Guide:**
 
 **1️⃣ Register Your Wallet**
+Choose your preferred method:
+
+**🔐 Traditional Wallet (Advanced Users)**
 \`/register-wallet\`
 • Opens a secure verification link
 • Connect your Solana wallet (Phantom, Trust, Coinbase, etc.)
 • Sign one message to prove ownership
-• That's it! Your wallet is registered instantly
+
+**✨ Magic Wallet (Easiest - Recommended)**
+\`/register-magic your@email.com\`
+• Create wallet with just your email
+• No app installation required
+• Works on all devices (mobile, desktop, web)
+• Enterprise-grade security
 
 **2️⃣ Send Tips**
 \`/tip @username 10\`
@@ -182,7 +191,8 @@ Sign once, tip forever—without compromising security.
 \`/logs\` - View your transaction history (sent via DM)
 
 🔐 **Wallet Management**
-\`/register-wallet\` - Connect your Solana wallet
+\`/register-wallet\` - Connect your Solana wallet (traditional)
+\`/register-magic <email>\` - Create wallet with Magic (easiest)
 \`/disconnect-wallet\` - Remove your wallet connection
 \`/status\` - Check bot and wallet status
 
@@ -190,7 +200,9 @@ Sign once, tip forever—without compromising security.
 \`/help\` - Show this guide
 \`/support <issue>\` - Contact support team
 
-🎁 **Testing** (Devnet only)
+🎁 **Airdrops**
+\`/airdrop <amount> [options]\` - Create a claimable SOL airdrop
+\`/my-airdrops\` - Manage your active airdrops
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -208,6 +220,11 @@ Sign once, tip forever—without compromising security.
 • Double-check your wallet address
 • Make sure you signed the message
 • Try the registration link again
+
+**Magic Wallet Issues?**
+• Check your email for verification code
+• Make sure you're using a valid email address
+• Try refreshing the registration page
 
 **Tip Not Working?**
 • Verify recipient has registered their wallet
@@ -237,20 +254,26 @@ const commandPermissions = {
     'help',
     'tip',
     'register-wallet',
+    'register-magic',
     'disconnect-wallet',
     'support',
     'status',
-    'logs'
+    'logs',
+    'airdrop',
+    'my-airdrops'
   ]
 };
 
 // ===== RATE LIMITS =====
 const rateLimits = {
   'register-wallet': { max: 5, window: 900000 }, // 5 per 15 minutes
+  'register-magic': { max: 5, window: 900000 }, // 5 per 15 minutes
   'disconnect-wallet': { max: 3, window: 300000 }, // 3 per 5 minutes
   'tip': { max: 10, window: 60000 }, // 10 per minute
   'support': { max: 2, window: 300000 }, // 2 per 5 minutes
   'logs': { max: 5, window: 60000 }, // 5 per minute
+  'airdrop': { max: 3, window: 300000 }, // 3 per 5 minutes
+  'my-airdrops': { max: 10, window: 60000 }, // 10 per minute
   default: { max: 10, window: 60000 } // 10 per minute for others
 };
 
