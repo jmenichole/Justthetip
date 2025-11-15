@@ -18,7 +18,7 @@ const API_URL = process.env.API_BASE_URL || 'https://api.mischief-manager.com';
  * @param {Interaction} interaction - Discord interaction
  * @param {Object} context - Command context
  */
-async function handleRegisterWalletCommand(interaction, context) {
+async function handleRegisterWalletCommand(interaction, _context) {
   const userId = interaction.user.id;
   const username = interaction.user.username;
   

@@ -19,8 +19,6 @@ const cors = require('cors');
 const helmet = require('helmet');
 const path = require('path');
 const { PublicKey } = require('@solana/web3.js');
-const nacl = require('tweetnacl');
-const bs58 = require('bs58');
 const adminRoutes = require('./adminRoutes');
 const walletRoutes = require('./walletRoutes');
 const tipsRoutes = require('./tipsRoutes');
@@ -233,7 +231,7 @@ async function createNFTMetadata(discordId, discordUsername, walletAddress, term
     return metadata;
 }
 
-async function storeTipRecord({ senderId, receiverId, amount, currency, signature, timestamp = new Date() }) {
+async function storeTipRecord({ senderId, receiverId, amount, currency, signature, timestamp: _timestamp = new Date() }) {
     try {
         sqlite.recordTip(String(senderId), String(receiverId), amount, currency, signature || null);
     } catch (error) {

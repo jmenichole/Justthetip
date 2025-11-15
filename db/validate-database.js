@@ -98,7 +98,7 @@ async function validateDatabase() {
         const indexesResult = await pool.query(indexesQuery);
         const existingIndexes = indexesResult.rows.map(row => row.indexname);
 
-        let allIndexesExist = true;
+        const allIndexesExist = true;
         for (const index of REQUIRED_INDEXES) {
             if (existingIndexes.includes(index)) {
                 console.log(`   ✅ ${index}`);

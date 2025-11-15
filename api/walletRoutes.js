@@ -29,7 +29,7 @@ setInterval(() => {
 /**
  * Check and store nonce to prevent replay attacks
  */
-async function checkAndStoreNonce(nonce, discordUserId, discordUsername) {
+async function checkAndStoreNonce(nonce, discordUserId, _discordUsername) {
     const data = registrationNoncesMemory.get(nonce);
     
     if (!data) {

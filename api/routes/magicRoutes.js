@@ -33,7 +33,7 @@ router.post('/auth', async (req, res) => {
         const { email, publicAddress, issuer } = metadata;
 
         // Check if user exists
-        let user = database.getUserByEmail(email);
+        const user = database.getUserByEmail(email);
 
         if (user) {
             // Update existing user

@@ -15,7 +15,7 @@ const { helpMessages } = require('../../../IMPROVED_SLASH_COMMANDS');
  * @param {Interaction} interaction - Discord interaction
  * @param {Object} context - Command context
  */
-async function handleHelpCommand(interaction, context) {
+async function handleHelpCommand(interaction, _context) {
   const embed = new EmbedBuilder()
     .setTitle('📚 JustTheTip Help Guide')
     .setDescription(helpMessages.userGuide)

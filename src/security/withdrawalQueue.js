@@ -246,7 +246,7 @@ class WithdrawalQueue {
    * @param {Object} withdrawal - Withdrawal details
    * @returns {Promise<string>} - Transaction signature
    */
-  async _processWithdrawal(withdrawal) {
+  async _processWithdrawal(_withdrawal) {
     // This would connect to your hot wallet or use connected user wallet
     // For now, throwing error since we don't have private key
     throw new Error('Withdrawal processing requires bot wallet configuration or user wallet signature');

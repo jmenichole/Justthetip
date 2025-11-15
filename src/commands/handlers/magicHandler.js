@@ -8,7 +8,7 @@ const axios = require('axios');
 
 const API_URL = process.env.API_BASE_URL || 'https://api.mischief-manager.com';
 
-async function handleRegisterMagicCommand(interaction, context) {
+async function handleRegisterMagicCommand(interaction, _context) {
   await interaction.deferReply({ ephemeral: true });
   
   const token = interaction.options.getString('token');

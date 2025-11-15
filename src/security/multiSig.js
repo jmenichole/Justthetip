@@ -281,7 +281,7 @@ class MultiSigManager {
    * Execute proposal transaction
    * @private
    */
-  async _executeProposal(proposal) {
+  async _executeProposal(_proposal) {
     // This would use Squads SDK to execute the approved transaction
     throw new Error('Proposal execution not yet implemented');
     
