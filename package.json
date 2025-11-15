@@ -45,6 +45,8 @@
   },
   "dependencies": {
     "@bitcoinerlab/secp256k1": "^1.2.0",
+    "@magic-ext/bitcoin": "^26.2.0",
+    "@magic-ext/flow": "^26.2.0",
     "@magic-ext/solana": "^28.2.0",
     "@magic-sdk/admin": "^2.8.2",
     "@metaplex-foundation/js": "^0.20.1",

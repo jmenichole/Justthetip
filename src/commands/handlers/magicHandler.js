@@ -13,14 +13,16 @@
 
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const crypto = require('crypto');
+const { getChainConfig, isChainSupported } = require('../../config/chains');
 
 const API_URL = process.env.API_BASE_URL || process.env.FRONTEND_URL || 'https://api.mischief-manager.com';
 
 // Generate registration token for Magic wallet setup (Discord-based)
-function generateRegistrationToken(discordId, discordUsername) {
+function generateRegistrationToken(discordId, discordUsername, chain = 'solana') {
   const payload = {
     discordId,
     discordUsername,
+    chain,
     timestamp: Date.now(),
     nonce: crypto.randomBytes(16).toString('hex')
   };
@@ -42,17 +44,31 @@ async function handleRegisterMagicCommand(interaction, context) {
   const discordUsername = interaction.user.username;
   const discordAvatar = interaction.user.displayAvatarURL();
   
+  // Get optional chain parameter (defaults to 'solana')
+  const chainId = interaction.options?.getString('chain') || 'solana';
+  
   try {
-    // Check if user already has a registered wallet
+    // Validate chain
+    if (!isChainSupported(chainId)) {
+      return await interaction.editReply({
+        content: `❌ Unsupported blockchain: ${chainId}\n\nSupported chains: solana, ethereum, polygon, bitcoin, flow\nUse \`/help magic\` to see details about each chain.`,
+      });
+    }
+    
+    const chainConfig = getChainConfig(chainId);
+    
+    // Check if user already has a wallet FOR THIS SPECIFIC CHAIN
     if (context.database) {
+      // TODO: Update this to check for chain-specific wallet
       const existingWallet = await context.database.getUserWallet(discordId);
-      if (existingWallet) {
+      if (existingWallet && existingWallet.blockchain === chainId) {
         const embed = new EmbedBuilder()
-          .setTitle('⚠️ Wallet Already Registered')
+          .setTitle(`⚠️ ${chainConfig.name} Wallet Already Registered`)
           .setDescription(
-            `You already have a wallet registered:\n\n` +
+            `You already have a ${chainConfig.name} wallet registered:\n\n` +
             `**Address:** \`${existingWallet.substring(0, 8)}...${existingWallet.substring(existingWallet.length - 6)}\`\n\n` +
-            `If you want to register a new Magic wallet, please disconnect your current wallet first using \`/disconnect-wallet\`.`
+            `If you want to register a new wallet, please disconnect your current wallet first using \`/disconnect-wallet\`.\n\n` +
+            `💡 **Tip:** You can create wallets on different blockchains!`
           )
           .setColor(0xfbbf24)
           .setTimestamp();
@@ -61,23 +77,25 @@ async function handleRegisterMagicCommand(interaction, context) {
       }
     }
     
-    // Generate registration token with Discord info (no email needed)
-    const registrationToken = generateRegistrationToken(discordId, discordUsername);
+    // Generate registration token with chain info
+    const registrationToken = generateRegistrationToken(discordId, discordUsername, chainId);
     
     // Create Magic registration URL
     const registrationUrl = `${API_URL}/api/magic/register-magic.html?token=${registrationToken}`;
     
     // Create success embed
     const embed = new EmbedBuilder()
-      .setTitle('✨ Magic Wallet Registration')
+      .setTitle(`${chainConfig.emoji} Create ${chainConfig.name} Wallet`)
       .setDescription(
-        `Create your Solana wallet with Discord - instant and secure!\n\n` +
-        `**Discord:** ${discordUsername}\n\n` +
+        `Create your **${chainConfig.name}** wallet with Discord - instant and secure!\n\n` +
+        `**Discord:** ${discordUsername}\n` +
+        `**Blockchain:** ${chainConfig.name} (${chainConfig.symbol})\n` +
+        `**Token Standard:** ${chainConfig.tokenStandard}\n\n` +
         `**How it works:**\n` +
         `1. Click the "Create Wallet" button below\n` +
         `2. Authorize with Discord (you're already logged in!)\n` +
-        `3. Your wallet will be created instantly\n` +
-        `4. Start receiving tips immediately!`
+        `3. Your ${chainConfig.name} wallet will be created instantly\n` +
+        `4. Start using it immediately!`
       )
       .setColor(0x6851ff) // Magic purple
       .addFields([
@@ -90,16 +108,21 @@ async function handleRegisterMagicCommand(interaction, context) {
           name: '🚀 One-Click Setup', 
           value: 'No email verification needed - authenticate with Discord!\nNo wallet app installation required',
           inline: false
+        },
+        {
+          name: `${chainConfig.emoji} About ${chainConfig.name}`,
+          value: chainConfig.description,
+          inline: false
         }
       ])
-      .setFooter({ text: '✨ Powered by Magic + Discord • 100% Non-Custodial' })
+      .setFooter({ text: `✨ Powered by Magic + Discord • ${chainConfig.features.join(' • ')}` })
       .setTimestamp();
     
     // Create button for registration
     const actionRow = new ActionRowBuilder()
       .addComponents(
         new ButtonBuilder()
-          .setLabel('✨ Create Wallet with Discord')
+          .setLabel(`${chainConfig.emoji} Create ${chainConfig.name} Wallet`)
           .setStyle(ButtonStyle.Link)
           .setURL(registrationUrl)
       );
@@ -109,7 +132,7 @@ async function handleRegisterMagicCommand(interaction, context) {
       components: [actionRow]
     });
     
-    console.log(`🎯 Magic registration initiated for ${discordUsername} (${discordId}) via Discord OAuth`);
+    console.log(`🎯 Magic registration initiated for ${discordUsername} (${discordId}) - Chain: ${chainConfig.name}`);
     
   } catch (error) {
     console.error('Error handling Magic registration command:', error);
