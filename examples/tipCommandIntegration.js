@@ -153,7 +153,7 @@ module.exports = {
  * Example balance checking function
  * Replace with your actual Solana balance checking logic
  */
-async function checkWalletBalance(walletAddress) {
+async function checkWalletBalance(_walletAddress) {
     // Your Solana RPC call to get balance
     // Return balance in SOL
     return 0.5; // placeholder
@@ -163,22 +163,17 @@ async function checkWalletBalance(walletAddress) {
  * Example transaction processing function
  * Replace with your actual Solana transaction logic
  */
-async function processTipTransaction({ from, to, amount, tipperUserId }) {
-    try {
-        // Your transaction logic here
-        // 1. Get tipper's private key
-        // 2. Create and sign transaction
-        // 3. Send transaction
-        // 4. Wait for confirmation
-        
-        return {
-            success: true,
-            signature: 'example_transaction_signature_hash'
-        };
-    } catch (error) {
-        return {
-            success: false,
-            error: error.message
-        };
-    }
+// eslint-disable-next-line no-unused-vars
+async function processTipTransaction({ from: _from, to: _to, amount: _amount, tipperUserId: _tipperUserId }) {
+    // Your transaction logic here
+    // 1. Get tipper's private key
+    // 2. Create and sign transaction
+    // 3. Send transaction
+    // 4. Wait for confirmation
+    
+    // In your real implementation, wrap this in try/catch to handle errors
+    return {
+        success: true,
+        signature: 'example_transaction_signature_hash'
+    };
 }
