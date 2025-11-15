@@ -224,7 +224,8 @@ async function runCodeSecurityLint() {
   log('🔐 Running Security Linting...', 'blue');
 
   try {
-    execSync('npx eslint . --ext .js --quiet --rule "security/*: warn"', {
+    // Run eslint with just the security plugin (configured in .eslintrc.json)
+    execSync('npx eslint . --ext .js --quiet', {
       stdio: 'pipe',
       encoding: 'utf8'
     });
