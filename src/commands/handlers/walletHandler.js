@@ -2,6 +2,9 @@
  * JustTheTip - Wallet Registration Handler
  * Handles wallet registration with x402 Trustless Agent
  * 
+ * NOTE: /register-wallet slash command is currently disabled in favor of /register-magic
+ * This code is kept for when WalletConnect QR integration is fixed
+ * 
  * Copyright (c) 2025 JustTheTip Bot
  * Licensed under the JustTheTip Custom License (Based on MIT).
  * SPDX-License-Identifier: MIT
