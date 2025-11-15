@@ -11,57 +11,121 @@
  * See LICENSE file in the project root for full license information.
  */
 
-const { EmbedBuilder } = require('discord.js');
-const axios = require('axios');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const crypto = require('crypto');
 
-const API_URL = process.env.API_BASE_URL || 'https://api.mischief-manager.com';
+const API_URL = process.env.API_BASE_URL || process.env.FRONTEND_URL || 'https://api.mischief-manager.com';
 
-async function handleRegisterMagicCommand(interaction, _context) {
+// Generate registration token for Magic wallet setup
+function generateRegistrationToken(discordId, email) {
+  const payload = {
+    discordId,
+    email,
+    timestamp: Date.now(),
+    nonce: crypto.randomBytes(16).toString('hex')
+  };
+  
+  const secret = process.env.REGISTRATION_TOKEN_SECRET || 'default-secret-change-me';
+  const hmac = crypto.createHmac('sha256', secret);
+  hmac.update(JSON.stringify(payload));
+  
+  return Buffer.from(JSON.stringify({
+    ...payload,
+    signature: hmac.digest('hex')
+  })).toString('base64url');
+}
+
+async function handleRegisterMagicCommand(interaction, context) {
   await interaction.deferReply({ ephemeral: true });
   
-  const token = interaction.options.getString('token');
+  const email = interaction.options.getString('email');
   const discordId = interaction.user.id;
-  const discordTag = interaction.user.tag;
+  const discordUsername = interaction.user.username;
   
   try {
-    // Call API to link Magic wallet to Discord
-    const response = await axios.post(`${API_URL}/api/magic/link-discord`, {
-      registrationToken: token,
-      discordId,
-      discordTag
-    });
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return await interaction.editReply({
+        content: '❌ Invalid email format. Please provide a valid email address.',
+      });
+    }
     
-    const { user } = response.data;
+    // Check if user already has a registered wallet
+    if (context.database) {
+      const existingWallet = await context.database.getUserWallet(discordId);
+      if (existingWallet) {
+        const embed = new EmbedBuilder()
+          .setTitle('⚠️ Wallet Already Registered')
+          .setDescription(
+            `You already have a wallet registered:\n\n` +
+            `**Address:** \`${existingWallet.substring(0, 8)}...${existingWallet.substring(existingWallet.length - 6)}\`\n\n` +
+            `If you want to register a new Magic wallet, please disconnect your current wallet first using \`/disconnect-wallet\`.`
+          )
+          .setColor(0xfbbf24)
+          .setTimestamp();
+          
+        return await interaction.editReply({ embeds: [embed] });
+      }
+    }
     
-    // Success embed
+    // Generate registration token
+    const registrationToken = generateRegistrationToken(discordId, email);
+    
+    // Create Magic registration URL
+    const registrationUrl = `${API_URL}/api/magic/register-magic.html?token=${registrationToken}`;
+    
+    // Create success embed
     const embed = new EmbedBuilder()
-      .setTitle('✨ Magic Wallet Linked Successfully!')
+      .setTitle('✨ Magic Wallet Registration')
       .setDescription(
-        `Your Magic wallet is now connected to Discord!\n\n` +
-        `**Email:** ${user.email}\n` +
-        `**Wallet:** \`${user.walletAddress.substring(0, 8)}...${user.walletAddress.substring(user.walletAddress.length - 6)}\`\n\n` +
-        `You can now receive tips instantly! Your wallet was created using passwordless email authentication.`
+        `Create your Solana wallet with just your email - no app downloads required!\n\n` +
+        `**Email:** ${email}\n` +
+        `**Discord:** ${discordUsername}\n\n` +
+        `**How it works:**\n` +
+        `1. Click the "Create Wallet" button below\n` +
+        `2. Enter the verification code sent to your email\n` +
+        `3. Your wallet will be created instantly\n` +
+        `4. Start receiving tips immediately!`
       )
       .setColor(0x6851ff) // Magic purple
+      .addFields([
+        {
+          name: '🔐 Security',
+          value: 'Enterprise-grade security (SOC 2 Type 2)\nYour private keys are encrypted and never stored on our servers',
+          inline: false
+        },
+        {
+          name: '🌐 Compatibility', 
+          value: 'Works on all devices - mobile, desktop, and web\nNo wallet app installation required',
+          inline: false
+        }
+      ])
       .setFooter({ text: '✨ Powered by Magic • 100% Non-Custodial' })
       .setTimestamp();
     
-    await interaction.editReply({ embeds: [embed] });
+    // Create button for registration
+    const actionRow = new ActionRowBuilder()
+      .addComponents(
+        new ButtonBuilder()
+          .setLabel('✨ Create Wallet with Magic')
+          .setStyle(ButtonStyle.Link)
+          .setURL(registrationUrl)
+      );
+    
+    await interaction.editReply({ 
+      embeds: [embed],
+      components: [actionRow]
+    });
+    
+    console.log(`🎯 Magic registration initiated for ${discordUsername} (${discordId}) with email ${email}`);
     
   } catch (error) {
-    console.error('Error linking Magic wallet:', error);
+    console.error('Error handling Magic registration command:', error);
     
-    let errorMessage = '❌ Failed to link Magic wallet.';
-    
-    if (error.response?.status === 404) {
-      errorMessage += ' Invalid or expired registration token. Please visit the Magic registration page and generate a new token.';
-    } else if (error.response?.status === 400) {
-      errorMessage += ` ${error.response.data.error}`;
-    } else {
-      errorMessage += ' Please try again or contact support if the issue persists.';
-    }
-    
-    await interaction.editReply({ content: errorMessage });
+    await interaction.editReply({
+      content: '❌ Failed to generate Magic wallet registration link. Please try again or contact support.',
+    });
   }
 }
 
