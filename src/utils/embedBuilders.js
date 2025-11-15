@@ -129,7 +129,7 @@ function createWalletRegisteredEmbed(currency, address, isVerified = false) {
  * @param {Object} recipient - Recipient user object
  * @param {number} amount - Tip amount (before fee)
  * @param {string} currency - Currency type
- * @param {number} fee - Fee amount
+ * @param {number} fee - Fee amount (flat fee in SOL)
  * @param {number} netAmount - Net amount received by recipient (amount - fee)
  * @returns {EmbedBuilder} Discord embed for successful tip
  */
@@ -154,12 +154,15 @@ function createTipSuccessEmbed(sender, recipient, amount, currency, fee = 0, net
   if (fee > 0) {
     embed.addFields(
       { name: '💰 Gross Amount', value: `${formatAmount(amount)} ${currency}`, inline: true },
-      { name: '📊 Fee (0.5%)', value: `${formatAmount(fee)} ${currency}`, inline: true },
+      { name: '📊 Network Fee', value: `${formatAmount(fee)} ${currency}`, inline: true },
       { name: '✅ Net Amount', value: `${formatAmount(actualNetAmount)} ${currency}`, inline: true }
     );
   }
   
-  embed.setFooter({ text: 'Thanks for spreading the love!' });
+  // Add optional tip message in footer
+  embed.setFooter({ 
+    text: '💡 Want to help keep fees low? Tip the dev with /tip @dev!' 
+  });
   
   return embed;
 }

@@ -24,16 +24,16 @@ const priceService = require('../utils/priceService');
 const feeWallets = require('../../security/feeWallet.json');
 
 const MICROPAYMENT_SIGNER = process.env.X402_PAYER_SECRET;
-// Transaction fee: 2-7% (0.02-0.07) - configurable via environment variable
-// Default to 3.5% as a reasonable mid-range fee
-const FEE_RATE = (() => {
-  const rate = parseFloat(process.env.TRANSACTION_FEE_RATE || '0.035');
-  // Validate fee rate is within acceptable range (2-7%)
-  if (rate < 0.02 || rate > 0.07) {
-    console.warn(`⚠️  TRANSACTION_FEE_RATE of ${rate} is outside recommended range (0.02-0.07). Using default 0.035.`);
-    return 0.035;
+// Flat transaction fee: 0.02 to 0.07 SOL max - configurable via environment variable
+// Default to 0.03 SOL as a reasonable flat fee
+const FLAT_FEE_AMOUNT = (() => {
+  const fee = parseFloat(process.env.TRANSACTION_FEE_AMOUNT || '0.03');
+  // Validate fee is within acceptable range (0.02-0.07 SOL)
+  if (fee < 0.02 || fee > 0.07) {
+    console.warn(`⚠️  TRANSACTION_FEE_AMOUNT of ${fee} SOL is outside acceptable range (0.02-0.07). Using default 0.03 SOL.`);
+    return 0.03;
   }
-  return rate;
+  return fee;
 })();
 const FEE_WALLET_SOL = feeWallets.SOL;
 
@@ -211,9 +211,14 @@ async function handleTipCommand(interaction, dependencies = {}) {
       amountInSol = await prices.convertUsdToSol(numericAmount);
     }
 
-    // Calculate fee (2-7% of the amount, configurable via TRANSACTION_FEE_RATE env var)
-    const feeAmount = amountInSol * FEE_RATE;
+    // Calculate flat fee (0.02-0.07 SOL, configurable via TRANSACTION_FEE_AMOUNT env var)
+    const feeAmount = FLAT_FEE_AMOUNT;
     const netAmount = amountInSol - feeAmount;
+    
+    // Ensure the amount is sufficient to cover the fee
+    if (netAmount <= 0) {
+      throw new Error(`Amount must be greater than ${FLAT_FEE_AMOUNT} SOL to cover the transaction fee.`);
+    }
 
     // Convert to lamports
     const netLamports = Math.round(netAmount * LAMPORTS_PER_SOL);
