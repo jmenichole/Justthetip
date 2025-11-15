@@ -69,7 +69,8 @@ function getUnreleasedChanges() {
   }
 
   const changelog = fs.readFileSync(changelogPath, 'utf8');
-  const unreleasedMatch = changelog.match(/## \[Unreleased\]([\s\S]*?)(?=##\s|\n\n---|\Z)/);
+  const unreleasedMatch = changelog.match(/## \[Unreleased\]([\s\S]*?)(?=##\s|\n\n---|$)/);
+
 
   if (!unreleasedMatch || !unreleasedMatch[1].trim()) {
     return null;

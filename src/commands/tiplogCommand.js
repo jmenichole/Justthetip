@@ -28,10 +28,11 @@ function getTimeframeDate(timeframe) {
   switch (timeframe) {
     case 'today':
       return new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    case 'week':
+    case 'week': {
       const weekAgo = new Date(now);
       weekAgo.setDate(weekAgo.getDate() - 7);
       return weekAgo;
+    }
     case 'month':
       return new Date(now.getFullYear(), now.getMonth(), 1);
     case 'year':

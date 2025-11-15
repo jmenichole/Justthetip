@@ -8,6 +8,8 @@
  * @eslint-env browser
  */
 
+/* global QRCode */
+
 // Import WalletConnect/Reown AppKit modules
 import { createAppKit } from 'https://cdn.jsdelivr.net/npm/@reown/appkit@1.8.14/+esm';
 import { SolanaAdapter } from 'https://cdn.jsdelivr.net/npm/@reown/appkit-adapter-solana@1.8.14/+esm';
@@ -244,6 +246,8 @@ function disableAllButtons() {
     const buttons = document.querySelectorAll('button');
     buttons.forEach(button => {
         button.disabled = true;
+        button.style.opacity = '0.5';
+        button.style.cursor = 'not-allowed';
     });
 }
 
@@ -504,20 +508,7 @@ async function submitWalletRegistration(publicKey, signature, message) {
     }
 }
 
-/**
- * Disable all wallet connection buttons after successful registration
- */
-function disableAllButtons() {
-    const buttons = ['connectButton', 'solflareButton', 'walletConnectButton', 'manualEntryButton'];
-    buttons.forEach(id => {
-        const btn = document.getElementById(id);
-        if (btn) {
-            btn.disabled = true;
-            btn.style.opacity = '0.5';
-            btn.style.cursor = 'not-allowed';
-        }
-    });
-}
+
 
 /**
  * Connect to wallet extension (legacy function for Phantom/Solflare buttons)

@@ -155,10 +155,12 @@ function initDatabase() {
     
 
     // Add Magic authentication columns to users table
+    // Note: SQLite doesn't support UNIQUE/DEFAULT constraints in ALTER TABLE
+    // We add the column without constraints and create an index separately
     const magicColumns = [
       { name: 'email', type: 'TEXT' },
-      { name: 'magic_issuer', type: 'TEXT UNIQUE' },
-      { name: 'auth_method', type: 'TEXT DEFAULT "walletconnect"' }
+      { name: 'magic_issuer', type: 'TEXT' },
+      { name: 'auth_method', type: 'TEXT' }
     ];
     
     for (const col of magicColumns) {
@@ -170,6 +172,20 @@ function initDatabase() {
           throw error;
         }
       }
+    }
+
+    // Set default value for auth_method if null
+    try {
+      db.exec(`UPDATE users SET auth_method = 'walletconnect' WHERE auth_method IS NULL`);
+    } catch (error) {
+      // Ignore errors if column doesn't exist yet
+    }
+
+    // Create unique index for magic_issuer if it doesn't exist
+    try {
+      db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_magic_issuer ON users(magic_issuer)`);
+    } catch (error) {
+      // Index might already exist or column might not exist
     }
 
     // Pending Magic registrations table

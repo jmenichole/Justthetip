@@ -83,47 +83,42 @@ async function initializeWalletConnect() {
  * @returns {Promise<{publicKey: string}>}
  */
 async function connectWalletConnect() {
-    try {
-        // Initialize if not already done
-        if (!appKit) {
-            const initialized = await initializeWalletConnect();
-            if (!initialized) {
-                throw new Error('Failed to initialize AppKit');
-            }
+    // Initialize if not already done
+    if (!appKit) {
+        const initialized = await initializeWalletConnect();
+        if (!initialized) {
+            throw new Error('Failed to initialize AppKit');
         }
-
-        // Open the AppKit modal
-        await appKit.open();
-
-        // Wait for connection with timeout
-        const maxWaitTime = 120000; // 2 minutes
-        const startTime = Date.now();
-
-        return new Promise((resolve, reject) => {
-            const checkConnection = setInterval(() => {
-                if (connectedAccount) {
-                    clearInterval(checkConnection);
-                    appKit.close();
-                    resolve({ publicKey: connectedAccount });
-                } else if (Date.now() - startTime > maxWaitTime) {
-                    clearInterval(checkConnection);
-                    reject(new Error('Connection timeout'));
-                }
-            }, 500);
-
-            // Also listen for modal close without connection
-            const unsubscribe = appKit.subscribeState((state) => {
-                if (!state.open && !connectedAccount) {
-                    clearInterval(checkConnection);
-                    unsubscribe();
-                    reject(new Error('User closed modal without connecting'));
-                }
-            });
-        });
-
-    } catch (error) {
-        throw error;
     }
+
+    // Open the AppKit modal
+    await appKit.open();
+
+    // Wait for connection with timeout
+    const maxWaitTime = 120000; // 2 minutes
+    const startTime = Date.now();
+
+    return new Promise((resolve, reject) => {
+        const checkConnection = setInterval(() => {
+            if (connectedAccount) {
+                clearInterval(checkConnection);
+                appKit.close();
+                resolve({ publicKey: connectedAccount });
+            } else if (Date.now() - startTime > maxWaitTime) {
+                clearInterval(checkConnection);
+                reject(new Error('Connection timeout'));
+            }
+        }, 500);
+
+        // Also listen for modal close without connection
+        const unsubscribe = appKit.subscribeState((state) => {
+            if (!state.open && !connectedAccount) {
+                clearInterval(checkConnection);
+                unsubscribe();
+                reject(new Error('User closed modal without connecting'));
+            }
+        });
+    });
 }
 
 /**
