@@ -16,11 +16,11 @@ const crypto = require('crypto');
 
 const API_URL = process.env.API_BASE_URL || process.env.FRONTEND_URL || 'https://api.mischief-manager.com';
 
-// Generate registration token for Magic wallet setup
-function generateRegistrationToken(discordId, email) {
+// Generate registration token for Magic wallet setup (Discord-based)
+function generateRegistrationToken(discordId, discordUsername) {
   const payload = {
     discordId,
-    email,
+    discordUsername,
     timestamp: Date.now(),
     nonce: crypto.randomBytes(16).toString('hex')
   };
@@ -38,19 +38,11 @@ function generateRegistrationToken(discordId, email) {
 async function handleRegisterMagicCommand(interaction, context) {
   await interaction.deferReply({ ephemeral: true });
   
-  const email = interaction.options.getString('email');
   const discordId = interaction.user.id;
   const discordUsername = interaction.user.username;
+  const discordAvatar = interaction.user.displayAvatarURL();
   
   try {
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return await interaction.editReply({
-        content: '❌ Invalid email format. Please provide a valid email address.',
-      });
-    }
-    
     // Check if user already has a registered wallet
     if (context.database) {
       const existingWallet = await context.database.getUserWallet(discordId);
@@ -69,8 +61,8 @@ async function handleRegisterMagicCommand(interaction, context) {
       }
     }
     
-    // Generate registration token
-    const registrationToken = generateRegistrationToken(discordId, email);
+    // Generate registration token with Discord info (no email needed)
+    const registrationToken = generateRegistrationToken(discordId, discordUsername);
     
     // Create Magic registration URL
     const registrationUrl = `${API_URL}/api/magic/register-magic.html?token=${registrationToken}`;
@@ -79,12 +71,11 @@ async function handleRegisterMagicCommand(interaction, context) {
     const embed = new EmbedBuilder()
       .setTitle('✨ Magic Wallet Registration')
       .setDescription(
-        `Create your Solana wallet with just your email - no app downloads required!\n\n` +
-        `**Email:** ${email}\n` +
+        `Create your Solana wallet with Discord - instant and secure!\n\n` +
         `**Discord:** ${discordUsername}\n\n` +
         `**How it works:**\n` +
         `1. Click the "Create Wallet" button below\n` +
-        `2. Enter the verification code sent to your email\n` +
+        `2. Authorize with Discord (you're already logged in!)\n` +
         `3. Your wallet will be created instantly\n` +
         `4. Start receiving tips immediately!`
       )
@@ -96,19 +87,19 @@ async function handleRegisterMagicCommand(interaction, context) {
           inline: false
         },
         {
-          name: '🌐 Compatibility', 
-          value: 'Works on all devices - mobile, desktop, and web\nNo wallet app installation required',
+          name: '🚀 One-Click Setup', 
+          value: 'No email verification needed - authenticate with Discord!\nNo wallet app installation required',
           inline: false
         }
       ])
-      .setFooter({ text: '✨ Powered by Magic • 100% Non-Custodial' })
+      .setFooter({ text: '✨ Powered by Magic + Discord • 100% Non-Custodial' })
       .setTimestamp();
     
     // Create button for registration
     const actionRow = new ActionRowBuilder()
       .addComponents(
         new ButtonBuilder()
-          .setLabel('✨ Create Wallet with Magic')
+          .setLabel('✨ Create Wallet with Discord')
           .setStyle(ButtonStyle.Link)
           .setURL(registrationUrl)
       );
@@ -118,7 +109,7 @@ async function handleRegisterMagicCommand(interaction, context) {
       components: [actionRow]
     });
     
-    console.log(`🎯 Magic registration initiated for ${discordUsername} (${discordId}) with email ${email}`);
+    console.log(`🎯 Magic registration initiated for ${discordUsername} (${discordId}) via Discord OAuth`);
     
   } catch (error) {
     console.error('Error handling Magic registration command:', error);
