@@ -24,7 +24,17 @@ const priceService = require('../utils/priceService');
 const feeWallets = require('../../security/feeWallet.json');
 
 const MICROPAYMENT_SIGNER = process.env.X402_PAYER_SECRET;
-const FEE_RATE = 0.005; // 0.5% fee
+// Transaction fee: 2-7% (0.02-0.07) - configurable via environment variable
+// Default to 3.5% as a reasonable mid-range fee
+const FEE_RATE = (() => {
+  const rate = parseFloat(process.env.TRANSACTION_FEE_RATE || '0.035');
+  // Validate fee rate is within acceptable range (2-7%)
+  if (rate < 0.02 || rate > 0.07) {
+    console.warn(`⚠️  TRANSACTION_FEE_RATE of ${rate} is outside recommended range (0.02-0.07). Using default 0.035.`);
+    return 0.035;
+  }
+  return rate;
+})();
 const FEE_WALLET_SOL = feeWallets.SOL;
 
 async function handleTipCommand(interaction, dependencies = {}) {
@@ -201,7 +211,7 @@ async function handleTipCommand(interaction, dependencies = {}) {
       amountInSol = await prices.convertUsdToSol(numericAmount);
     }
 
-    // Calculate fee (0.5% of the amount)
+    // Calculate fee (2-7% of the amount, configurable via TRANSACTION_FEE_RATE env var)
     const feeAmount = amountInSol * FEE_RATE;
     const netAmount = amountInSol - feeAmount;
 
