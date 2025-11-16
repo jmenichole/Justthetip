@@ -14,7 +14,7 @@ const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('
 const crypto = require('crypto');
 
 // Get API URL for wallet registration page
-const API_URL = process.env.API_BASE_URL || 'https://api.mischief-manager.com';
+const API_URL = process.env.API_BASE_URL || 'https://justthetip.vercel.app';
 
 /**
  * Handle the /register-wallet command

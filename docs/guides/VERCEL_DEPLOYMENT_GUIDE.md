@@ -58,6 +58,14 @@ Configure these environment variables in the Vercel dashboard (Project Settings 
 - `NFT_STORAGE_API_KEY` - NFT.Storage API key for metadata storage
 - `X402_TREASURY_WALLET` - Treasury wallet address for X402 payments
 
+### Required for Stripe Crypto Onramp
+- `STRIPE_SECRET_KEY` - Stripe secret key for backend API calls (sk_test_* or sk_live_*)
+- `STRIPE_PUBLISHABLE_KEY` - Stripe publishable key for frontend widget (pk_test_* or pk_live_*)
+- `STRIPE_WEBHOOK_SECRET` - Stripe webhook secret for verifying webhook signatures (whsec_*)
+
+**Note**: The Stripe Crypto Onramp allows users to purchase cryptocurrency (SOL, USDC) directly to their Solana wallets using credit/debit cards and other payment methods. This is fully integrated and deployed on Vercel via the API routes at `/api/stripe/onramp/*`.
+
+
 See `.env.example` for a complete list of environment variables.
 
 ## Configuration Details
@@ -108,11 +116,36 @@ After deployment, your API will be available at:
 - API: `https://your-project.vercel.app/api/*`
 - Static files: `https://your-project.vercel.app/*` (served from `docs/`)
 
-Example endpoints:
+### Available API Routes
+
+#### Core Functionality
 - `https://your-project.vercel.app/api/health` - Health check
 - `https://your-project.vercel.app/api/tips` - Tips listing
+- `https://your-project.vercel.app/api/registerwallet/verify` - Wallet registration
+
+#### Stripe Crypto Onramp (Buy Cryptocurrency)
+- `https://your-project.vercel.app/api/stripe/onramp/session` - Create purchase session
+- `https://your-project.vercel.app/api/stripe/onramp/session/:id` - Get session status
+- `https://your-project.vercel.app/api/stripe/onramp/webhook` - Stripe webhooks
+- `https://your-project.vercel.app/api/stripe/onramp/config` - Public configuration
+
+#### Magic Link Embedded Wallets
+- `https://your-project.vercel.app/api/magic/register` - Register with Magic
+- `https://your-project.vercel.app/api/magic/login` - Login with Magic
+
+#### x402 Payment Protocol
+- `https://your-project.vercel.app/api/x402/premium/*` - Paid premium endpoints
+- `https://your-project.vercel.app/api/x402/info` - Payment info
+
+#### Static Pages
 - `https://your-project.vercel.app/landing.html` - Landing page
 - `https://your-project.vercel.app/sign.html` - Wallet registration page (used by `/registerwallet` command)
+- `https://your-project.vercel.app/register-magic.html` - Magic wallet registration
+- `https://your-project.vercel.app/buy-crypto.html` - Stripe crypto onramp page
+
+- `https://your-project.vercel.app/api/tips` - Tips listing
+- `https://your-project.vercel.app/landing.html` - Landing page
+- `https://your-project.vercel.app/sign.html` - Wallet registration page (used by `/register-wallet` command)
 
 ## Testing Locally
 

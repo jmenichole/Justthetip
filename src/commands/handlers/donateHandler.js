@@ -69,7 +69,7 @@ async function handleDonateCommand(interaction, _context) {
         new ButtonBuilder()
           .setLabel('💜 Support Page')
           .setStyle(ButtonStyle.Link)
-          .setURL('https://mischief-manager.com/support')
+          .setURL('https://github.com/jmenichole/Justthetip')
       );
 
     await interaction.reply({

@@ -282,9 +282,9 @@ This software is proprietary and confidential. Unauthorized copying, distributio
 
 ## 🔗 Links
 
-- **Website**: [mischiefmanager.org](https://mischiefmanager.org)
-- **Discord**: [Join our server](#)
-- **Documentation**: [Full API docs](#)
+- **GitHub Repository**: [github.com/jmenichole/Justthetip](https://github.com/jmenichole/Justthetip)
+- **Documentation**: [GitHub Pages](https://jmenichole.github.io/Justthetip)
+- **API Server**: [Vercel Deployment](https://justthetip.vercel.app)
 
 ---
 

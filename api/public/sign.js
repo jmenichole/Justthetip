@@ -89,7 +89,7 @@ async function initializeAppKit() {
 // When deployed, the API backend should be on Vercel and frontend on GitHub Pages
 const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? window.location.origin  // Local development
-    : (window.JUSTTHETIP_API_URL || 'https://api.mischief-manager.com'); // Production - can be overridden
+    : (window.JUSTTHETIP_API_URL || 'https://justthetip.vercel.app'); // Production - can be overridden
 
 // Parse URL parameters
 const urlParams = new URLSearchParams(window.location.search);

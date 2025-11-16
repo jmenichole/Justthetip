@@ -233,7 +233,7 @@ async function handleTipCommand(interaction, context) {
       new ButtonBuilder()
         .setLabel('☕ Tip the Dev')
         .setStyle(ButtonStyle.Link)
-        .setURL('https://mischief-manager.com/support')
+        .setURL('https://github.com/jmenichole/Justthetip')
     );
   
   // Send message
