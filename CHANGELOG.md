@@ -16,9 +16,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CONTRIBUTORS.md with proper attribution to project maintainers
 - REPOSITORY_INDEX.md with complete repository structure and feature overview
 - Developer contribution guide for Kick integration features
+- Magic Link Discord Social Login documentation and configuration guides
+  - MAGIC_DISCORD_OAUTH_FIX.md - Quick reference for redirect URI configuration
+  - docs/guides/MAGIC_DISCORD_SOCIAL_LOGIN_SETUP.md - Complete setup guide
+  - docs/guides/MAGIC_DISCORD_REDIRECT_FIX.md - 5-minute quick fix guide
 
 ### Changed
 - Updated .env.example with Kick API, Passkey, and encryption configuration sections
+- Updated .env.example with Magic Link Discord OAuth redirect URI notes
+- Enhanced Magic Link Discord OAuth documentation with domain allowlist configuration
+  - Added Magic Link dashboard allowlist requirements to all guides
+  - Added troubleshooting for CORS and "origin not allowed" errors
+  - Updated configuration checklists to include domain allowlist steps
+
+### Fixed
+- Magic Link Discord social login "invalid redirect URI" error in dashboard testing
+  - Documented both required redirect URIs (production and test) that must be registered in Discord Developer Portal
+  - Added comprehensive troubleshooting guides for OAuth configuration
+  - **Added critical domain allowlist configuration** for Magic Link dashboard (Settings → Allowlists)
+  - Documented that applications must allowlist their domains in Magic Link for authentication to work
 
 ## [1.0.0] - 2025-11-07
 
