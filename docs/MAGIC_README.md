@@ -27,6 +27,13 @@ Choose the document that best fits your needs:
 - Deployment guide
 - 30-minute implementation
 
+**Discord Social Login**: [guides/MAGIC_DISCORD_SOCIAL_LOGIN_SETUP.md](./guides/MAGIC_DISCORD_SOCIAL_LOGIN_SETUP.md) ⚠️
+- Fix "invalid redirect URI" error in Magic dashboard
+- Configure Discord OAuth redirect URIs
+- Production and test redirect URIs explained
+- Step-by-step Discord Developer Portal setup
+- 10-minute configuration
+
 **Deep Dive**: [guides/MAGIC_EMBEDDED_WALLETS_EVALUATION.md](./guides/MAGIC_EMBEDDED_WALLETS_EVALUATION.md)
 - Full technical evaluation
 - Security architecture
@@ -74,16 +81,19 @@ npm install magic-sdk @magic-ext/solana @magic-sdk/admin
 | **MAGIC_IMPLEMENTATION_SUMMARY.md** | 11KB | Executive overview & quick answer | Decision makers | 5 min |
 | **MAGIC_VS_X402_DECISION_GUIDE.md** | 11KB | Strategic comparison & recommendations | Decision makers, Tech leads | 15 min |
 | **MAGIC_WITH_GITHUB_SECRETS.md** ⭐ | 13KB | Simplified setup with existing secrets | Developers | 10 min |
+| **MAGIC_DISCORD_SOCIAL_LOGIN_SETUP.md** ⚠️ | 8KB | Fix Discord OAuth redirect URI issues | Developers | 10 min |
 | **MAGIC_QUICKSTART_GUIDE.md** | 20KB | Practical implementation guide | Developers | 30-60 min |
 | **MAGIC_EMBEDDED_WALLETS_EVALUATION.md** | 24KB | Complete technical evaluation | Architects, Senior devs | 60 min |
 
-**Total**: 79KB of documentation / ~21,000 words  
-⭐ = **Start here if you're implementing** (API keys already configured)
+**Total**: 98KB of documentation / ~26,000 words  
+⭐ = **Start here if you're implementing** (API keys already configured)  
+⚠️ = **Read this if you see "invalid redirect URI" errors**
 
 ## 🎯 Common Questions → Best Document
 
 | Question | Go To Document | Section |
 |----------|---------------|---------|
+| "Invalid redirect URI error?" | MAGIC_DISCORD_SOCIAL_LOGIN_SETUP.md | Configuration Guide |
 | "Is Magic better than x402?" | MAGIC_IMPLEMENTATION_SUMMARY.md | Quick Answer |
 | "What will it cost?" | MAGIC_VS_X402_DECISION_GUIDE.md | Cost Breakdown |
 | "How do I implement it?" | MAGIC_QUICKSTART_GUIDE.md | Implementation Guide |
