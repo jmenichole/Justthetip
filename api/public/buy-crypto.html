@@ -199,6 +199,236 @@
             opacity: 0.7;
         }
 
+        /* Registration Prompt Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(10, 10, 15, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .registration-modal {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            max-width: 500px;
+            width: 100%;
+            padding: 40px;
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .registration-modal h2 {
+            color: var(--text-primary);
+            font-size: 24px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .registration-modal p {
+            color: var(--text-secondary);
+            font-size: 15px;
+            line-height: 1.8;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .wallet-display {
+            background: rgba(102, 126, 234, 0.1);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            word-break: break-all;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+            color: var(--text-primary);
+            text-align: center;
+        }
+
+        .modal-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .modal-btn {
+            width: 100%;
+            padding: 14px 24px;
+            font-size: 15px;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .modal-btn.primary {
+            background: var(--primary-gradient);
+            color: white;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .modal-btn.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .modal-btn.secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            border: 1px solid var(--card-border);
+        }
+
+        .modal-btn.secondary:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .modal-btn.link {
+            background: transparent;
+            color: var(--text-secondary);
+            padding: 10px;
+            font-size: 14px;
+        }
+
+        .modal-btn.link:hover {
+            color: var(--text-primary);
+        }
+
+        .registration-options {
+            margin-bottom: 20px;
+        }
+
+        .registration-option {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--card-border);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .registration-option:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .registration-option h4 {
+            color: var(--text-primary);
+            font-size: 15px;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .registration-option p {
+            color: var(--text-secondary);
+            font-size: 13px;
+            margin: 0;
+            text-align: left;
+        }
+
+        .wallet-input-section {
+            margin-bottom: 25px;
+            background: rgba(102, 126, 234, 0.08);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--card-border);
+        }
+
+        .wallet-input-section h3 {
+            color: var(--text-primary);
+            font-size: 16px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .wallet-input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .wallet-input {
+            flex: 1;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+        }
+
+        .wallet-input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .wallet-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .smart-fill-btn {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .smart-fill-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .smart-fill-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .wallet-hint {
+            margin-top: 10px;
+            color: var(--text-secondary);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
         @media (max-width: 640px) {
             body {
                 padding: 10px;
@@ -240,6 +470,28 @@
             .widget-container {
                 min-height: 500px;
             }
+
+            .wallet-input-group {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .wallet-input {
+                width: 100%;
+            }
+
+            .smart-fill-btn {
+                width: 100%;
+                padding: 12px 16px;
+            }
+
+            .registration-modal {
+                padding: 30px 20px;
+            }
+
+            .registration-modal h2 {
+                font-size: 20px;
+            }
         }
     </style>
 </head>
@@ -252,6 +504,26 @@
             </div>
             <h1>Buy Crypto with Stripe</h1>
             <p>Purchase SOL or USDC directly to your wallet</p>
+        </div>
+
+        <!-- Wallet Input Section -->
+        <div class="wallet-input-section" id="walletInputSection">
+            <h3>🎯 Enter Your Wallet Address</h3>
+            <div class="wallet-input-group">
+                <input 
+                    type="text" 
+                    id="walletInput" 
+                    class="wallet-input" 
+                    placeholder="Paste your Solana wallet address here..."
+                    readonly
+                />
+                <button id="smartFillBtn" class="smart-fill-btn">
+                    🔮 Smart Fill JustTheTip Wallet
+                </button>
+            </div>
+            <div class="wallet-hint">
+                💡 <strong>Don't have your wallet handy?</strong> Click "Smart Fill" to automatically use your registered JustTheTip wallet address.
+            </div>
         </div>
 
         <div class="info-box">
@@ -279,15 +551,139 @@
         </div>
     </div>
 
+    <!-- Registration Prompt Modal -->
+    <div id="registrationModal" class="modal-overlay">
+        <div class="registration-modal">
+            <h2>🎉 Purchase Complete!</h2>
+            <p>Your crypto is on the way! Would you like to save this wallet to your JustTheTip account for faster purchases next time?</p>
+            
+            <div class="wallet-display" id="modalWalletAddress"></div>
+            
+            <div class="registration-options">
+                <div class="registration-option" onclick="registerWithMagic()">
+                    <h4>✨ Quick Register with Magic Link</h4>
+                    <p>Passwordless authentication - Fast & secure</p>
+                </div>
+                
+                <div class="registration-option" onclick="registerWithWallet()">
+                    <h4>🔐 Register with Wallet Signature</h4>
+                    <p>Sign with your wallet to verify ownership</p>
+                </div>
+            </div>
+            
+            <div class="modal-buttons">
+                <button class="modal-btn link" onclick="closeRegistrationModal()">
+                    Maybe Later - Continue to Discord
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Get wallet address from URL parameters
         const urlParams = new URLSearchParams(window.location.search);
-        const walletAddress = urlParams.get('wallet');
+        let walletAddress = urlParams.get('wallet');
         const amount = urlParams.get('amount');
 
         // Status elements
         const statusElement = document.getElementById('statusMessage');
         const errorElement = document.getElementById('errorMessage');
+        const walletInput = document.getElementById('walletInput');
+        const smartFillBtn = document.getElementById('smartFillBtn');
+        const walletInputSection = document.getElementById('walletInputSection');
+
+        // Initialize wallet input with URL parameter if provided
+        if (walletAddress) {
+            walletInput.value = walletAddress;
+            // Hide input section if wallet is already provided
+            walletInputSection.style.display = 'none';
+        }
+
+        // Smart Fill Button Handler
+        smartFillBtn.addEventListener('click', async () => {
+            try {
+                smartFillBtn.disabled = true;
+                smartFillBtn.textContent = '🔄 Loading...';
+
+                // Try to get Discord user info from URL or session
+                const discordId = urlParams.get('discordId') || urlParams.get('userId');
+                
+                if (discordId) {
+                    // Fetch wallet from JustTheTip API using Discord ID
+                    const response = await fetch(`/api/wallet/${discordId}`);
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.success && data.wallet) {
+                            walletAddress = data.wallet;
+                            walletInput.value = walletAddress;
+                            smartFillBtn.textContent = '✅ Wallet Loaded!';
+                            
+                            // Auto-initialize after 1 second
+                            setTimeout(() => {
+                                walletInputSection.style.display = 'none';
+                                initializeOnramp();
+                            }, 1000);
+                            return;
+                        }
+                    }
+                }
+
+                // Fallback: Try to get from localStorage or session
+                const storedWallet = localStorage.getItem('justthetip_wallet');
+                if (storedWallet) {
+                    walletAddress = storedWallet;
+                    walletInput.value = walletAddress;
+                    smartFillBtn.textContent = '✅ Wallet Loaded!';
+                    
+                    setTimeout(() => {
+                        walletInputSection.style.display = 'none';
+                        initializeOnramp();
+                    }, 1000);
+                    return;
+                }
+
+                // If no wallet found
+                smartFillBtn.textContent = '⚠️ No Wallet Found';
+                showError('No JustTheTip wallet found. Please register a wallet first using the /register-wallet command in Discord.');
+                
+                // Make input editable for manual entry
+                walletInput.readOnly = false;
+                walletInput.placeholder = 'Paste your Solana wallet address here...';
+                walletInput.focus();
+                
+                setTimeout(() => {
+                    smartFillBtn.textContent = '🔮 Smart Fill JustTheTip Wallet';
+                    smartFillBtn.disabled = false;
+                }, 3000);
+
+            } catch (error) {
+                console.error('Smart fill error:', error);
+                smartFillBtn.textContent = '❌ Failed';
+                showError('Failed to load wallet. Please try again or enter manually.');
+                
+                walletInput.readOnly = false;
+                walletInput.placeholder = 'Paste your Solana wallet address here...';
+                
+                setTimeout(() => {
+                    smartFillBtn.textContent = '🔮 Smart Fill JustTheTip Wallet';
+                    smartFillBtn.disabled = false;
+                }, 3000);
+            }
+        });
+
+        // Allow manual continue if user enters wallet manually
+        walletInput.addEventListener('input', (e) => {
+            const value = e.target.value.trim();
+            if (value.length >= 32 && value.length <= 44) {
+                walletAddress = value;
+                smartFillBtn.textContent = '▶️ Continue to Payment';
+                smartFillBtn.onclick = () => {
+                    walletInputSection.style.display = 'none';
+                    initializeOnramp();
+                };
+            }
+        });
 
         // Initialize Stripe Onramp
         async function initializeOnramp() {
@@ -361,6 +757,11 @@
                     console.log('Onramp session updated:', event);
                     if (event.payload.session.status === 'fulfillment_complete') {
                         showSuccess('✅ Purchase completed! Crypto is on its way to your wallet.');
+                        // Handle purchase completion and check registration
+                        handlePurchaseComplete({
+                            walletAddress: event.payload.session.transaction_details?.wallet_address || walletAddress,
+                            sessionId: event.payload.session.id
+                        });
                     }
                 });
 
@@ -396,6 +797,82 @@
             errorElement.className = 'status success';
             errorElement.style.display = 'block';
             statusElement.style.display = 'none';
+        }
+
+        // Modal Functions
+        const registrationModal = document.getElementById('registrationModal');
+        const modalWalletAddress = document.getElementById('modalWalletAddress');
+
+        async function checkWalletRegistration(wallet) {
+            try {
+                // Try to find if this wallet is already registered
+                const response = await fetch(`/api/wallet/search?address=${wallet}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    return data.registered;
+                }
+                return false;
+            } catch (error) {
+                console.error('Error checking registration:', error);
+                return false;
+            }
+        }
+
+        function showRegistrationModal(wallet) {
+            modalWalletAddress.textContent = wallet;
+            registrationModal.classList.add('active');
+            
+            // Save wallet to localStorage for registration flow
+            localStorage.setItem('pending_wallet_registration', wallet);
+        }
+
+        function closeRegistrationModal() {
+            registrationModal.classList.remove('active');
+            // Redirect to Discord or JustTheTip home
+            window.location.href = 'https://discord.gg/justthetip';
+        }
+
+        async function registerWithMagic() {
+            const wallet = localStorage.getItem('pending_wallet_registration');
+            if (!wallet) {
+                showError('Wallet address not found. Please try again.');
+                return;
+            }
+            
+            // Redirect to Magic Link registration page with wallet prefilled
+            window.location.href = `/register-magic.html?wallet=${wallet}&source=onramp`;
+        }
+
+        async function registerWithWallet() {
+            const wallet = localStorage.getItem('pending_wallet_registration');
+            if (!wallet) {
+                showError('Wallet address not found. Please try again.');
+                return;
+            }
+            
+            // Redirect to wallet signature registration page with wallet prefilled
+            window.location.href = `/sign.html?wallet=${wallet}&source=onramp`;
+        }
+
+        // Handle purchase completion
+        function handlePurchaseComplete(sessionData) {
+            const purchasedWallet = sessionData.walletAddress || walletAddress;
+            
+            // Check if wallet is registered
+            checkWalletRegistration(purchasedWallet).then(isRegistered => {
+                if (!isRegistered) {
+                    // Show registration prompt after short delay
+                    setTimeout(() => {
+                        showRegistrationModal(purchasedWallet);
+                    }, 2000);
+                } else {
+                    // Wallet already registered, just show success
+                    showSuccess('✅ Purchase completed! Crypto is on its way to your registered wallet.');
+                    setTimeout(() => {
+                        window.location.href = 'https://discord.gg/justthetip';
+                    }, 3000);
+                }
+            });
         }
 
         // Initialize on page load

@@ -145,6 +145,10 @@ class Database {
     return sqlite.getAllWallets();
   }
 
+  async getUserIdByWallet(walletAddress) {
+    return sqlite.getUserIdByWallet(walletAddress);
+  }
+
   // ===== AIRDROP METHODS =====
   async createAirdrop(airdropData) {
     // Convert from new format to existing schema
