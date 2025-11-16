@@ -14,7 +14,7 @@ The error "Magic publishable key not configured" has been addressed by:
 Added comprehensive Magic configuration section with:
 - All required environment variables
 - Clear instructions for local development vs production
-- Important limitation: Magic fiat on-ramp only works on Ethereum/Polygon, NOT Solana
+- **Important: Magic does NOT support fiat on-ramp for Solana - use Stripe instead**
 - References to existing documentation
 
 ### 2. Created `docs/MAGIC_PRODUCTION_DEPLOYMENT.md`
@@ -103,15 +103,15 @@ You should see a registration link. If you still get the error, check the troubl
 
 ## ⚠️ Important Limitation
 
-**Magic's fiat on-ramp only works on Ethereum and Polygon, NOT Solana.**
+**Magic does NOT support fiat on-ramp (buying crypto) for Solana.**
 
 What this means:
 - ✅ Users CAN create Solana wallets with Magic
 - ✅ Users CAN authenticate with email
 - ✅ Users CAN sign Solana transactions
-- ❌ Users CANNOT buy crypto through Magic's widget on Solana
+- ❌ Users CANNOT buy crypto through Magic (feature not available for Solana)
 
-**Solution**: Use Stripe Crypto Onramp for Solana fiat purchases (already integrated).
+**Solution**: Use **Stripe Crypto Onramp** for Solana fiat purchases (already integrated). Stripe fully supports Solana and provides the same functionality for buying crypto with credit cards, bank transfers, etc.
 
 ## 🆘 Troubleshooting
 

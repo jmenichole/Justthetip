@@ -190,29 +190,31 @@ If you need to rotate Magic API keys:
 
 ## 📝 Important Limitations
 
-### Fiat On-Ramp Limitation
+### Fiat On-Ramp - Use Stripe, NOT Magic
 
-⚠️ **IMPORTANT**: Magic's built-in fiat on-ramp (buy crypto with credit card/ACH) is **ONLY supported on Ethereum and Polygon networks**, NOT on Solana.
+⚠️ **IMPORTANT**: Magic does NOT support fiat on-ramp (buying crypto with credit card/ACH) for Solana networks.
 
 **What this means**:
 - ✅ Users CAN create and use Solana wallets with Magic
 - ✅ Users CAN authenticate with email/OTP
 - ✅ Users CAN sign transactions with their Magic wallet
-- ❌ Users CANNOT buy crypto directly through Magic's widget on Solana
+- ❌ Magic does NOT provide a fiat on-ramp for Solana (this feature doesn't exist)
 
-**Alternative for Solana Fiat On-Ramp**:
-- Use **Stripe Crypto Onramp** instead (already integrated)
-- Stripe supports Solana and provides similar functionality
+**Solution for Solana Fiat On-Ramp**:
+- Use **Stripe Crypto Onramp** instead (already integrated in the bot)
+- Stripe fully supports Solana and allows users to buy SOL directly
+- Stripe provides credit/debit card, bank transfer, Apple Pay, Google Pay support
 - Configuration: See Stripe section in `.env.example`
+- Stripe Onramp routes: `/api/stripe/onramp/*`
 
 ### Network Support
 
 Magic embedded wallets work on Solana for:
-- ✅ Wallet creation
-- ✅ Authentication
+- ✅ Wallet creation and management
+- ✅ User authentication
 - ✅ Transaction signing
 - ✅ Balance checking
-- ❌ Fiat on-ramp (Ethereum/Polygon only)
+- ❌ Fiat on-ramp - **Use Stripe Crypto Onramp**
 
 ## ✅ Deployment Checklist
 
