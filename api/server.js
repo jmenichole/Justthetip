@@ -54,7 +54,12 @@ app.use(helmet({
     contentSecurityPolicy: {
         directives: {
             defaultSrc: ["'self'"],
-            scriptSrc: ["'self'"],
+            scriptSrc: [
+                "'self'",
+                "'unsafe-inline'", // Required for inline scripts in register-magic.html
+                "https://cdn.tailwindcss.com", // Tailwind CSS CDN
+                "https://cdn.jsdelivr.net" // Magic SDK and extensions
+            ],
             styleSrc: ["'self'", "'unsafe-inline'"], // Allow inline styles for the HTML pages
             imgSrc: ["'self'", "data:", "https:", "https://tan-glamorous-porcupine-751.mypinata.cloud"],
             connectSrc: [
@@ -65,7 +70,9 @@ app.use(helmet({
                 "https://api.mainnet-beta.solana.com",
                 "https://api.devnet.solana.com",
                 "https://phantom.app",
-                "https://solflare.com"
+                "https://solflare.com",
+                "https://auth.magic.link", // Magic authentication service
+                "https://*.magic.link" // Magic SDK connections
             ],
             fontSrc: ["'self'", "data:"],
             objectSrc: ["'none'"],
