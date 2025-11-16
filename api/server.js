@@ -1010,10 +1010,18 @@ app.get('/register-magic.html', (req, res) => {
             return res.status(500).send('Failed to load registration page');
         }
         
-        // Inject Magic publishable key
-        const injectedHtml = html.replace(
-            '{{MAGIC_PUBLISHABLE_KEY}}', 
-            process.env.MAGIC_PUBLISHABLE_KEY || ''
+        // Inject Magic publishable key and other configuration values
+        let injectedHtml = html.replace(
+            "const MAGIC_PUBLISHABLE_KEY = '';",
+            `const MAGIC_PUBLISHABLE_KEY = '${process.env.MAGIC_PUBLISHABLE_KEY || ''}';`
+        );
+        injectedHtml = injectedHtml.replace(
+            "const MAGIC_SOLANA_RPC_URL = 'https://api.mainnet-beta.solana.com';",
+            `const MAGIC_SOLANA_RPC_URL = '${process.env.MAGIC_SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com'}';`
+        );
+        injectedHtml = injectedHtml.replace(
+            "const MAGIC_SOLANA_NETWORK = 'mainnet-beta';",
+            `const MAGIC_SOLANA_NETWORK = '${process.env.MAGIC_SOLANA_NETWORK || 'mainnet-beta'}';`
         );
         
         res.send(injectedHtml);
