@@ -865,6 +865,21 @@ function getAllWallets() {
   }
 }
 
+/**
+ * Get user ID by wallet address
+ * @param {string} walletAddress - Solana wallet address
+ * @returns {string|null} Discord user ID or null if not found
+ */
+function getUserIdByWallet(walletAddress) {
+  try {
+    const result = db.prepare('SELECT user_id FROM registered_wallets WHERE wallet_address = ?').get(walletAddress);
+    return result ? result.user_id : null;
+  } catch (error) {
+    console.error('Error getting user ID by wallet:', error);
+    return null;
+  }
+}
+
 // Export functions
 module.exports = {
   getUser,
@@ -899,6 +914,7 @@ module.exports = {
   getUserWallet,
   removeUserWallet,
   getAllWallets,
+  getUserIdByWallet,
   db, // Export for testing
 };
 

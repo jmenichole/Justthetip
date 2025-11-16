@@ -284,6 +284,95 @@ router.get('/registerwallet/status/:discordUserId', walletRegistrationLimiter, a
     }
 });
 
+/**
+ * GET /api/wallet/:discordUserId
+ * Simple endpoint to get wallet address for a Discord user
+ * Used by buy-crypto page for smart fill functionality
+ */
+router.get('/wallet/:discordUserId', walletRegistrationLimiter, async (req, res) => {
+    try {
+        const { discordUserId } = req.params;
+        
+        // Validate Discord user ID format
+        if (!/^\d+$/.test(discordUserId)) {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid Discord user ID format'
+            });
+        }
+
+        const walletAddress = await database.getUserWallet(String(discordUserId));
+
+        if (!walletAddress) {
+            return res.status(404).json({
+                success: false,
+                error: 'No wallet found for this user'
+            });
+        }
+
+        res.json({
+            success: true,
+            wallet: walletAddress
+        });
+
+    } catch (error) {
+        console.error('Wallet fetch error:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
+/**
+ * GET /api/wallet/search
+ * Check if a wallet address is registered in JustTheTip
+ * Used by buy-crypto page to determine if registration prompt should be shown
+ */
+router.get('/wallet/search', walletRegistrationLimiter, async (req, res) => {
+    try {
+        const { address } = req.query;
+        
+        if (!address) {
+            return res.status(400).json({
+                success: false,
+                error: 'Wallet address is required'
+            });
+        }
+
+        // Validate Solana wallet address format
+        if (address.length < 32 || address.length > 44) {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid Solana wallet address format'
+            });
+        }
+
+        // Search for wallet in database
+        const userId = await database.getUserIdByWallet(address);
+
+        if (!userId) {
+            return res.json({
+                success: true,
+                registered: false
+            });
+        }
+
+        res.json({
+            success: true,
+            registered: true,
+            userId: userId
+        });
+
+    } catch (error) {
+        console.error('Wallet search error:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
 // Export router and nonce storage for use in server.js
 module.exports = router;
 module.exports.registrationNoncesMemory = registrationNoncesMemory;
