@@ -21,6 +21,7 @@ const walletRoutes = require('./walletRoutes');
 const tipsRoutes = require('./tipsRoutes');
 const healthRoutes = require('./healthRoutes');
 const magicRoutes = require('./routes/magicRoutes');
+const stripeOnrampRoutes = require('./routes/stripeOnrampRoutes');
 const solanaDevTools = require('../src/utils/solanaDevTools');
 const coinbaseClient = require('../src/utils/coinbaseClient');
 const X402PaymentHandler = require('../src/utils/x402PaymentHandler');
@@ -45,7 +46,10 @@ const CONFIG = {
     NFT_STORAGE_API_KEY: process.env.NFT_STORAGE_API_KEY,
     COINBASE_COMMERCE_API_KEY: process.env.COINBASE_COMMERCE_API_KEY,
     COINBASE_COMMERCE_WEBHOOK_SECRET: process.env.COINBASE_COMMERCE_WEBHOOK_SECRET,
-    X402_TREASURY_WALLET: process.env.X402_TREASURY_WALLET
+    X402_TREASURY_WALLET: process.env.X402_TREASURY_WALLET,
+    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
+    STRIPE_PUBLISHABLE_KEY: process.env.STRIPE_PUBLISHABLE_KEY,
+    STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET
 };
 
 // ===== MIDDLEWARE =====
@@ -58,7 +62,8 @@ app.use(helmet({
                 "'self'",
                 "'unsafe-inline'", // Required for inline scripts in register-magic.html
                 "https://cdn.tailwindcss.com", // Tailwind CSS CDN
-                "https://cdn.jsdelivr.net" // Magic SDK and extensions
+                "https://cdn.jsdelivr.net", // Magic SDK and extensions
+                "https://crypto-js.stripe.com" // Stripe Crypto Onramp SDK
             ],
             styleSrc: ["'self'", "'unsafe-inline'"], // Allow inline styles for the HTML pages
             imgSrc: ["'self'", "data:", "https:", "https://tan-glamorous-porcupine-751.mypinata.cloud"],
@@ -72,12 +77,17 @@ app.use(helmet({
                 "https://phantom.app",
                 "https://solflare.com",
                 "https://auth.magic.link", // Magic authentication service
-                "https://*.magic.link" // Magic SDK connections
+                "https://*.magic.link", // Magic SDK connections
+                "https://api.stripe.com", // Stripe API
+                "https://*.stripe.com" // Stripe services
             ],
             fontSrc: ["'self'", "data:"],
             objectSrc: ["'none'"],
             mediaSrc: ["'self'"],
-            frameSrc: ["'none'"],
+            frameSrc: [
+                "'self'",
+                "https://*.stripe.com" // Stripe embedded elements
+            ],
         },
     },
     crossOriginEmbedderPolicy: false, // Required for some wallet extensions
@@ -980,6 +990,9 @@ app.use('/api', healthRoutes);
 
 // Magic embedded wallet routes
 app.use('/api/magic', magicRoutes);
+
+// Stripe Crypto Onramp routes
+app.use('/api/stripe/onramp', stripeOnrampRoutes);
 
 // WalletConnect Configuration Endpoint
 // Serves public WalletConnect project ID (safe to expose to frontend)
