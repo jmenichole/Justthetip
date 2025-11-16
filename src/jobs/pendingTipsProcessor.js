@@ -71,7 +71,7 @@ async function processExpiredPendingTips(client) {
               `A tip of **${amountDisplay}** from ${sender ? `<@${sender.id}>` : 'a user'} has expired.\n\n` +
               `You didn't register your wallet within 24 hours, so the tip could not be processed.\n\n` +
               `🔐 **Register now to receive future tips:**\n` +
-              `Use \`/register-wallet\` in any server with JustTheTip to get started!`
+              `Use \`/register-magic\` in any server with JustTheTip to get started!`
             );
           } catch (dmError) {
             logger.error(`[PendingTips] Failed to DM receiver ${tip.receiver_id}: ${dmError.message}`);

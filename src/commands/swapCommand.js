@@ -49,7 +49,7 @@ async function handleSwapCommand(interaction, userWallets) {
     const userWallet = userWallets.get(userId);
     if (!userWallet) {
       return await interaction.reply({
-        content: '❌ Please register your wallet first with `/register-wallet`.',
+        content: '❌ Please register your wallet first with `/register-magic`.',
         ephemeral: true,
       });
     }

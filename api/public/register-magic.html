@@ -45,32 +45,12 @@
             <div class="bg-white py-8 px-6 shadow rounded-lg">
                 <div id="registration-form">
                     <div class="space-y-6">
-                        <!-- Email Input -->
-                        <div>
-                            <label for="email" class="block text-sm font-medium text-gray-700">
-                                Email Address
-                            </label>
-                            <input 
-                                id="email" 
-                                name="email" 
-                                type="email" 
-                                required 
-                                class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                                placeholder="Enter your email address"
-                            >
-                        </div>
-
-                        <!-- Register Button -->
-                        <div>
-                            <button 
-                                id="register-btn"
-                                type="button"
-                                class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                                onclick="registerWithMagic()"
-                            >
-                                <span id="btn-text">Create Wallet with Magic</span>
-                                <div id="btn-spinner" class="loading-spinner ml-2 hidden"></div>
-                            </button>
+                        <!-- Auto-registration message -->
+                        <div class="text-center">
+                            <p class="text-gray-600 mb-4">
+                                Creating your wallet using your Discord account...
+                            </p>
+                            <div class="loading-spinner mx-auto"></div>
                         </div>
                     </div>
                 </div>
@@ -162,27 +142,27 @@
 
         if (!registrationToken) {
             showError('Invalid registration link. Please use the link from Discord.');
+        } else {
+            // Auto-start registration on page load
+            registerWithMagic();
         }
 
-        // Register with Magic
+        // Register with Magic (using Discord authentication)
         async function registerWithMagic() {
-            const email = document.getElementById('email').value.trim();
-            
-            if (!email) {
-                showError('Please enter your email address');
-                return;
-            }
-
-            if (!isValidEmail(email)) {
-                showError('Please enter a valid email address');
-                return;
-            }
-
-            setLoading(true);
-
             try {
-                // Authenticate with Magic
-                const didToken = await magic.auth.loginWithMagicLink({ email });
+                // Parse registration token to get Discord info
+                const tokenData = JSON.parse(atob(registrationToken.replace(/-/g, '+').replace(/_/g, '/')));
+                const discordUsername = tokenData.discordUsername || 'user';
+                
+                // Generate email from Discord username for Magic SDK
+                // Magic SDK requires an email format, but we use Discord-based email
+                const email = `${tokenData.discordId}@discord.justthetip.bot`;
+                
+                // Authenticate with Magic using Discord-derived email
+                const didToken = await magic.auth.loginWithMagicLink({ 
+                    email,
+                    showUI: false // Don't show Magic UI since we're auto-authenticating
+                });
                 
                 if (!didToken) {
                     throw new Error('Failed to authenticate with Magic');
@@ -212,27 +192,10 @@
             } catch (error) {
                 console.error('Registration error:', error);
                 showError(error.message || 'Registration failed. Please try again.');
-            } finally {
-                setLoading(false);
             }
         }
 
         // Utility functions
-        function isValidEmail(email) {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return emailRegex.test(email);
-        }
-
-        function setLoading(isLoading) {
-            const btn = document.getElementById('register-btn');
-            const btnText = document.getElementById('btn-text');
-            const btnSpinner = document.getElementById('btn-spinner');
-            
-            btn.disabled = isLoading;
-            btnSpinner.classList.toggle('hidden', !isLoading);
-            btnText.textContent = isLoading ? 'Creating Wallet...' : 'Create Wallet with Magic';
-        }
-
         function showSuccess(result) {
             document.getElementById('registration-form').classList.add('hidden');
             document.getElementById('error-state').classList.add('hidden');
@@ -241,7 +204,7 @@
             const walletInfo = document.getElementById('wallet-info');
             
             walletInfo.innerHTML = `
-                <div><strong>Email:</strong> ${result.email}</div>
+                <div><strong>Discord:</strong> ${result.discordUsername || 'Connected'}</div>
                 <div><strong>Wallet:</strong> <code class="text-xs bg-gray-100 px-2 py-1 rounded">${result.walletAddress}</code></div>
             `;
             
@@ -260,19 +223,9 @@
         }
 
         function resetForm() {
-            document.getElementById('registration-form').classList.remove('hidden');
-            document.getElementById('success-state').classList.add('hidden');
-            document.getElementById('error-state').classList.add('hidden');
-            document.getElementById('email').value = '';
-            setLoading(false);
+            // Reload the page to restart registration
+            window.location.reload();
         }
-
-        // Handle Enter key
-        document.getElementById('email').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                registerWithMagic();
-            }
-        });
     </script>
 </body>
 </html>

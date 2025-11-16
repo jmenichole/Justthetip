@@ -19,7 +19,7 @@ const API_URL = process.env.API_BASE_URL || 'https://api.mischief-manager.com';
 
 /**
  * Parse expiration string to milliseconds
- * @param {string} expiresIn - Format: "2m", "1h", "24h", "7d", etc.
+ * @param {string} expiresIn - Format: "5s", "30s", "2m", "1h", "24h", "7d", etc.
  * @returns {number} Milliseconds until expiration
  */
 function parseExpiration(expiresIn) {
@@ -31,6 +31,8 @@ function parseExpiration(expiresIn) {
   }
   
   switch (unit) {
+    case 's':
+      return value * 1000;
     case 'm':
       return value * 60 * 1000;
     case 'h':
@@ -38,7 +40,7 @@ function parseExpiration(expiresIn) {
     case 'd':
       return value * 24 * 60 * 60 * 1000;
     default:
-      throw new Error('Invalid expiration unit. Use "m" for minutes, "h" for hours, or "d" for days');
+      throw new Error('Invalid expiration unit. Use "s" for seconds, "m" for minutes, "h" for hours, or "d" for days');
   }
 }
 
@@ -87,8 +89,8 @@ async function handleAirdropCommand(interaction, context) {
       content: '❌ Please specify **either** a claim limit (total_claims) **or** a time limit (expires_in), not both or neither.\n\n' +
                '**Examples:**\n' +
                '• `/airdrop amount:10 total_claims:50` - First 50 users\n' +
-               '• `/airdrop amount:5 expires_in:2m` - Anyone within 2 minutes\n' +
-               '• `/airdrop amount:20 expires_in:1h` - Anyone within 1 hour',
+               '• `/airdrop amount:5 expires_in:30s` - Anyone within 30 seconds\n' +
+               '• `/airdrop amount:20 expires_in:2m` - Anyone within 2 minutes',
       ephemeral: true
     });
   }
@@ -140,7 +142,7 @@ async function handleAirdropCommand(interaction, context) {
     const senderWallet = await database.getUserWallet(senderId);
     if (!senderWallet) {
       return interaction.editReply({ 
-        content: '❌ Please register your wallet first using `/register-wallet`', 
+        content: '❌ Please register your wallet first using `/register-magic`', 
         ephemeral: true 
       });
     }

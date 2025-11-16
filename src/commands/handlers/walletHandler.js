@@ -84,7 +84,7 @@ async function handleDisconnectWalletCommand(interaction, context) {
   
   if (!walletAddress) {
     return interaction.reply({ 
-      content: '❌ You don\'t have a wallet registered. Use `/register-wallet` to connect one.', 
+      content: '❌ You don\'t have a wallet registered. Use `/register-magic` to connect one.', 
       ephemeral: true 
     });
   }
@@ -104,7 +104,7 @@ async function handleDisconnectWalletCommand(interaction, context) {
       `✅ Your wallet registration has been removed\n` +
       `✅ You can no longer receive tips until you re-register\n` +
       `✅ Your private keys remain secure in your wallet\n\n` +
-      `To reconnect, use \`/register-wallet\` anytime.`
+      `To reconnect, use \`/register-magic\` anytime.`
     )
     .setColor(0x667eea)
     .setFooter({ text: 'JustTheTip - x402 Trustless Agent' })

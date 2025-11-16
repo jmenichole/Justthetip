@@ -88,7 +88,7 @@ async function handleTipCommand(interaction, dependencies = {}) {
     } catch (error) {
       await interaction.editReply({ 
         content: '❌ You need to register your wallet before sending tips.\n\n' +
-                 'Use `/register-wallet` to get started!',
+                 'Use `/register-magic` to get started!',
       });
       return;
     }
@@ -163,7 +163,7 @@ async function handleTipCommand(interaction, dependencies = {}) {
           `🎉 **You've received a tip!**\n\n` +
           `${interaction.user} just sent you **${amountDisplay}**!\n\n` +
           `To claim your tip, you need to register your wallet:\n` +
-          `1. Use the \`/register-wallet\` command in any server where JustTheTip is available\n` +
+          `1. Use the \`/register-magic\` command in any server where JustTheTip is available\n` +
           `2. Complete the wallet verification process\n` +
           `3. Your tip will be automatically sent to your wallet!\n\n` +
           `⏰ **Important:** You have **24 hours** to register your wallet. ` +

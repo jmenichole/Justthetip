@@ -52,7 +52,7 @@ async function handleStatusCommand(interaction, context) {
         name: '🔐 Your Wallet Status', 
         value: walletAddress 
           ? `✅ Registered\n\`${walletAddress.slice(0, 8)}...${walletAddress.slice(-8)}\``
-          : '❌ Not registered\nUse `/register-wallet` to connect your wallet',
+          : '❌ Not registered\nUse `/register-magic` to create your wallet',
         inline: false 
       }
     )
@@ -75,7 +75,7 @@ async function handleLogsCommand(interaction, context) {
   
   if (!walletAddress) {
     return interaction.reply({ 
-      content: '❌ Please register your wallet first using `/register-wallet`', 
+      content: '❌ Please register your wallet first using `/register-magic`', 
       ephemeral: true 
     });
   }

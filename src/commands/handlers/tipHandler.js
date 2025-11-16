@@ -64,7 +64,7 @@ async function handleTipCommand(interaction, context) {
   const senderWallet = await database.getUserWallet(senderId);
   if (!senderWallet) {
     return interaction.reply({ 
-      content: '❌ Please register your wallet first using `/register-wallet`', 
+      content: '❌ Please register your wallet first using `/register-magic`', 
       ephemeral: true 
     });
   }
@@ -102,7 +102,7 @@ async function handleTipCommand(interaction, context) {
           .setDescription(
             `**${interaction.user.username}** tried to send you **$${usdAmount.toFixed(2)} USD** (~${solAmount.toFixed(4)} SOL)!\n\n` +
             `To receive tips, you need to register your Solana wallet first.\n\n` +
-            `Use the \`/register-wallet\` command to get started.\n\n` +
+            `Use the \`/register-magic\` command to get started.\n\n` +
             `_This tip intent will expire in 7 days._`
           )
           .setColor(0xfbbf24)
@@ -122,14 +122,14 @@ async function handleTipCommand(interaction, context) {
           `💌 **${recipient.username}** hasn't registered their wallet yet.\n\n` +
           `✅ We've sent them a notification about your tip!\n` +
           `⏰ They have **7 days** to register and you can retry the tip.\n\n` +
-          `_They'll need to use \`/register-wallet\` to receive tips._`,
+          `_They'll need to use \`/register-magic\` to receive tips._`,
         ephemeral: true 
       });
 
     } catch (error) {
       console.error('Error handling unregistered recipient:', error);
       return interaction.reply({ 
-        content: `❌ **${recipient.username}** hasn't registered their wallet yet.\n\nThey need to use \`/register-wallet\` to receive tips.`, 
+        content: `❌ **${recipient.username}** hasn't registered their wallet yet.\n\nThey need to use \`/register-magic\` to receive tips.`, 
         ephemeral: true 
       });
     }
