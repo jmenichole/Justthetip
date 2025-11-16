@@ -71,7 +71,7 @@ openssl rand -base64 32
 
 ### 1. Check Health Endpoint
 ```bash
-curl https://api.mischief-manager.com/api/magic/health
+curl https://justthetip.vercel.app/api/magic/health
 ```
 
 Expected response:

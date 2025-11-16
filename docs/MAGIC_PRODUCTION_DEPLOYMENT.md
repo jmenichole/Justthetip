@@ -32,7 +32,7 @@ When code is pushed to the main branch:
 You can verify Magic is properly configured by checking the health endpoint:
 
 ```bash
-curl https://api.mischief-manager.com/api/magic/health
+curl https://justthetip.vercel.app/api/magic/health
 ```
 
 Expected response:
@@ -186,7 +186,7 @@ If you need to rotate Magic API keys:
 
 - Check documentation: `/docs/guides/MAGIC_QUICKSTART_GUIDE.md`
 - Review integration: `MAGIC_INTEGRATION_COMPLETE.md`
-- API health check: https://api.mischief-manager.com/api/magic/health
+- API health check: https://justthetip.vercel.app/api/magic/health
 
 ## 📝 Important Limitations
 
