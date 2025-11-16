@@ -132,8 +132,28 @@
                 }
             });
         } catch (error) {
-            console.error('Failed to initialize Magic SDK:', error);
-            showError('Magic SDK initialization failed. Please contact support.');
+            // Enhanced error logging with detailed information
+            console.error('Failed to initialize Magic SDK:', {
+                error: error,
+                errorMessage: error.message,
+                errorStack: error.stack,
+                publishableKeyPresent: !!(MAGIC_PUBLISHABLE_KEY && !MAGIC_PUBLISHABLE_KEY.includes('{{')),
+                rpcUrl: MAGIC_SOLANA_RPC_URL,
+                network: MAGIC_SOLANA_NETWORK,
+                timestamp: new Date().toISOString()
+            });
+            
+            // Provide user-friendly error message based on error type
+            let userMessage = 'Magic SDK initialization failed. ';
+            if (!MAGIC_PUBLISHABLE_KEY || MAGIC_PUBLISHABLE_KEY.includes('{{')) {
+                userMessage += 'The service is not properly configured. Please contact support.';
+            } else if (error.message && error.message.includes('network')) {
+                userMessage += 'Network connection issue detected. Please check your internet connection and try again.';
+            } else {
+                userMessage += 'An unexpected error occurred. Please contact support with error code: ' + error.message;
+            }
+            
+            showError(userMessage);
         }
 
         // Get registration token from URL
