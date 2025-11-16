@@ -314,19 +314,19 @@
                         </svg>
                     </button>
                     <div class="faq-answer">
-                        <p>JustTheTip is 100% non-custodial, meaning you maintain full control of your private keys and funds at all times. Unlike traditional tipping bots that hold your crypto, we never have access to your wallet. All transactions are signed by you in your own wallet, with smart contract escrow for unregistered users.</p>
+                        <p>JustTheTip uses Magic's embedded wallet technology for seamless, non-custodial wallet creation. Your wallet is created instantly via Discord authentication, and you approve every transaction in your own wallet using Solana Pay. Unlike traditional bots that hold your funds, we never have access to your private keys - they're secured by Magic's industry-standard MPC (multi-party computation) infrastructure.</p>
                     </div>
                 </div>
 
                 <div class="faq-item">
                     <button class="faq-question">
-                        <span>How does the Trustless Agent technology work?</span>
+                        <span>How does wallet creation work?</span>
                         <svg class="faq-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M19 9L12 16L5 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                     </button>
                     <div class="faq-answer">
-                        <p>Our Trustless Agent uses signature-based authentication. You sign once to prove wallet ownership, and the bot can then facilitate tipping without requiring repeated signatures for every transaction. Your private keys never leave your wallet, and all operations are cryptographically verifiable on-chain.</p>
+                        <p>Use the /register-magic command in Discord, authenticate with your email, and your Solana wallet is created instantly. Magic handles the wallet infrastructure using secure, non-custodial technology - you don't need to install any wallet apps or manage seed phrases. The bot never sees or stores your private keys.</p>
                     </div>
                 </div>
 
@@ -344,13 +344,25 @@
 
                 <div class="faq-item">
                     <button class="faq-question">
+                        <span>How do I send a tip?</span>
+                        <svg class="faq-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M19 9L12 16L5 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Use /tip @username $amount in Discord. The bot generates a Solana Pay link that opens in your wallet (Phantom, Solflare, etc.). Review the transaction details and approve it in your wallet. You sign each transaction yourself - the bot never signs on your behalf or touches your funds.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
                         <span>What happens if I tip someone who isn't registered?</span>
                         <svg class="faq-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M19 9L12 16L5 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                     </button>
                     <div class="faq-answer">
-                        <p>No problem! Tips to unregistered users are held securely in smart contract escrow using program-derived addresses. The recipient can claim their funds at any time by registering their wallet. No tips are ever lost.</p>
+                        <p>We'll notify the recipient via DM that they have a pending tip. They have 7 days to register using /register-magic, then you can resend the tip. Your funds stay in your wallet the whole time - nothing is locked or escrowed.</p>
                     </div>
                 </div>
 
@@ -362,7 +374,7 @@
                         </svg>
                     </button>
                     <div class="faq-answer">
-                        <p>Absolutely. JustTheTip uses smart contract escrow, program-derived addresses, and zero private key exposure. All code is open source and auditable on-chain. We employ AES-256-GCM encryption and follow security best practices throughout the architecture.</p>
+                        <p>Yes. JustTheTip uses Magic's enterprise-grade wallet infrastructure with MPC (multi-party computation) technology. You approve every transaction in your wallet using Solana Pay. The bot generates transaction requests but never has access to your private keys. All code is open source and auditable on-chain.</p>
                     </div>
                 </div>
 
@@ -386,7 +398,7 @@
                         </svg>
                     </button>
                     <div class="faq-answer">
-                        <p>Yes! JustTheTip works on any device with Phantom, Solflare, or WalletConnect support. Our mobile wallet guide helps you set up your preferred wallet for seamless tipping on the go.</p>
+                        <p>Yes! Magic wallets work on any device. For transactions, the Solana Pay links work with mobile wallets like Phantom and Solflare. Registration is done once via email on any device, and tipping works seamlessly on mobile and desktop Discord.</p>
                     </div>
                 </div>
 
@@ -398,7 +410,7 @@
                         </svg>
                     </button>
                     <div class="faq-answer">
-                        <p>Getting started is simple: 1) Add the bot to your Discord server, 2) Use /register to link your Solana wallet (sign once to prove ownership), 3) Start tipping with /tip command. The entire process takes less than 60 seconds!</p>
+                        <p>It's simple: 1) Run /register-magic in Discord, 2) Verify your email, 3) Your wallet is created instantly! Then use /tip @user $amount to send tips. Each tip opens in your wallet for you to approve. The entire setup takes less than 2 minutes.</p>
                     </div>
                 </div>
 
@@ -410,7 +422,7 @@
                         </svg>
                     </button>
                     <div class="faq-answer">
-                        <p>x402 is our premium feature system that enables USDC micropayments for advanced functionality. This includes enhanced analytics, priority transaction processing, and exclusive features. It's completely optional—all core tipping features are free.</p>
+                        <p>x402 is our API monetization layer that enables premium features through USDC micropayments. This includes enhanced analytics, priority processing, and advanced features. It's completely optional - all core tipping functionality is free with standard network fees only.</p>
                     </div>
                 </div>
 
@@ -422,7 +434,19 @@
                         </svg>
                     </button>
                     <div class="faq-answer">
-                        <p>All transactions occur on the Solana blockchain, which is publicly viewable by design. We store your Discord ID and wallet address for functionality, but we don't track or sell your data. See our Privacy Policy for complete details.</p>
+                        <p>All Solana transactions are publicly viewable on the blockchain by design. We store your Discord ID and wallet address for bot functionality, but we don't track or sell your data. You can verify all transactions yourself on Solana explorers. See our Privacy Policy for complete details.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>Do I need to install a wallet app?</span>
+                        <svg class="faq-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M19 9L12 16L5 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <div class="faq-answer">
+                        <p>For basic usage, no! Magic creates your wallet instantly via email authentication. However, to approve tip transactions, you'll need a Solana wallet app like Phantom or Solflare to scan the Solana Pay QR codes or links. These wallets are free and take minutes to set up.</p>
                     </div>
                 </div>
             </div>
