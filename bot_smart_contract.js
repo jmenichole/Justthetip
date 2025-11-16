@@ -71,7 +71,8 @@ const smartContractCommands = improvedCommands;
 // Note: This is being phased out in favor of database-only storage
 
 // Get API URL for wallet registration page (sign.html is served by API server)
-const API_URL = process.env.API_BASE_URL || 'https://api.mischief-manager.com';
+// Vercel deployment is the recommended API server for all endpoints including crypto onramp
+const API_URL = process.env.API_BASE_URL || 'https://justthetip.vercel.app';
 
 
 client.once('ready', async () => {
