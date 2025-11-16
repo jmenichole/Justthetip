@@ -15,41 +15,36 @@ const improvedCommands = [
   // ===== CORE COMMANDS =====
   {
     name: 'help',
-    description: '📚 View all available commands and how to use JustTheTip',
+    description: 'gm - learn how to send sats',
   },
 
   {
     name: 'tip',
-    description: '💸 Send a tip in USD to another Discord user',
+    description: 'send some sol to a fren',
     options: [
       {
         name: 'user',
         type: 6, // USER
-        description: 'The user you want to tip',
+        description: 'who gets the bag',
         required: true
       },
       {
         name: 'amount',
         type: 10, // NUMBER
-        description: 'Amount in USD ($0.10 to $100.00)',
+        description: 'how much ($0.10 to $100)',
         required: true
       }
     ]
   },
 
   {
-    name: 'register-wallet',
-    description: '🔐 Connect your Solana wallet - Sign once, tip forever',
-  },
-
-  {
     name: 'register-magic',
-    description: '✨ Create wallet with Magic (email login - easiest method)',
+    description: 'create wallet with email (easiest way to start)',
     options: [
       {
         name: 'email',
         type: 3, // STRING
-        description: 'Your email address for Magic wallet creation',
+        description: 'your email',
         required: true
       }
     ]
@@ -57,17 +52,17 @@ const improvedCommands = [
 
   {
     name: 'disconnect-wallet',
-    description: '🔓 Disconnect your registered Solana wallet from JustTheTip',
+    description: 'unlink your wallet',
   },
 
   {
     name: 'support',
-    description: '🎫 Contact support team or report an issue',
+    description: 'something broken? lmk',
     options: [
       {
         name: 'issue',
         type: 3, // STRING
-        description: 'Describe your problem or question',
+        description: 'what went wrong',
         required: true
       }
     ]
@@ -75,27 +70,22 @@ const improvedCommands = [
 
   {
     name: 'status',
-    description: '🔍 Check bot status and your wallet connection status',
+    description: 'check if youre connected',
   },
 
   {
     name: 'logs',
-    description: '📋 View your recent transactions (sent via DM)',
-  },
-
-  {
-    name: 'donate',
-    description: '☕ Support the developer with an optional donation',
+    description: 'see your tx history',
   },
 
   {
     name: 'airdrop',
-    description: '💝 Share the love - create a claimable SOL airdrop',
+    description: 'drop bags for everyone (default 5min timer)',
     options: [
       {
         name: 'amount',
         type: 10, // NUMBER
-        description: 'Amount in USD per claim (e.g., 5 for $5, 20 for $20)',
+        description: 'how much per person ($0.10 to $100)',
         required: true,
         min_value: 0.10,
         max_value: 100.00
@@ -103,7 +93,7 @@ const improvedCommands = [
       {
         name: 'total_claims',
         type: 4, // INTEGER
-        description: 'Max users who can claim (leave empty for unlimited within time)',
+        description: 'max claimers (default unlimited)',
         required: false,
         min_value: 1,
         max_value: 1000
@@ -111,7 +101,7 @@ const improvedCommands = [
       {
         name: 'expires_in',
         type: 3, // STRING
-        description: 'How long available (leave empty for unlimited users within 2min)',
+        description: 'how long (default 5min)',
         required: false,
         choices: [
           { name: '2 minutes', value: '2m' },
@@ -127,123 +117,88 @@ const improvedCommands = [
       {
         name: 'message',
         type: 3, // STRING
-        description: 'Custom message to show claimers (optional)',
+        description: 'custom msg for claimers',
         required: false,
         max_length: 200
       },
       {
         name: 'require_server',
         type: 5, // BOOLEAN
-        description: 'Only allow claims from users in this server? (default: false)',
+        description: 'only this server?',
         required: false
       }
     ]
-  },
-
-  {
-    name: 'my-airdrops',
-    description: '📊 View and manage your active airdrops',
   }
 ];
 
 // ===== COMMAND DESCRIPTIONS FOR /help =====
 const HELP_MESSAGES = {
   userGuide: `
-**🎯 JustTheTip - x402 Trustless Agent**
-Sign once, tip forever—without compromising security.
+**gm anon**
 
-**Quick Start Guide:**
+welcome to justthetip - send sol as easy as DMing
 
-**1️⃣ Register Your Wallet**
-Choose your preferred method:
+**how it works:**
 
-**🔐 Traditional Wallet (Advanced Users)**
-\`/register-wallet\`
-• Opens a secure verification link
-• Connect your Solana wallet (Phantom, Trust, Coinbase, etc.)
-• Sign one message to prove ownership
-
-**✨ Magic Wallet (Easiest - Recommended)**
+**1️⃣ get a wallet**
 \`/register-magic your@email.com\`
-• Create wallet with just your email
-• No app installation required
-• Works on all devices (mobile, desktop, web)
-• Enterprise-grade security
+• easiest way - just need email
+• wallet created instantly
+• works everywhere
 
-**2️⃣ Send Tips**
-\`/tip @username 10\`
-• Tip other Discord users in USD
-• Amount between $0.10 and $100.00
-• 100% non-custodial - you control your wallet
-• Automatically converted to SOL at current price
+**2️⃣ tip someone**
+\`/tip @fren 5\`
+• send $0.10 to $100
+• instant on solana
+• they dont need a wallet yet (we hold it til they register)
 
-**3️⃣ Request Testnet Tokens** (For developers)
-• Get free testnet SOL for testing
-• Amount in USD (maximum $20.00)
-• Works on devnet only
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-**All Commands:**
-
-💸 **Tipping**
-\`/tip @user <amount>\` - Send USD to another user
-\`/logs\` - View your transaction history (sent via DM)
-
-🔐 **Wallet Management**
-\`/register-wallet\` - Connect your Solana wallet (traditional)
-\`/register-magic <email>\` - Create wallet with Magic (easiest)
-\`/disconnect-wallet\` - Remove your wallet connection
-\`/status\` - Check bot and wallet status
-
-🆘 **Support**
-\`/help\` - Show this guide
-\`/support <issue>\` - Contact support team
-
-🎁 **Airdrops**
-\`/airdrop <amount> [options]\` - Create a claimable SOL airdrop
-\`/my-airdrops\` - Manage your active airdrops
+**3️⃣ make it rain**
+\`/airdrop 1 50\`
+• drop $1 for 50 ppl
+• 5min timer (or set custom)
+• first come first serve
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-**⚡ Network:** Solana Mainnet
-**🛡️ Security:** x402 Trustless Agent - Non-custodial, you control your keys
-**💰 Fees:** Only network transaction fees
+**commands:**
+
+\`/tip @user <amount>\` - send sol
+\`/airdrop <amount> [claims]\` - make it rain (5min default)
+\`/register-magic <email>\` - get wallet
+\`/status\` - check connection
+\`/logs\` - see your txs
+\`/disconnect-wallet\` - unlink
+\`/support <issue>\` - report bugs
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+**fees?** only network fees (couple cents)
+**safe?** non-custodial, you own your keys
+**network:** solana mainnet
 `,
 
   support: `
-**🎫 Support & Help**
+**need help?**
 
-**Common Issues:**
+**wallet issues?**
+• check your email for magic link
+• make sure you completed registration
+• try \`/register-magic\` again
 
-**Wallet Won't Connect?**
-• Double-check your wallet address
-• Make sure you signed the message
-• Try the registration link again
+**tip not working?**
+• they dont need wallet to receive (we hold it)
+• amount must be $0.10-$100
+• check balance with \`/status\`
 
-**Magic Wallet Issues?**
-• Check your email for verification code
-• Make sure you're using a valid email address
-• Try refreshing the registration page
+**cant see logs?**
+• check DMs
+• enable DMs in server settings
 
-**Tip Not Working?**
-• Verify recipient has registered their wallet
-• Check you have sufficient SOL balance
-• Amount must be between $0.10 and $100.00
+**still broken?**
+\`/support <describe the issue>\`
 
-**Can't See Logs?**
-• Check your DMs (direct messages)
-• Enable DMs from server members in privacy settings
-
-**Need to Disconnect?**
-Use \`/disconnect-wallet\` to remove your wallet registration.
-
-**Still Need Help?**
-Use \`/support <describe-your-issue>\`
-Your message will be sent to the support team.
-
-**Contact:**
-• GitHub: github.com/jmenichole/Justthetip/issues
+or hit us up:
+• github.com/jmenichole/Justthetip/issues
 `
 };
 
@@ -253,27 +208,23 @@ const commandPermissions = {
   public: [
     'help',
     'tip',
-    'register-wallet',
     'register-magic',
     'disconnect-wallet',
     'support',
     'status',
     'logs',
-    'airdrop',
-    'my-airdrops'
+    'airdrop'
   ]
 };
 
 // ===== RATE LIMITS =====
 const rateLimits = {
-  'register-wallet': { max: 5, window: 900000 }, // 5 per 15 minutes
   'register-magic': { max: 5, window: 900000 }, // 5 per 15 minutes
   'disconnect-wallet': { max: 3, window: 300000 }, // 3 per 5 minutes
   'tip': { max: 10, window: 60000 }, // 10 per minute
   'support': { max: 2, window: 300000 }, // 2 per 5 minutes
   'logs': { max: 5, window: 60000 }, // 5 per minute
   'airdrop': { max: 3, window: 300000 }, // 3 per 5 minutes
-  'my-airdrops': { max: 10, window: 60000 }, // 10 per minute
   default: { max: 10, window: 60000 } // 10 per minute for others
 };
 

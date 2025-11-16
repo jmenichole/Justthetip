@@ -51,12 +51,11 @@ const { commands: improvedCommands } = require('./IMPROVED_SLASH_COMMANDS');
 // Import command handlers
 const { handleHelpCommand } = require('./src/commands/handlers/helpHandler');
 const { handleTipCommand } = require('./src/commands/handlers/tipHandler');
-const { handleRegisterWalletCommand, handleDisconnectWalletCommand } = require('./src/commands/handlers/walletHandler');
+const { handleDisconnectWalletCommand } = require('./src/commands/handlers/walletHandler');
 const { handleSupportCommand } = require('./src/commands/handlers/supportHandler');
-const { handleDonateCommand, handleCopyWalletButton } = require('./src/commands/handlers/donateHandler');
 const { handleRegisterMagicCommand } = require('./src/commands/handlers/magicHandler');
 const { handleStatusCommand, handleLogsCommand } = require('./src/commands/handlers/statusHandler');
-const { handleAirdropCommand, handleMyAirdropsCommand } = require('./src/commands/handlers/airdropHandler');
+const { handleAirdropCommand } = require('./src/commands/handlers/airdropHandler');
 
 const client = new Client({
   intents: [
@@ -137,25 +136,17 @@ client.on(Events.InteractionCreate, async interaction => {
       case 'tip':
         await handleTipCommand(interaction, context);
         break;
-        
-      case 'register-wallet':
-        await handleRegisterWalletCommand(interaction, context);
+
+      case 'register-magic':
+        await handleRegisterMagicCommand(interaction, context);
         break;
         
       case 'disconnect-wallet':
         await handleDisconnectWalletCommand(interaction, context);
         break;
         
-
-      case 'register-magic':
-        await handleRegisterMagicCommand(interaction, context);
-        break;
       case 'support':
         await handleSupportCommand(interaction, context);
-        break;
-        
-      case 'donate':
-        await handleDonateCommand(interaction, context);
         break;
         
       case 'status':
@@ -170,13 +161,9 @@ client.on(Events.InteractionCreate, async interaction => {
         await handleAirdropCommand(interaction, context);
         break;
         
-      case 'my-airdrops':
-        await handleMyAirdropsCommand(interaction, context);
-        break;
-        
       default:
         await interaction.reply({
-          content: '❌ Unknown command. Use `/help` to see available commands.',
+          content: 'unknown command - try /help',
           ephemeral: true
         });
     }
@@ -237,8 +224,6 @@ client.on(Events.InteractionCreate, async interaction => {
     const embed = createOnChainBalanceEmbed(walletAddress, balance, true);
     
     await interaction.update({ embeds: [embed] });
-  } else if (interaction.customId === 'copy_dev_wallet') {
-    await handleCopyWalletButton(interaction);
   }
 });// Handle reaction-based airdrop claims
 client.on(Events.MessageReactionAdd, async (reaction, user) => {
