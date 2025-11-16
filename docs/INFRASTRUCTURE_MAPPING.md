@@ -4,9 +4,32 @@
 
 This document provides a comprehensive mapping of all infrastructure components, domains, and their purposes in the JustTheTip ecosystem.
 
+**See Also**: [PAGE_DIRECTORY.md](./PAGE_DIRECTORY.md) - Complete list of all accessible pages and endpoints
+
 ---
 
 ## 🌐 Domain & Deployment Map
+
+### Quick Links - All Pages
+
+**Wallet & Registration Pages:**
+- 🔐 Magic Wallet: `https://justthetip.vercel.app/api/magic/register-magic.html`
+- 💼 Traditional Wallet: `https://justthetip.vercel.app/sign.html`
+- 💳 Buy Crypto: `https://justthetip.vercel.app/buy-crypto.html`
+- 🏠 Landing Page: `https://jmenichole.github.io/Justthetip/landing.html`
+
+**Documentation Pages:**
+- 📚 Docs Home: `https://jmenichole.github.io/Justthetip/index.html`
+- ❓ Support: `https://jmenichole.github.io/Justthetip/support.html`
+- 📜 Terms: `https://jmenichole.github.io/Justthetip/terms.html`
+- 🔒 Privacy: `https://jmenichole.github.io/Justthetip/privacy.html`
+- 💰 Investor Info: `https://jmenichole.github.io/Justthetip/investor.html`
+
+**API Health Checks:**
+- ✅ Magic Health: `https://justthetip.vercel.app/api/magic/health`
+- ✅ API Health: `https://justthetip.vercel.app/api/health`
+
+**Complete Page List**: See [PAGE_DIRECTORY.md](./PAGE_DIRECTORY.md)
 
 ### Production Domains
 
@@ -211,6 +234,7 @@ REGISTRATION_TOKEN_SECRET=<random-secret>
 STRIPE_SECRET_KEY=sk_live_...
 STRIPE_PUBLISHABLE_KEY=pk_live_...
 STRIPE_WEBHOOK_SECRET=whsec_...
+STRIPE_PAYMENT_METHOD_ID=pm_...  # Optional, for default payment method
 
 # Solana
 SOLANA_RPC_URL=https://api.mainnet-beta.solana.com

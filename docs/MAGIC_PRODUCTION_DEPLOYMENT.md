@@ -12,10 +12,17 @@ Magic API keys are **already configured** in GitHub Actions secrets and are **au
 
 The following secrets are already set up in the GitHub repository:
 
+**Magic Wallet:**
 - ✅ `MAGIC_PUBLISHABLE_KEY` - Public key for frontend SDK
 - ✅ `MAGIC_SECRET_KEY` - Secret key for backend API
 - ✅ `MAGIC_SOLANA_NETWORK` - Network configuration (mainnet-beta/devnet)
 - ✅ `MAGIC_SOLANA_RPC_URL` - RPC endpoint URL
+
+**Stripe Crypto Onramp:**
+- ✅ `STRIPE_SECRET_KEY` - Stripe secret key for backend API
+- ✅ `STRIPE_PUBLISHABLE_KEY` - Stripe publishable key for frontend
+- ✅ `STRIPE_WEBHOOK_SECRET` - Webhook signature verification
+- ✅ `STRIPE_PAYMENT_METHOD_ID` - Default payment method (optional)
 
 ### Automatic Deployment
 
