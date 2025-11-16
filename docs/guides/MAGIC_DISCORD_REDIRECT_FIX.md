@@ -38,11 +38,20 @@ https://auth.magic.link/v1/oauth2/yQOcm6A9KjEIVf77yvvfzD9bnvJQgvOLsfe-CkpHXTg=/c
 
 Click **"Save Changes"** at the bottom of the page.
 
-### Step 5: Test
+### Step 5: Configure Magic Link Dashboard
+
+1. Go to [Magic Link Dashboard](https://dashboard.magic.link)
+2. Navigate to **Settings** → **Allowlists**
+3. Add your application domain to **Allowed Origins**:
+   - `https://jmenichole.github.io` (for production)
+   - `http://localhost:3000` (for development)
+
+### Step 6: Test
 
 1. Go back to Magic Link dashboard
-2. Click **"Test Connection"** again
-3. ✅ It should now work!
+2. Navigate to **Settings** → **Social Login** → **Discord**
+3. Click **"Test Connection"** again
+4. ✅ It should now work!
 
 ## Why This Happens
 
@@ -59,11 +68,18 @@ See the complete guide: [MAGIC_DISCORD_SOCIAL_LOGIN_SETUP.md](./MAGIC_DISCORD_SO
 
 ## Verification Checklist
 
-After adding both URIs, you should see in Discord Developer Portal:
+After configuration, verify:
 
+**In Discord Developer Portal:**
 ```
 ✅ https://auth.magic.link/v1/oauth2/yQOcm6A9KjEIVf77yvvfzD9bnvJQgvOLsfe-CkpHXTg=/callback
 ✅ https://dashboard.magic.link/app/social_login/test_connection_callback
+```
+
+**In Magic Link Dashboard (Settings → Allowlists):**
+```
+✅ https://jmenichole.github.io (or your domain)
+✅ http://localhost:3000 (for development)
 ```
 
 ---

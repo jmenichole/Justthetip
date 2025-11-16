@@ -71,14 +71,54 @@ After adding both redirect URIs, your Discord OAuth2 Redirects section should sh
 ✅ https://dashboard.magic.link/app/social_login/test_connection_callback
 ```
 
-### Step 5: Test the Connection
+### Step 5: Configure Magic Link Dashboard (Important!)
+
+After configuring Discord, you need to configure domain allowlists in your Magic Link dashboard:
 
 1. Go to [Magic Link Dashboard](https://dashboard.magic.link)
-2. Navigate to: **Settings** → **Social Login** → **Discord**
-3. Click **Test Connection** button
-4. You should now be redirected to Discord's authorization page
-5. Authorize the application
-6. You should be redirected back to the Magic Link dashboard with a success message
+2. Navigate to: **Settings** → **Allowlists**
+3. Add your application domains to the **Allowed Origins** list:
+   - For production: `https://yourdomain.com`
+   - For development: `http://localhost:3000` (or your dev port)
+   - For GitHub Pages: `https://jmenichole.github.io`
+   
+**Note**: Magic Link requires domain allowlisting for security. Without this, your application won't be able to communicate with Magic's authentication service, even if Discord OAuth is configured correctly.
+
+**What to add:**
+- Add all domains where your application will be hosted
+- Include protocol (`https://` or `http://`)
+- Do NOT include trailing slashes
+- Localhost addresses are allowed for development
+
+**Example allowlist entries:**
+```
+https://jmenichole.github.io
+https://yourdomain.com
+http://localhost:3000
+```
+
+### Step 6: Configure Discord Social Login in Magic Dashboard
+
+1. In Magic Link Dashboard, navigate to: **Settings** → **Social Login**
+2. Select **Discord** from the provider list
+3. Enter your Discord **Client ID**: `1419742988128616479`
+4. Enter your Discord **Client Secret** (from Discord Developer Portal)
+5. Verify the **Redirect URI** shown matches what you added to Discord
+6. Configure scopes (recommended: `identify` and `email`)
+7. Click **Save**
+
+### Step 7: Test the Connection
+
+1. In Magic Link Dashboard, on the Discord social login configuration page
+2. Click **Test Connection** button
+3. You should now be redirected to Discord's authorization page
+4. Authorize the application
+5. You should be redirected back to the Magic Link dashboard with a success message
+
+If the test fails, verify:
+- Both redirect URIs are added to Discord Developer Portal
+- Domain allowlist is configured in Magic Link dashboard
+- Client ID and Secret are correct
 
 ## Troubleshooting
 
@@ -111,6 +151,30 @@ After adding both redirect URIs, your Discord OAuth2 Redirects section should sh
 - Verify the production redirect URI is correctly added to Discord
 - Check that the Magic Link client ID hash in the production URL is correct
 - Ensure your Magic Link publishable key matches the application configuration
+- **Verify your application domain is in the Magic Link allowlist** (Settings → Allowlists)
+
+### Error: "Origin not allowed" or CORS errors
+
+**Symptom**: Authentication fails with CORS or "origin not allowed" errors in browser console.
+
+**Solution**:
+- Go to Magic Link Dashboard → Settings → Allowlists
+- Add your application domain to **Allowed Origins**
+- Include the protocol (`https://` or `http://`)
+- Do NOT include trailing slashes
+- For development, add `http://localhost:3000` (or your port)
+- For production, add your actual domain (e.g., `https://jmenichole.github.io`)
+- Click **Save** and test again
+
+### Error: Magic SDK initialization fails
+
+**Symptom**: Magic SDK fails to initialize or shows authentication errors.
+
+**Solution**:
+- Verify domain allowlist is configured correctly in Magic dashboard
+- Check that your Magic Link publishable key is correct
+- Ensure the domain where your app runs matches an allowlisted domain
+- Check browser console for specific error messages
 
 ## Configuration Checklist
 
@@ -129,6 +193,9 @@ Use this checklist to ensure everything is configured correctly:
 - [ ] Discord Client ID configured
 - [ ] Discord Client Secret configured
 - [ ] Redirect URI displayed matches what's in Discord portal
+- [ ] **Domain allowlist configured** in Settings → Allowlists
+- [ ] **Application domains added** to Allowed Origins (e.g., `https://jmenichole.github.io`)
+- [ ] **Localhost added for development** (e.g., `http://localhost:3000`)
 - [ ] Test connection successful
 - [ ] Scopes configured (typically `identify` and `email`)
 

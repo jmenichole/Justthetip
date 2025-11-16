@@ -20,6 +20,8 @@ Both URIs must be registered in your Discord application's OAuth2 settings for t
 
 ### Quick Fix (5 minutes)
 
+**Part 1: Discord Developer Portal**
+
 1. Go to [Discord Developer Portal](https://discord.com/developers/applications)
 2. Select your application (ID: `1419742988128616479`)
 3. Navigate to **OAuth2** → **General**
@@ -29,7 +31,21 @@ Both URIs must be registered in your Discord application's OAuth2 settings for t
    https://dashboard.magic.link/app/social_login/test_connection_callback
    ```
 5. Click **Save Changes**
-6. Test the connection in Magic Link dashboard - it should now work!
+
+**Part 2: Magic Link Dashboard (Important!)**
+
+6. Go to [Magic Link Dashboard](https://dashboard.magic.link)
+7. Navigate to **Settings** → **Allowlists**
+8. Add your application domains to **Allowed Origins**:
+   ```
+   https://jmenichole.github.io
+   http://localhost:3000
+   ```
+   (Add all domains where your app will run)
+9. Click **Save**
+10. Test the connection in Magic Link dashboard - it should now work!
+
+**Note**: Without the domain allowlist configuration in Magic Link, your application won't be able to authenticate users even if Discord OAuth is configured correctly.
 
 ## Detailed Documentation
 
@@ -41,11 +57,18 @@ For complete setup instructions and troubleshooting, see:
 
 ## Verification
 
-After configuration, your Discord OAuth2 redirects should show:
+After configuration, verify both systems:
 
+**Discord OAuth2 Redirects:**
 ```
 ✅ https://auth.magic.link/v1/oauth2/yQOcm6A9KjEIVf77yvvfzD9bnvJQgvOLsfe-CkpHXTg=/callback
 ✅ https://dashboard.magic.link/app/social_login/test_connection_callback
+```
+
+**Magic Link Dashboard Allowlists (Settings → Allowlists → Allowed Origins):**
+```
+✅ https://jmenichole.github.io (or your production domain)
+✅ http://localhost:3000 (for development)
 ```
 
 ## Why This Is Required
