@@ -37,7 +37,7 @@ async function fetchBadge(discordId) {
 async function requireBadge(discordId) {
   const badge = await fetchBadge(discordId);
   if (!badge) {
-    throw new Error('User is not verified. Please use /register-wallet to link your Solana wallet.');
+    throw new Error('User is not verified. Please use /register-magic to link your Solana wallet.');
   }
 
   // For now, we trust that the wallet was signature-verified during registration

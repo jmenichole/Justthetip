@@ -140,7 +140,7 @@ async function handleAirdropCommand(interaction, context) {
     const senderWallet = await database.getUserWallet(senderId);
     if (!senderWallet) {
       return interaction.editReply({ 
-        content: '❌ Please register your wallet first using `/register-wallet`', 
+        content: '❌ Please register your wallet first using `/register-magic`', 
         ephemeral: true 
       });
     }

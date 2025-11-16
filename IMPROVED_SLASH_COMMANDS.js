@@ -15,7 +15,7 @@ const improvedCommands = [
   // ===== CORE COMMANDS =====
   {
     name: 'help',
-    description: 'gm - learn how to send sats',
+    description: 'learn to use justthetip bot',
   },
 
   {
@@ -39,13 +39,13 @@ const improvedCommands = [
 
   {
     name: 'register-magic',
-    description: 'create wallet with email (easiest way to start)',
+    description: 'create wallet with Discord (easiest way to start)',
     options: [
       {
         name: 'email',
         type: 3, // STRING
         description: 'your email',
-        required: true
+        required: false
       }
     ]
   },
@@ -80,7 +80,7 @@ const improvedCommands = [
 
   {
     name: 'airdrop',
-    description: 'drop bags for everyone (default 5min timer)',
+    description: 'drop bags for everyone (default 30s timer)',
     options: [
       {
         name: 'amount',
@@ -101,17 +101,16 @@ const improvedCommands = [
       {
         name: 'expires_in',
         type: 3, // STRING
-        description: 'how long (default 5min)',
+        description: 'how long (default 30s)',
         required: false,
         choices: [
-          { name: '2 minutes', value: '2m' },
-          { name: '5 minutes', value: '5m' },
-          { name: '15 minutes', value: '15m' },
-          { name: '30 minutes', value: '30m' },
-          { name: '1 hour', value: '1h' },
-          { name: '6 hours', value: '6h' },
-          { name: '24 hours (1 day)', value: '24h' },
-          { name: '7 days (1 week)', value: '7d' }
+          { name: '5 seconds', value: '5s' },
+          { name: '10 seconds', value: '10s' },
+          { name: '15 seconds', value: '15s' },
+          { name: '20 seconds', value: '20s' },
+          { name: '30 seconds', value: '30s' },
+          { name: '1 minute', value: '1m' },
+          { name: '2 minutes', value: '2m' }
         ]
       },
       {
@@ -134,15 +133,15 @@ const improvedCommands = [
 // ===== COMMAND DESCRIPTIONS FOR /help =====
 const HELP_MESSAGES = {
   userGuide: `
-**gm anon**
+**Welcome to JustTheTip!**
 
-welcome to justthetip - send sol as easy as DMing
+Send SOL as easy as sending a DM.
 
 **how it works:**
 
 **1️⃣ get a wallet**
-\`/register-magic your@email.com\`
-• easiest way - just need email
+\`/register-magic\`
+• easiest way - authenticate with Discord
 • wallet created instantly
 • works everywhere
 
@@ -155,7 +154,7 @@ welcome to justthetip - send sol as easy as DMing
 **3️⃣ make it rain**
 \`/airdrop 1 50\`
 • drop $1 for 50 ppl
-• 5min timer (or set custom)
+• quick timer options (5s-2m)
 • first come first serve
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -163,8 +162,8 @@ welcome to justthetip - send sol as easy as DMing
 **commands:**
 
 \`/tip @user <amount>\` - send sol
-\`/airdrop <amount> [claims]\` - make it rain (5min default)
-\`/register-magic <email>\` - get wallet
+\`/airdrop <amount> [claims]\` - make it rain
+\`/register-magic\` - get wallet
 \`/status\` - check connection
 \`/logs\` - see your txs
 \`/disconnect-wallet\` - unlink

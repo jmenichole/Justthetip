@@ -309,7 +309,7 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
     const userWallet = await db.getUserWallet(user.id);
     if (!userWallet) {
       try {
-        await user.send('❌ Please register your wallet first using `/register-wallet` to claim airdrops.');
+        await user.send('❌ Please register your wallet first using `/register-magic` to claim airdrops.');
       } catch (error) {
         // User has DMs disabled
       }

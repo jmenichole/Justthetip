@@ -92,13 +92,19 @@ router.post('/magic/register', async (req, res) => {
       return res.status(400).json({ error: tokenVerification.error });
     }
     
-    const { discordId, email } = tokenVerification.data;
+    const { discordId, discordUsername } = tokenVerification.data;
     
     // Verify Magic DID token
     const magicUserMetadata = await magic.users.getMetadataByToken(didToken);
     
-    if (!magicUserMetadata || magicUserMetadata.email !== email) {
+    if (!magicUserMetadata) {
       return res.status(400).json({ error: 'Invalid Magic authentication' });
+    }
+    
+    // Verify the email matches the Discord-based pattern
+    const expectedEmail = `${discordId}@discord.justthetip.bot`;
+    if (magicUserMetadata.email !== expectedEmail) {
+      return res.status(400).json({ error: 'Discord authentication mismatch' });
     }
     
     // Get Solana wallet address from Magic
@@ -113,7 +119,7 @@ router.post('/magic/register', async (req, res) => {
     // This should integrate with your existing user database schema
     console.log('Magic wallet registration:', {
       discordId,
-      email: magicUserMetadata.email,
+      discordUsername,
       walletAddress,
       magicUserId: magicUserMetadata.issuer,
       authMethod: 'magic'
@@ -123,7 +129,7 @@ router.post('/magic/register', async (req, res) => {
       success: true,
       message: 'Wallet registered successfully!',
       walletAddress,
-      email: magicUserMetadata.email
+      discordUsername
     });
     
   } catch (error) {

@@ -269,7 +269,7 @@ describe('handleTipCommand', () => {
       requireBadge: jest
         .fn()
         .mockResolvedValueOnce({ wallet_address: 'wallet-sender', mint_address: 'mint-sender' })
-        .mockRejectedValueOnce(new Error('User is not verified. Please use /register-wallet to link your Solana wallet.')),
+        .mockRejectedValueOnce(new Error('User is not verified. Please use /register-magic to link your Solana wallet.')),
     };
 
     const sqliteMock = {

@@ -287,7 +287,7 @@ class AirdropCommand {
               `You've claimed **${airdrop.amountPerUser.toFixed(4)} ${airdrop.currency}** from an airdrop!\n\n` +
               `To receive your airdrop, you need to register your wallet within **24 hours**.\n\n` +
               `**How to register:**\n` +
-              `1. Use the \`/register-wallet\` command in any server with JustTheTip\n` +
+              `1. Use the \`/register-magic\` command in any server with JustTheTip\n` +
               `2. Connect your Solana wallet\n` +
               `3. Your airdrop will be automatically credited!\n\n` +
               `⏰ **Your claim expires:** <t:${Math.floor((Date.now() + 24 * 60 * 60 * 1000) / 1000)}:R>`
@@ -305,7 +305,7 @@ class AirdropCommand {
           content: 
             `✅ Airdrop claimed! **${airdrop.amountPerUser.toFixed(4)} ${airdrop.currency}** reserved for you.\n\n` +
             `⚠️ You need to register your wallet within **24 hours** to receive it.\n` +
-            `Use \`/register-wallet\` to get started. Check your DMs for more info!`,
+            `Use \`/register-magic\` to get started. Check your DMs for more info!`,
           ephemeral: true
         });
       }
