@@ -26,6 +26,7 @@
             <div class="nav-links">
                 <a href="#features">Features</a>
                 <a href="#about">About</a>
+                <a href="#faq">FAQ</a>
                 <a href="https://github.com/jmenichole/Justthetip" target="_blank" rel="noopener">GitHub</a>
             </div>
         </div>
@@ -297,6 +298,161 @@
         </div>
     </section>
 
+    <!-- FAQ Section -->
+    <section id="faq" class="faq">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Frequently Asked Questions</h2>
+                <p class="section-subtitle">Everything you need to know about JustTheTip</p>
+            </div>
+            <div class="faq-grid">
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>What makes JustTheTip different from other tipping bots?</span>
+                        <svg class="faq-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M19 9L12 16L5 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <div class="faq-answer">
+                        <p>JustTheTip uses Magic's embedded wallet technology for seamless, non-custodial wallet creation. Your wallet is created instantly via Discord authentication, and you approve every transaction in your own wallet using Solana Pay. Unlike traditional bots that hold your funds, we never have access to your private keys - they're secured by Magic's industry-standard MPC (multi-party computation) infrastructure.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>How does wallet creation work?</span>
+                        <svg class="faq-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M19 9L12 16L5 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Use the /register-magic command in Discord, authenticate with your email, and your Solana wallet is created instantly. Magic handles the wallet infrastructure using secure, non-custodial technology - you don't need to install any wallet apps or manage seed phrases. The bot never sees or stores your private keys.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>What tokens can I tip with?</span>
+                        <svg class="faq-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M19 9L12 16L5 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Currently, JustTheTip supports SOL tipping on Solana mainnet. Multi-token support (USDC, BONK, USDT) is coming soon! Since all tokens share the same Solana address, your single registration will work for all future tokens—no additional setup needed.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>How do I send a tip?</span>
+                        <svg class="faq-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M19 9L12 16L5 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Use /tip @username $amount in Discord. The bot generates a Solana Pay link that opens in your wallet (Phantom, Solflare, etc.). Review the transaction details and approve it in your wallet. You sign each transaction yourself - the bot never signs on your behalf or touches your funds.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>What happens if I tip someone who isn't registered?</span>
+                        <svg class="faq-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M19 9L12 16L5 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <div class="faq-answer">
+                        <p>We'll notify the recipient via DM that they have a pending tip. They have 7 days to register using /register-magic, then you can resend the tip. Your funds stay in your wallet the whole time - nothing is locked or escrowed.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>Is JustTheTip secure?</span>
+                        <svg class="faq-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M19 9L12 16L5 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Yes. JustTheTip uses Magic's enterprise-grade wallet infrastructure with MPC (multi-party computation) technology. You approve every transaction in your wallet using Solana Pay. The bot generates transaction requests but never has access to your private keys. All code is open source and auditable on-chain.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>What are the fees?</span>
+                        <svg class="faq-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M19 9L12 16L5 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <div class="faq-answer">
+                        <p>JustTheTip only charges standard Solana network fees, which average around $0.0001 per transaction. There are no additional bot fees or hidden charges. What you tip is what the recipient gets (minus minimal network fees).</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>Can I use JustTheTip on mobile?</span>
+                        <svg class="faq-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M19 9L12 16L5 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Yes! Magic wallets work on any device. For transactions, the Solana Pay links work with mobile wallets like Phantom and Solflare. Registration is done once via email on any device, and tipping works seamlessly on mobile and desktop Discord.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>How do I get started?</span>
+                        <svg class="faq-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M19 9L12 16L5 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <div class="faq-answer">
+                        <p>It's simple: 1) Run /register-magic in Discord, 2) Verify your email, 3) Your wallet is created instantly! Then use /tip @user $amount to send tips. Each tip opens in your wallet for you to approve. The entire setup takes less than 2 minutes.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>What is x402 integration?</span>
+                        <svg class="faq-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M19 9L12 16L5 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <div class="faq-answer">
+                        <p>x402 is our API monetization layer that enables premium features through USDC micropayments. This includes enhanced analytics, priority processing, and advanced features. It's completely optional - all core tipping functionality is free with standard network fees only.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>Is my transaction history private?</span>
+                        <svg class="faq-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M19 9L12 16L5 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <div class="faq-answer">
+                        <p>All Solana transactions are publicly viewable on the blockchain by design. We store your Discord ID and wallet address for bot functionality, but we don't track or sell your data. You can verify all transactions yourself on Solana explorers. See our Privacy Policy for complete details.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>Do I need to install a wallet app?</span>
+                        <svg class="faq-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M19 9L12 16L5 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <div class="faq-answer">
+                        <p>For basic usage, no! Magic creates your wallet instantly via email authentication. However, to approve tip transactions, you'll need a Solana wallet app like Phantom or Solflare to scan the Solana Pay QR codes or links. These wallets are free and take minutes to set up.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- CTA Section -->
     <section class="cta">
         <div class="container">
@@ -354,5 +510,28 @@
             </div>
         </div>
     </footer>
+
+    <script>
+        // FAQ Accordion functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const faqItems = document.querySelectorAll('.faq-item');
+            
+            faqItems.forEach(item => {
+                const question = item.querySelector('.faq-question');
+                
+                question.addEventListener('click', () => {
+                    // Close other items
+                    faqItems.forEach(otherItem => {
+                        if (otherItem !== item && otherItem.classList.contains('active')) {
+                            otherItem.classList.remove('active');
+                        }
+                    });
+                    
+                    // Toggle current item
+                    item.classList.toggle('active');
+                });
+            });
+        });
+    </script>
 </body>
 </html>
