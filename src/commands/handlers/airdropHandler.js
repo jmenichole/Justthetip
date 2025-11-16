@@ -15,7 +15,7 @@ const database = require('../../../db/database');
 const priceService = require('../../utils/priceService');
 
 // API URL for claim links
-const API_URL = process.env.API_BASE_URL || 'https://api.mischief-manager.com';
+const API_URL = process.env.API_BASE_URL || 'https://justthetip.vercel.app';
 
 /**
  * Parse expiration string to milliseconds

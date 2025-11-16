@@ -26,7 +26,7 @@ When users type `/donate`, they see:
 - ✅ Three buttons:
   - 📋 Copy Wallet Address (ephemeral popup with address)
   - 🔗 View on Solscan (opens your wallet on explorer)
-  - 💜 Support Page (links to mischief-manager.com/support)
+  - 💜 Support Page (links to GitHub repository)
 
 ### What Users See
 ```

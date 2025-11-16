@@ -15,7 +15,7 @@ const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('
 const crypto = require('crypto');
 const { getChainConfig, isChainSupported } = require('../../config/chains');
 
-const API_URL = process.env.API_BASE_URL || process.env.FRONTEND_URL || 'https://api.mischief-manager.com';
+const API_URL = process.env.API_BASE_URL || process.env.FRONTEND_URL || 'https://justthetip.vercel.app';
 
 // Generate registration token for Magic wallet setup (Discord-based)
 function generateRegistrationToken(discordId, discordUsername, chain = 'solana') {
