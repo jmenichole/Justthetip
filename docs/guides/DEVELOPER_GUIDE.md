@@ -487,7 +487,7 @@ JustTheTip Custom License (Based on MIT) - see LICENSE file for details.
 ## Support
 
 - GitHub Issues: [Report bugs](https://github.com/jmenichole/Justthetip/issues)
-- Documentation: [Full docs](https://jmenichole.github.io/Justthetip/)
+- Landing Page: [Visit site](https://jmenichole.github.io/Justthetip/)
 
 ---
 
