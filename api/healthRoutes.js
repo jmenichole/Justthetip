@@ -50,6 +50,9 @@ router.get('/health', (req, res) => {
             treasuryConfigured: Boolean(CONFIG.X402_TREASURY_WALLET),
             network: CONFIG.SOLANA_CLUSTER
         },
+        aiGateway: {
+            apiKeyConfigured: Boolean(CONFIG.AI_GATEWAY_API_KEY)
+        },
         devTools: {
             defaultCluster: devStatus.defaultCluster,
             connections: devStatus.connections.length,
