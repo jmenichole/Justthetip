@@ -359,7 +359,7 @@ This software is proprietary and confidential. Unauthorized copying, distributio
 ## 🔗 Links
 
 - **GitHub Repository**: [github.com/jmenichole/Justthetip](https://github.com/jmenichole/Justthetip)
-- **Documentation**: [GitHub Pages](https://jmenichole.github.io/Justthetip)
+- **Landing Page**: [GitHub Pages](https://jmenichole.github.io/Justthetip)
 - **API Server**: [Vercel Deployment](https://justthetip.vercel.app)
 
 ---

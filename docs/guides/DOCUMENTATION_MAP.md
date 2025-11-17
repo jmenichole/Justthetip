@@ -258,7 +258,7 @@ Welcome to the JustTheTip documentation! This document provides a comprehensive 
 
 ### Community
 - **GitHub**: https://github.com/jmenichole/Justthetip
-- **Documentation Site**: https://jmenichole.github.io/Justthetip/
+- **Landing Page**: https://jmenichole.github.io/Justthetip/
 
 ## 📝 Contributing to Documentation
 

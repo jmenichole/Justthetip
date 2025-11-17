@@ -393,7 +393,7 @@ curl https://api.justthetip.io/api/x402/stats
 For x402 integration support:
 - GitHub Issues: https://github.com/jmenichole/Justthetip/issues
 - Solana Discord: #x402-hackathon channel
-- Documentation: https://jmenichole.github.io/Justthetip/
+- Landing Page: https://jmenichole.github.io/Justthetip/
 
 ---
 

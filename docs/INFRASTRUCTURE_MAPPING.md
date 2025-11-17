@@ -36,7 +36,7 @@ This document provides a comprehensive mapping of all infrastructure components,
 | Component | URL | Platform | Purpose |
 |-----------|-----|----------|---------|
 | **API Server** | `https://justthetip.vercel.app` | Vercel | All API endpoints, webhook handlers |
-| **Frontend/Docs** | `https://jmenichole.github.io/Justthetip` | GitHub Pages | Landing pages, documentation |
+| **Landing/Info Pages** | `https://jmenichole.github.io/Justthetip` | GitHub Pages | Landing page, support, legal pages |
 | **Discord Bot** | N/A (WebSocket) | Railway | Discord bot process |
 | **Magic Registration** | `https://justthetip.vercel.app/api/magic/register-magic.html` | Vercel | Magic wallet registration page |
 | **Wallet Registration** | `https://justthetip.vercel.app/sign.html` | Vercel | Traditional wallet registration |
@@ -139,14 +139,14 @@ origin: [
 
 ---
 
-### 3. Frontend/Documentation (GitHub Pages)
+### 3. Landing & Info Pages (GitHub Pages)
 
 **Base URL**: `https://jmenichole.github.io/Justthetip`
 
 **Files Served**:
 - `landing.html` - Main landing page (OAuth redirect target)
-- `index.html` - Documentation index
-- `/docs/*` - All documentation files
+- `index.html` - Redirects to landing.html
+- `support.html`, `terms.html`, `privacy.html`, `investor.html` - Info and legal pages
 
 **Purpose**:
 - Landing pages for users
