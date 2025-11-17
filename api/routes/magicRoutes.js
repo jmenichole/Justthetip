@@ -3,7 +3,20 @@ const { Magic } = require('@magic-sdk/admin');
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
+const rateLimit = require('express-rate-limit');
 const router = express.Router();
+
+// Rate limiter for registration endpoint to prevent abuse
+const registrationLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // Limit each IP to 5 registration attempts per windowMs
+  message: { 
+    error: 'Too many registration attempts from this IP, please try again after 15 minutes.',
+    retry_after: '15 minutes'
+  },
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+});
 
 // Initialize Magic Admin SDK with secret from GitHub secrets
 const magic = new Magic(process.env.MAGIC_SECRET_KEY);
@@ -83,7 +96,7 @@ router.get('/register-magic.html', (req, res) => {
 });
 
 // Route: Verify Magic DID token and complete registration
-router.post('/register', async (req, res) => {
+router.post('/register', registrationLimiter, async (req, res) => {
   try {
     const { didToken, registrationToken } = req.body;
     
