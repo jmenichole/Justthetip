@@ -11,6 +11,7 @@
 const { EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle } = require('discord.js');
 const { PublicKey, LAMPORTS_PER_SOL } = require('@solana/web3.js');
 const crypto = require('crypto');
+const { checkPremiumFeature, useConsumable } = require('../../config/discordSKUs');
 
 /**
  * Generate Solana Pay URL for direct P2P transfer
@@ -42,6 +43,7 @@ async function handleTipCommand(interaction, context) {
   
   const recipient = interaction.options.getUser('user');
   const usdAmount = interaction.options.getNumber('amount');
+  const privateMode = interaction.options.getBoolean('private') || false; // New option
   const senderId = interaction.user.id;
   
   // Prevent self-tipping
@@ -50,6 +52,24 @@ async function handleTipCommand(interaction, context) {
       content: '❌ You cannot tip yourself!', 
       ephemeral: true 
     });
+  }
+  
+  // Check premium access for private tips
+  if (privateMode) {
+    const hasPremium = await checkPremiumFeature(senderId, 'private_tips', database);
+    const hasConsumable = !hasPremium && await useConsumable(senderId, 'private_tips', database);
+    
+    if (!hasPremium && !hasConsumable) {
+      return interaction.reply({
+        content: '❌ Private tips are a premium feature!\n\n' +
+                 '**Options:**\n' +
+                 '• Subscribe to Premium ($4.99/month) for unlimited private tips\n' +
+                 '• Buy a Private Tips Bundle (25 tips for $1.99)\n' +
+                 '• Send as public tip (default)\n\n' +
+                 'Use `/premium` to learn more!',
+        ephemeral: true
+      });
+    }
   }
   
   // Validate USD amount
@@ -240,10 +260,35 @@ async function handleTipCommand(interaction, context) {
   await interaction.reply({ 
     embeds: [embed], 
     components: [row],
-    ephemeral: false 
+    ephemeral: privateMode // Make ephemeral if private mode
   });
   
-  console.log(`💸 Tip initiated: ${interaction.user.tag} → ${recipient.tag}: $${usdAmount.toFixed(2)} USD (${solAmount.toFixed(4)} SOL) | Reference: ${reference}`);
+  // If private mode, also send DMs to both parties
+  if (privateMode) {
+    try {
+      // DM to recipient
+      await recipient.send(
+        `💝 **Private Tip Received!**\n\n` +
+        `<@${senderId}> sent you $${usdAmount.toFixed(2)} USD (~${solAmount.toFixed(4)} SOL) privately!\n` +
+        `The transaction is being processed. You'll be notified when it completes.`
+      );
+    } catch (error) {
+      console.log(`Could not DM recipient ${recipient.tag} for private tip`);
+    }
+    
+    try {
+      // DM to sender confirming private mode
+      await interaction.user.send(
+        `✅ **Private Tip Sent!**\n\n` +
+        `Your tip of $${usdAmount.toFixed(2)} USD to <@${recipient.id}> was sent privately.\n` +
+        `No public announcement was made. Only you and the recipient are notified.`
+      );
+    } catch (error) {
+      console.log(`Could not DM sender ${interaction.user.tag} for private tip confirmation`);
+    }
+  }
+  
+  console.log(`💸 Tip initiated${privateMode ? ' (PRIVATE)' : ''}: ${interaction.user.tag} → ${recipient.tag}: $${usdAmount.toFixed(2)} USD (${solAmount.toFixed(4)} SOL) | Reference: ${reference}`);
   
   // Start monitoring for transaction (async, don't await)
   monitorTipTransaction(reference, interaction, recipient, usdAmount, solAmount, database).catch(err => {

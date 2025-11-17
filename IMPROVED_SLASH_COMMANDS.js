@@ -33,6 +33,12 @@ const improvedCommands = [
         type: 10, // NUMBER
         description: 'how much ($0.10 to $100)',
         required: true
+      },
+      {
+        name: 'private',
+        type: 5, // BOOLEAN
+        description: 'send privately (no public announcement) - premium feature',
+        required: false
       }
     ]
   },
