@@ -147,6 +147,118 @@ const DISCORD_SKUS = {
       type: 'durable',
       feature: 'vanity_tag'
     }
+  },
+
+  // API Linking Subscriptions (B2B for Bot Developers)
+  api_linking: {
+    api_developer_monthly: {
+      sku_id: 'justthetip_api_developer',
+      name: 'JustTheTip API - Developer',
+      description: 'API access for bot developers: Basic endpoints, 60 req/min, 10K req/day',
+      price: 4.99, // Same as Premium (includes Premium features)
+      currency: 'USD',
+      type: 'subscription',
+      interval: 'monthly',
+      features: [
+        'All Premium user features included',
+        'API access for your Discord bot',
+        'Basic tip operations via API',
+        'Balance checking and history',
+        'Webhook support',
+        '60 requests/minute',
+        '10,000 requests/day',
+        'Email support',
+        'API documentation access'
+      ],
+      rate_limits: {
+        requests_per_minute: 60,
+        requests_per_hour: 1000,
+        requests_per_day: 10000,
+        concurrent_requests: 5
+      },
+      endpoints: [
+        'POST /api/v1/tip',
+        'GET /api/v1/balance',
+        'GET /api/v1/history',
+        'POST /api/v1/webhook/setup',
+        'GET /api/v1/user/stats'
+      ]
+    },
+
+    api_business_monthly: {
+      sku_id: 'justthetip_api_business',
+      name: 'JustTheTip API - Business',
+      description: 'API access for established bots: Bulk operations, 300 req/min, 100K req/day',
+      price: 9.99, // Same as Pro (includes Pro features)
+      currency: 'USD',
+      type: 'subscription',
+      interval: 'monthly',
+      features: [
+        'All Pro user features included',
+        'All Developer API features',
+        'Bulk tip operations',
+        'Airdrop creation via API',
+        'Scheduled operations',
+        'Analytics dashboard',
+        '300 requests/minute',
+        '100,000 requests/day',
+        'Priority support',
+        '99.5% uptime SLA'
+      ],
+      rate_limits: {
+        requests_per_minute: 300,
+        requests_per_hour: 10000,
+        requests_per_day: 100000,
+        concurrent_requests: 20
+      },
+      endpoints: [
+        'POST /api/v1/tip',
+        'POST /api/v1/tip/bulk',
+        'GET /api/v1/balance',
+        'GET /api/v1/history',
+        'POST /api/v1/airdrop',
+        'POST /api/v1/webhook/setup',
+        'GET /api/v1/user/stats',
+        'GET /api/v1/analytics',
+        'POST /api/v1/tip/schedule'
+      ]
+    },
+
+    api_enterprise_custom: {
+      sku_id: 'justthetip_api_enterprise',
+      name: 'JustTheTip API - Enterprise',
+      description: 'Custom API solution for large-scale bots: White-label, 1K req/min, 1M req/day',
+      price: null, // Custom pricing - contact sales
+      currency: 'USD',
+      type: 'subscription',
+      interval: 'custom',
+      features: [
+        'All Business API features',
+        'Triviadrop creation via API',
+        'White-label options (no JustTheTip branding)',
+        'Custom integrations',
+        'Dedicated account manager',
+        '1,000 requests/minute',
+        '1,000,000 requests/day',
+        'Custom rate limits available',
+        'Priority transaction processing',
+        '99.9% uptime SLA'
+      ],
+      rate_limits: {
+        requests_per_minute: 1000,
+        requests_per_hour: 50000,
+        requests_per_day: 1000000,
+        concurrent_requests: 100
+      },
+      endpoints: [
+        'All Business endpoints',
+        'POST /api/v1/triviadrop',
+        'POST /api/v1/custom/integration',
+        'GET /api/v1/advanced/analytics',
+        'POST /api/v1/white-label/config'
+      ],
+      notes: 'Requires manual approval. Contact api-sales@justthetip.bot for pricing.'
+    }
   }
 };
 
