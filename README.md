@@ -9,6 +9,36 @@ A Discord bot that enables seamless Solana (SOL) tipping and airdrops with autom
 - **Discord Integration** - Slash commands for tipping, airdrops, and wallet management
 - **User-Friendly** - No complex setup required for recipients
 - **Transaction Tracking** - Full transaction history and verification
+- **🤖 Intelligent FAQ Bot** - Natural language question answering with 20+ FAQs
+- **💬 Natural Language Processing** - Process transactions using natural conversation
+- **📊 Automated Reports** - Generate transaction reports with analytics
+- **🎯 Contextual Help** - Smart assistance based on user intent
+
+## ✨ New Intelligent Features
+
+### Intelligent FAQ Bot
+Ask questions naturally and get instant answers:
+- "How do I create a wallet?"
+- "Is JustTheTip safe?"
+- "What are the fees?"
+
+Use `/faq` to browse categories or search for specific topics.
+
+### Natural Language Transactions
+Talk to the bot naturally:
+- "send 0.5 SOL to @friend"
+- "what's my balance?"
+- "show my transaction history"
+
+The bot understands your intent and helps you complete actions.
+
+### Automated Reports
+Generate detailed transaction reports:
+- `/report period:this_week` - Weekly activity summary
+- `/report period:this_month` - Monthly statistics
+- Analytics including top tippers, volume, and trends
+
+See [Intelligent Features Documentation](docs/INTELLIGENT_FEATURES.md) for details.
 
 ## 🏗️ Architecture
 
@@ -145,16 +175,62 @@ const privateKey = walletManager.getUserPrivateKey(userId);
 const stats = walletManager.getWalletStats();
 ```
 
+#### Intelligent Features Integration
+
+```javascript
+// FAQ Service
+const { searchFAQ, analyzeIntent } = require('./src/services/faqService');
+
+// Search FAQs
+const results = searchFAQ('how to create wallet');
+
+// Analyze user intent
+const intent = analyzeIntent('what is my balance?');
+
+// Natural Language Service
+const { processNaturalLanguage } = require('./src/services/naturalLanguageService');
+
+// Process natural language message
+const intent = processNaturalLanguage('send 0.5 SOL to @user');
+
+// Report Service
+const { generateUserReport } = require('./src/services/reportService');
+
+// Generate transaction report
+const report = await generateUserReport(userId, transactions, 'this_week');
+```
+
 ### For End Users
 
 #### Discord Commands
 
+**Core Commands:**
 ```
-/tip @user 0.1          # Tip user 0.1 SOL (creates wallet if needed)
-/airdrop @user 0.05     # Airdrop 0.05 SOL to user
-/wallet balance         # Check your wallet balance
-/wallet address         # Get your wallet address
-/wallet send 0.1 <addr> # Send SOL to external address
+/tip @user 0.1              # Tip user 0.1 SOL (creates wallet if needed)
+/airdrop 0.05 50            # Airdrop 0.05 SOL to 50 claimers
+/register-magic             # Create wallet with Discord OAuth
+/status                     # Check your connection and balance
+/logs                       # View transaction history
+/disconnect-wallet          # Unlink your wallet
+/support <issue>            # Report issues
+```
+
+**New Intelligent Commands:**
+```
+/faq                        # Browse FAQ categories
+/faq query:<question>       # Search FAQs (e.g., "how to tip")
+/faq category:tipping       # View FAQs by category
+/report                     # Generate weekly transaction report
+/report period:this_month   # Generate monthly report
+```
+
+**Natural Language (DM or @mention):**
+```
+"How do I create a wallet?"    # Get FAQ answer
+"what's my balance?"           # Check balance
+"send 0.5 SOL to @friend"      # Initiate tip
+"show my transactions"         # View history
+"generate my weekly report"    # Create report
 ```
 
 ## 🔒 Security Features

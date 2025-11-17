@@ -76,36 +76,28 @@ async function handleAirdropCommand(interaction, context) {
   const senderId = interaction.user.id;
   const senderTag = interaction.user.tag;
   
-  // Get command options
+  // Get command options with defaults
   const usdAmountPerClaim = interaction.options.getNumber('amount');
-  const totalClaims = interaction.options.getInteger('total_claims'); // Optional
-  const expiresIn = interaction.options.getString('expires_in'); // Optional
+  const totalClaims = interaction.options.getInteger('total_claims') || null; // Optional, default null
+  const expiresIn = interaction.options.getString('expires_in') || '30s'; // Default 30s if not claim-limited
   const customMessage = interaction.options.getString('message') || null;
   const requireServer = interaction.options.getBoolean('require_server') || false;
   
-  // Validate: either total_claims OR expires_in must be specified (not both, not neither)
-  if ((totalClaims && expiresIn) || (!totalClaims && !expiresIn)) {
-    return interaction.reply({
-      content: '❌ Please specify **either** a claim limit (total_claims) **or** a time limit (expires_in), not both or neither.\n\n' +
-               '**Examples:**\n' +
-               '• `/airdrop amount:10 total_claims:50` - First 50 users\n' +
-               '• `/airdrop amount:5 expires_in:30s` - Anyone within 30 seconds\n' +
-               '• `/airdrop amount:20 expires_in:2m` - Anyone within 2 minutes',
-      ephemeral: true
-    });
-  }
+  // Auto-default: If neither totalClaims nor custom expiresIn, use 30s timer
+  const useTimerMode = !totalClaims;
+  const finalExpiresIn = useTimerMode ? expiresIn : null;
   
-  // Defer reply since we'll be doing calculations
-  await interaction.deferReply({ ephemeral: false });
+  // Defer reply - ephemeral for confirmation, then public announcement
+  await interaction.deferReply({ ephemeral: true });
   
   try {
-    // Parse expiration if provided
+    // Parse expiration if in timer mode
     let expirationMs = null;
     let expiresAt = null;
     
-    if (expiresIn) {
+    if (useTimerMode) {
       try {
-        expirationMs = parseExpiration(expiresIn);
+        expirationMs = parseExpiration(finalExpiresIn);
         expiresAt = Date.now() + expirationMs;
       } catch (error) {
         return interaction.editReply({ 
@@ -115,7 +107,7 @@ async function handleAirdropCommand(interaction, context) {
       }
     }
     
-    // Calculate total cost (if claim limit specified)
+    // Calculate total cost
     let totalUSD, totalSOL, solPerClaim, solPrice;
     
     if (totalClaims) {
@@ -147,7 +139,29 @@ async function handleAirdropCommand(interaction, context) {
       });
     }
     
-    // Check sender's balance
+    // Build confirmation message explaining auto-defaults
+    let confirmationMsg = `✅ **Airdrop Configuration Confirmed** (Only you can see this)\n\n`;
+    confirmationMsg += `**Settings:**\n`;
+    confirmationMsg += `• Amount per Claim: $${usdAmountPerClaim.toFixed(2)} USD (~${solPerClaim.toFixed(4)} SOL)\n`;
+    
+    if (totalClaims) {
+      confirmationMsg += `• Mode: Fixed Claims *(${totalClaims} users)*\n`;
+      confirmationMsg += `• Timer: None\n`;
+    } else {
+      confirmationMsg += `• Mode: Timer-based *(until timer expires)*\n`;
+      confirmationMsg += `• Timer: ${formatDuration(expirationMs)} ${!interaction.options.getString('expires_in') ? '*(default)* ' : ''}\n`;
+    }
+    
+    confirmationMsg += `• Custom Message: ${customMessage ? `"${customMessage}"` : 'None *(default)*'}\n`;
+    confirmationMsg += `• Server-locked: ${requireServer ? 'Yes' : 'No *(default)*'}\n`;
+    confirmationMsg += `• Estimated Max Cost: ~${totalSOL.toFixed(4)} SOL\n\n`;
+    confirmationMsg += `⚠️ **Note:** ${totalClaims ? 'First ' + totalClaims + ' claimers' : 'Anyone who reacts within ' + formatDuration(expirationMs)} will receive SOL.\n\n`;
+    confirmationMsg += `The airdrop will be posted publicly in the channel now...`;
+    
+    await interaction.editReply({
+      content: confirmationMsg,
+      ephemeral: true
+    });
     const { getSolanaBalance } = require('../../../contracts/sdk');
     let balance;
     try {

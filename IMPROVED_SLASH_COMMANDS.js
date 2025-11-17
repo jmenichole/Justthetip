@@ -33,6 +33,12 @@ const improvedCommands = [
         type: 10, // NUMBER
         description: 'how much ($0.10 to $100)',
         required: true
+      },
+      {
+        name: 'private',
+        type: 5, // BOOLEAN
+        description: 'send privately (no public announcement) - premium feature',
+        required: false
       }
     ]
   },
@@ -127,6 +133,123 @@ const improvedCommands = [
         required: false
       }
     ]
+  },
+
+  // ===== NEW INTELLIGENT FEATURES =====
+  {
+    name: 'faq',
+    description: 'intelligent faq bot - ask questions naturally',
+    options: [
+      {
+        name: 'query',
+        type: 3, // STRING
+        description: 'search faq (e.g., "how do i tip")',
+        required: false
+      },
+      {
+        name: 'category',
+        type: 3, // STRING
+        description: 'browse by category',
+        required: false,
+        choices: [
+          { name: 'Getting Started', value: 'gettingStarted' },
+          { name: 'Tipping & Transactions', value: 'tipping' },
+          { name: 'Wallet Management', value: 'walletManagement' },
+          { name: 'Troubleshooting', value: 'troubleshooting' },
+          { name: 'Advanced Features', value: 'advanced' }
+        ]
+      }
+    ]
+  },
+
+  {
+    name: 'report',
+    description: 'generate transaction reports and statistics',
+    options: [
+      {
+        name: 'period',
+        type: 3, // STRING
+        description: 'time period for report',
+        required: false,
+        choices: [
+          { name: 'Today', value: 'today' },
+          { name: 'Yesterday', value: 'yesterday' },
+          { name: 'This Week', value: 'this_week' },
+          { name: 'Last Week', value: 'last_week' },
+          { name: 'This Month', value: 'this_month' },
+          { name: 'Last Month', value: 'last_month' }
+        ]
+      },
+      {
+        name: 'type',
+        type: 3, // STRING
+        description: 'report type',
+        required: false,
+        choices: [
+          { name: 'Personal Report', value: 'personal' },
+          { name: 'Community Report (Admin)', value: 'community' }
+        ]
+      }
+    ]
+  },
+
+  {
+    name: 'triviadrop',
+    description: 'trivia game with prizes - test your knowledge to win',
+    options: [
+      {
+        name: 'total_amount',
+        type: 10, // NUMBER
+        description: 'total prize pool ($0.10 to $1000)',
+        required: true,
+        min_value: 0.10,
+        max_value: 1000.00
+      },
+      {
+        name: 'rounds',
+        type: 4, // INTEGER
+        description: 'number of trivia rounds (1-10, default: 3)',
+        required: false,
+        min_value: 1,
+        max_value: 10
+      },
+      {
+        name: 'topic',
+        type: 3, // STRING
+        description: 'trivia topic',
+        required: false,
+        choices: [
+          { name: 'Crypto', value: 'crypto' },
+          { name: 'General Knowledge', value: 'general' },
+          { name: 'Science', value: 'science' },
+          { name: 'Random', value: 'random' }
+        ]
+      },
+      {
+        name: 'winners_per_round',
+        type: 4, // INTEGER
+        description: 'winners per round (1-20, default: 1)',
+        required: false,
+        min_value: 1,
+        max_value: 20
+      },
+      {
+        name: 'timer',
+        type: 4, // INTEGER
+        description: 'answer time per round in seconds (free: 15 or 30, premium: 10-120)',
+        required: false,
+        choices: [
+          { name: '15 seconds (Free)', value: 15 },
+          { name: '30 seconds (Free)', value: 30 },
+          { name: '10 seconds (Premium)', value: 10 },
+          { name: '20 seconds (Premium)', value: 20 },
+          { name: '45 seconds (Premium)', value: 45 },
+          { name: '60 seconds (Premium)', value: 60 },
+          { name: '90 seconds (Premium)', value: 90 },
+          { name: '120 seconds (Premium)', value: 120 }
+        ]
+      }
+    ]
   }
 ];
 
@@ -163,13 +286,21 @@ Send SOL as easy as sending a DM.
 
 \`/tip @user <amount>\` - send sol
 \`/airdrop <amount> [claims]\` - make it rain
+\`/triviadrop <total> [rounds]\` - trivia game with prizes 🎯
 \`/register-magic\` - get wallet
 \`/status\` - check connection
 \`/logs\` - see your txs
+\`/faq [query]\` - intelligent help bot 🤖
+\`/report [period]\` - generate reports 📊
 \`/disconnect-wallet\` - unlink
 \`/support <issue>\` - report bugs
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+**new features:**
+💡 Ask me questions naturally! Just mention me or DM me
+📊 Generate transaction reports automatically
+🤖 Intelligent FAQ bot understands your questions
 
 **fees?** only network fees (couple cents)
 **safe?** non-custodial, you own your keys
@@ -212,7 +343,10 @@ const commandPermissions = {
     'support',
     'status',
     'logs',
-    'airdrop'
+    'airdrop',
+    'triviadrop',
+    'faq',
+    'report'
   ]
 };
 
@@ -224,6 +358,9 @@ const rateLimits = {
   'support': { max: 2, window: 300000 }, // 2 per 5 minutes
   'logs': { max: 5, window: 60000 }, // 5 per minute
   'airdrop': { max: 3, window: 300000 }, // 3 per 5 minutes
+  'triviadrop': { max: 2, window: 600000 }, // 2 per 10 minutes
+  'faq': { max: 10, window: 60000 }, // 10 per minute
+  'report': { max: 5, window: 300000 }, // 5 per 5 minutes
   default: { max: 10, window: 60000 } // 10 per minute for others
 };
 
