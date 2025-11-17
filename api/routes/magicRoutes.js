@@ -60,13 +60,18 @@ router.get('/register-magic.html', (req, res) => {
     const htmlPath = path.join(__dirname, '../public/register-magic.html');
     let html = fs.readFileSync(htmlPath, 'utf8');
     
-    // Inject environment variables
-    html = html.replace('{{MAGIC_PUBLISHABLE_KEY}}', process.env.MAGIC_PUBLISHABLE_KEY || '');
-    html = html.replace('{{MAGIC_SOLANA_RPC_URL}}', 
-      process.env.MAGIC_SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com'
+    // Inject environment variables by replacing the empty string literals
+    html = html.replace(
+      "const MAGIC_PUBLISHABLE_KEY = '';",
+      `const MAGIC_PUBLISHABLE_KEY = '${process.env.MAGIC_PUBLISHABLE_KEY || ''}';`
     );
-    html = html.replace('{{MAGIC_SOLANA_NETWORK}}', 
-      process.env.MAGIC_SOLANA_NETWORK || 'mainnet-beta'
+    html = html.replace(
+      "const MAGIC_SOLANA_RPC_URL = 'https://api.mainnet-beta.solana.com';",
+      `const MAGIC_SOLANA_RPC_URL = '${process.env.MAGIC_SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com'}';`
+    );
+    html = html.replace(
+      "const MAGIC_SOLANA_NETWORK = 'mainnet-beta';",
+      `const MAGIC_SOLANA_NETWORK = '${process.env.MAGIC_SOLANA_NETWORK || 'mainnet-beta'}';`
     );
     
     res.setHeader('Content-Type', 'text/html');
