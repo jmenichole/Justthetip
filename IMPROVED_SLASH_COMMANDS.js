@@ -127,6 +127,64 @@ const improvedCommands = [
         required: false
       }
     ]
+  },
+
+  // ===== NEW INTELLIGENT FEATURES =====
+  {
+    name: 'faq',
+    description: 'intelligent faq bot - ask questions naturally',
+    options: [
+      {
+        name: 'query',
+        type: 3, // STRING
+        description: 'search faq (e.g., "how do i tip")',
+        required: false
+      },
+      {
+        name: 'category',
+        type: 3, // STRING
+        description: 'browse by category',
+        required: false,
+        choices: [
+          { name: 'Getting Started', value: 'gettingStarted' },
+          { name: 'Tipping & Transactions', value: 'tipping' },
+          { name: 'Wallet Management', value: 'walletManagement' },
+          { name: 'Troubleshooting', value: 'troubleshooting' },
+          { name: 'Advanced Features', value: 'advanced' }
+        ]
+      }
+    ]
+  },
+
+  {
+    name: 'report',
+    description: 'generate transaction reports and statistics',
+    options: [
+      {
+        name: 'period',
+        type: 3, // STRING
+        description: 'time period for report',
+        required: false,
+        choices: [
+          { name: 'Today', value: 'today' },
+          { name: 'Yesterday', value: 'yesterday' },
+          { name: 'This Week', value: 'this_week' },
+          { name: 'Last Week', value: 'last_week' },
+          { name: 'This Month', value: 'this_month' },
+          { name: 'Last Month', value: 'last_month' }
+        ]
+      },
+      {
+        name: 'type',
+        type: 3, // STRING
+        description: 'report type',
+        required: false,
+        choices: [
+          { name: 'Personal Report', value: 'personal' },
+          { name: 'Community Report (Admin)', value: 'community' }
+        ]
+      }
+    ]
   }
 ];
 
@@ -166,10 +224,17 @@ Send SOL as easy as sending a DM.
 \`/register-magic\` - get wallet
 \`/status\` - check connection
 \`/logs\` - see your txs
+\`/faq [query]\` - intelligent help bot 🤖
+\`/report [period]\` - generate reports 📊
 \`/disconnect-wallet\` - unlink
 \`/support <issue>\` - report bugs
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+**new features:**
+💡 Ask me questions naturally! Just mention me or DM me
+📊 Generate transaction reports automatically
+🤖 Intelligent FAQ bot understands your questions
 
 **fees?** only network fees (couple cents)
 **safe?** non-custodial, you own your keys
@@ -212,7 +277,9 @@ const commandPermissions = {
     'support',
     'status',
     'logs',
-    'airdrop'
+    'airdrop',
+    'faq',
+    'report'
   ]
 };
 
@@ -224,6 +291,8 @@ const rateLimits = {
   'support': { max: 2, window: 300000 }, // 2 per 5 minutes
   'logs': { max: 5, window: 60000 }, // 5 per minute
   'airdrop': { max: 3, window: 300000 }, // 3 per 5 minutes
+  'faq': { max: 10, window: 60000 }, // 10 per minute
+  'report': { max: 5, window: 300000 }, // 5 per 5 minutes
   default: { max: 10, window: 60000 } // 10 per minute for others
 };
 

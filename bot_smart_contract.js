@@ -56,6 +56,9 @@ const { handleSupportCommand } = require('./src/commands/handlers/supportHandler
 const { handleRegisterMagicCommand } = require('./src/commands/handlers/magicHandler');
 const { handleStatusCommand, handleLogsCommand } = require('./src/commands/handlers/statusHandler');
 const { handleAirdropCommand } = require('./src/commands/handlers/airdropHandler');
+const { handleFAQCommand } = require('./src/commands/handlers/faqHandler');
+const { handleReportCommand } = require('./src/commands/handlers/reportHandler');
+const { handleNaturalLanguageMessage } = require('./src/commands/handlers/naturalLanguageHandler');
 
 const client = new Client({
   intents: [
@@ -169,6 +172,14 @@ client.on(Events.InteractionCreate, async interaction => {
         
       case 'airdrop':
         await handleAirdropCommand(interaction, context);
+        break;
+        
+      case 'faq':
+        await handleFAQCommand(interaction, context);
+        break;
+        
+      case 'report':
+        await handleReportCommand(interaction, context);
         break;
         
       default:
@@ -354,6 +365,19 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
   } catch (error) {
     console.error('Error handling airdrop claim:', error);
   }
+});
+
+// Handle natural language messages (DMs and mentions)
+client.on(Events.MessageCreate, async (message) => {
+  // Create context for natural language handler
+  const context = {
+    sdk,
+    database: db,
+    priceService,
+    client
+  };
+  
+  await handleNaturalLanguageMessage(message, context);
 });
 
 client.login(process.env.DISCORD_BOT_TOKEN);
