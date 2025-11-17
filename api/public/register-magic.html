@@ -119,6 +119,7 @@
 
         // Initialize Magic SDK
         let magic;
+        let magicInitialized = false;
         try {
             if (!MAGIC_PUBLISHABLE_KEY || MAGIC_PUBLISHABLE_KEY.includes('{{')) {
                 throw new Error('Magic publishable key not configured');
@@ -131,6 +132,7 @@
                     })
                 }
             });
+            magicInitialized = true;
         } catch (error) {
             // Enhanced error logging with detailed information
             console.error('Failed to initialize Magic SDK:', {
@@ -170,6 +172,9 @@
 
         if (!registrationToken) {
             showError('Invalid registration link. Please use the link from Discord.');
+        } else if (!magicInitialized) {
+            // Don't attempt registration if Magic SDK failed to initialize
+            // Error message was already shown above
         } else {
             // Auto-start registration on page load
             registerWithMagic();
@@ -179,7 +184,7 @@
         async function registerWithMagic() {
             try {
                 // Verify Magic SDK is initialized
-                if (!magic) {
+                if (!magicInitialized || !magic) {
                     throw new Error('Magic SDK not initialized. This usually means the service is not properly configured. Please ensure you are using the correct deployment URL: https://justthetip.vercel.app');
                 }
                 
