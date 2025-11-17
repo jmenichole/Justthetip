@@ -32,23 +32,17 @@ describe('Random User Service', () => {
       expect(result.amount).toBe(1.0);
     });
 
-    test('should parse "tip X last Y messages" command', () => {
+    test('should NOT parse "tip X last Y messages" command (feature removed)', () => {
       const result = parseRandomTipCommand('tip 2 last 50 messages 0.25');
-      expect(result).not.toBeNull();
-      expect(result.count).toBe(2);
-      expect(result.criterion).toBe('last_messages');
-      expect(result.messageCount).toBe(50);
-      expect(result.amount).toBe(0.25);
-      expect(result.isLastMessages).toBe(true);
+      expect(result).toBeNull(); // This pattern is no longer supported
     });
 
-    test('should parse fun criterions (gay, poor, rich, etc)', () => {
+    test('should NOT parse fun criterions (feature removed for professional use)', () => {
       const criterions = ['gay', 'poor', 'rich', 'smart', 'dumb', 'cool'];
       
       criterions.forEach(criterion => {
         const result = parseRandomTipCommand(`tip 1 ${criterion} 0.1`);
-        expect(result).not.toBeNull();
-        expect(result.criterion).toBe(criterion);
+        expect(result).toBeNull(); // These criterions are no longer supported
       });
     });
 
