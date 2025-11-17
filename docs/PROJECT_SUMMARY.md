@@ -109,7 +109,7 @@ npm run start:smart-contract
 
 - **GitHub**: https://github.com/jmenichole/Justthetip
 - **Issues**: https://github.com/jmenichole/Justthetip/issues
-- **Documentation**: https://jmenichole.github.io/Justthetip/
+- **Landing Page**: https://jmenichole.github.io/Justthetip/
 - **License**: [Custom MIT-based](../LICENSE)
 
 ## Acknowledgments

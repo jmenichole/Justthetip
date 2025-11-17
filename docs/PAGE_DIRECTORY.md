@@ -46,7 +46,7 @@ This document lists all accessible pages in the JustTheTip ecosystem with their 
 
 ---
 
-### Documentation Pages (GitHub Pages - https://jmenichole.github.io/Justthetip)
+### Landing & Info Pages (GitHub Pages - https://jmenichole.github.io/Justthetip)
 
 #### Main Pages
 
@@ -58,13 +58,12 @@ This document lists all accessible pages in the JustTheTip ecosystem with their 
      - Discord OAuth callback handling
      - Wallet verification flow
 
-2. **Documentation Home**
+2. **Index (Redirects to Landing)**
    - **URL**: `https://jmenichole.github.io/Justthetip/index.html`
-   - **Purpose**: Documentation index and navigation
+   - **Purpose**: Redirects visitors to landing.html
    - **Features**:
-     - Links to all guides
-     - Project overview
-     - Quick start information
+     - Automatic redirect to landing page
+     - Fallback link for manual navigation
 
 3. **Support Page**
    - **URL**: `https://jmenichole.github.io/Justthetip/support.html`
@@ -220,7 +219,7 @@ For local testing (when running `npm start`):
 | Traditional Registration | `justthetip.vercel.app/sign.html` | ✅ Backup | Register wallet | Bot link |
 | Buy Crypto | `justthetip.vercel.app/buy-crypto.html` | ❌ | Purchase SOL | Direct/Bot |
 | Landing Page | N/A | `jmenichole.github.io/Justthetip/landing.html` | OAuth redirect | Discord |
-| Documentation | N/A | `jmenichole.github.io/Justthetip/index.html` | Docs index | Public |
+| Index (Redirect) | N/A | `jmenichole.github.io/Justthetip/index.html` | Redirects to landing | Public |
 | Support | N/A | `jmenichole.github.io/Justthetip/support.html` | Help & FAQ | Public |
 | Terms | N/A | `jmenichole.github.io/Justthetip/terms.html` | Legal | Public |
 | Privacy | N/A | `jmenichole.github.io/Justthetip/privacy.html` | Privacy | Public |

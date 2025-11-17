@@ -285,7 +285,7 @@ JustTheTip represents a significant advancement in Discord-blockchain integratio
 
 **Contact & Resources:**
 - GitHub: https://github.com/jmenichole/Justthetip
-- Documentation: https://jmenichole.github.io/Justthetip
+- Landing Page: https://jmenichole.github.io/Justthetip
 - License: Custom MIT-based (commercial sale restricted)
 
 ---
