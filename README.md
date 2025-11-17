@@ -268,6 +268,29 @@ If upgrading from the old pre-generation wallet system:
 4. Bot sends transaction to new wallet
 5. User can manage wallet with Discord commands
 
+## 🤖 AI Gateway Integration
+
+JustTheTip supports Vercel AI Gateway for intelligent features like natural language commands, smart FAQ assistance, and automated insights.
+
+**Key Features:**
+- Natural language transaction parsing
+- AI-powered FAQ bot
+- Transaction insights and analytics
+- Content moderation
+- Multilingual support
+
+**Documentation:**
+- [AI Gateway Use Cases](docs/AI_GATEWAY_USE_CASES.md) - Comprehensive exploration of potential AI features
+- [Quick Start Guide](docs/AI_GATEWAY_QUICKSTART.md) - Step-by-step implementation guide
+- [Code Examples](examples/aiGatewayExamples.js) - Ready-to-use implementation patterns
+
+**Setup:**
+```env
+AI_GATEWAY_API_KEY=your_vercel_ai_gateway_key
+```
+
+See `.env.example` for detailed configuration instructions.
+
 ## 🤝 Contributing
 
 1. Fork the repository
