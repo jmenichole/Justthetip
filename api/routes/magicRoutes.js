@@ -83,7 +83,7 @@ router.get('/register-magic.html', (req, res) => {
 });
 
 // Route: Verify Magic DID token and complete registration
-router.post('/magic/register', async (req, res) => {
+router.post('/register', async (req, res) => {
   try {
     const { didToken, registrationToken } = req.body;
     
@@ -147,7 +147,7 @@ router.post('/magic/register', async (req, res) => {
 });
 
 // Route: Get Magic wallet info for existing user
-router.get('/magic/wallet/:discordId', async (req, res) => {
+router.get('/wallet/:discordId', async (req, res) => {
   try {
     const { discordId } = req.params;
     
@@ -166,15 +166,34 @@ router.get('/magic/wallet/:discordId', async (req, res) => {
 });
 
 // Route: Health check
-router.get('/magic/health', (req, res) => {
-  const hasRequiredEnvVars = !!(
-    process.env.MAGIC_PUBLISHABLE_KEY && 
-    process.env.MAGIC_SECRET_KEY
-  );
+router.get('/health', (req, res) => {
+  const hasPublishableKey = !!(process.env.MAGIC_PUBLISHABLE_KEY);
+  const hasSecretKey = !!(process.env.MAGIC_SECRET_KEY);
+  const hasRegistrationTokenSecret = !!(process.env.REGISTRATION_TOKEN_SECRET);
+  const hasSolanaNetwork = !!(process.env.MAGIC_SOLANA_NETWORK);
+  const hasSolanaRpcUrl = !!(process.env.MAGIC_SOLANA_RPC_URL);
+  
+  const hasRequiredEnvVars = hasPublishableKey && hasSecretKey;
+  const isFullyConfigured = hasRequiredEnvVars && hasRegistrationTokenSecret;
   
   res.json({
     status: 'ok',
     magic_configured: hasRequiredEnvVars,
+    fully_configured: isFullyConfigured,
+    configuration: {
+      publishable_key: hasPublishableKey,
+      secret_key: hasSecretKey,
+      registration_token_secret: hasRegistrationTokenSecret,
+      solana_network: hasSolanaNetwork,
+      solana_rpc_url: hasSolanaRpcUrl
+    },
+    deployment: {
+      recommended_url: 'https://justthetip.vercel.app',
+      frontend_url: 'https://jmenichole.github.io/Justthetip',
+      deprecated_urls: [
+        'api.mischief-manager.com (no longer maintained)'
+      ]
+    },
     timestamp: new Date().toISOString()
   });
 });

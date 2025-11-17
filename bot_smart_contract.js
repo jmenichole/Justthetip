@@ -74,9 +74,18 @@ const smartContractCommands = improvedCommands;
 // Vercel deployment is the recommended API server for all endpoints including crypto onramp
 const API_URL = process.env.API_BASE_URL || 'https://justthetip.vercel.app';
 
+// Validate API URL and warn about deprecated deployments
+if (API_URL.includes('mischief-manager')) {
+  console.warn('⚠️  WARNING: You are using a deprecated API URL (mischief-manager.com)');
+  console.warn('⚠️  This deployment is no longer maintained and may not have proper configuration.');
+  console.warn('⚠️  Please update API_BASE_URL to: https://justthetip.vercel.app');
+  console.warn('⚠️  Magic wallet registration and other features may not work correctly.');
+}
+
 
 client.once('ready', async () => {
   console.log(`🟢 JustTheTip Smart Contract Bot logged in as ${client.user.tag}`);
+  console.log(`📡 Using API URL: ${API_URL}`);
   
   // Connect to database (optional)
   await db.connectDB();
