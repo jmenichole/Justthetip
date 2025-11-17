@@ -61,6 +61,7 @@ jobs:
           railway variables set DISCORD_BOT_TOKEN="${{ secrets.DISCORD_BOT_TOKEN }}" --serviceId=${{ secrets.RAILWAY_BOT_SERVICE_ID }}
           railway variables set DISCORD_CLIENT_ID="${{ secrets.DISCORD_CLIENT_ID }}" --serviceId=${{ secrets.RAILWAY_BOT_SERVICE_ID }}
           railway variables set FRONTEND_URL="${{ secrets.FRONTEND_URL }}" --serviceId=${{ secrets.RAILWAY_BOT_SERVICE_ID }}
+          railway variables set API_BASE_URL="${{ secrets.API_BASE_URL }}" --serviceId=${{ secrets.RAILWAY_BOT_SERVICE_ID }}
           railway variables set GUILD_ID="${{ secrets.GUILD_ID }}" --serviceId=${{ secrets.RAILWAY_BOT_SERVICE_ID }}
           railway variables set HELIUS_API_KEY="${{ secrets.HELIUS_API_KEY }}" --serviceId=${{ secrets.RAILWAY_BOT_SERVICE_ID }}
           railway variables set SOLANA_RPC_URL="${{ secrets.SOLANA_RPC_URL }}" --serviceId=${{ secrets.RAILWAY_BOT_SERVICE_ID }}
@@ -133,6 +134,11 @@ jobs:
           railway variables set PORT="3000" --serviceId=${{ secrets.RAILWAY_API_SERVICE_ID }}
           railway variables set NODE_ENV="production" --serviceId=${{ secrets.RAILWAY_API_SERVICE_ID }}
           railway variables set CORS_ORIGIN="${{ secrets.CORS_ORIGIN }}" --serviceId=${{ secrets.RAILWAY_API_SERVICE_ID }}
+          railway variables set MAGIC_PUBLISHABLE_KEY="${{ secrets.MAGIC_PUBLISHABLE_KEY }}" --serviceId=${{ secrets.RAILWAY_API_SERVICE_ID }}
+          railway variables set MAGIC_SECRET_KEY="${{ secrets.MAGIC_SECRET_KEY }}" --serviceId=${{ secrets.RAILWAY_API_SERVICE_ID }}
+          railway variables set REGISTRATION_TOKEN_SECRET="${{ secrets.REGISTRATION_TOKEN_SECRET }}" --serviceId=${{ secrets.RAILWAY_API_SERVICE_ID }}
+          railway variables set MAGIC_SOLANA_NETWORK="${{ secrets.MAGIC_SOLANA_NETWORK }}" --serviceId=${{ secrets.RAILWAY_API_SERVICE_ID }}
+          railway variables set MAGIC_SOLANA_RPC_URL="${{ secrets.MAGIC_SOLANA_RPC_URL }}" --serviceId=${{ secrets.RAILWAY_API_SERVICE_ID }}
           echo "✅ Environment variables configured successfully"
 
       - name: Deploy to Railway
