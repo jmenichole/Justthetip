@@ -21,38 +21,45 @@ function calculateDateRange(period) {
   let startDate, endDate = now;
   
   switch (period) {
-    case 'today':
+    case 'today': {
       startDate = today;
       break;
+    }
       
-    case 'yesterday':
+    case 'yesterday': {
       startDate = new Date(today.getTime() - 24 * 60 * 60 * 1000);
       endDate = today;
       break;
+    }
       
-    case 'this_week':
+    case 'this_week': {
       const dayOfWeek = today.getDay();
       startDate = new Date(today.getTime() - dayOfWeek * 24 * 60 * 60 * 1000);
       break;
+    }
       
-    case 'last_week':
+    case 'last_week': {
       const lastWeekEnd = new Date(today.getTime() - today.getDay() * 24 * 60 * 60 * 1000);
       startDate = new Date(lastWeekEnd.getTime() - 7 * 24 * 60 * 60 * 1000);
       endDate = lastWeekEnd;
       break;
+    }
       
-    case 'this_month':
+    case 'this_month': {
       startDate = new Date(today.getFullYear(), today.getMonth(), 1);
       break;
+    }
       
-    case 'last_month':
+    case 'last_month': {
       startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
       endDate = new Date(today.getFullYear(), today.getMonth(), 0);
       break;
+    }
       
     case 'recent':
-    default:
+    default: {
       startDate = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000); // Last 7 days
+    }
   }
   
   return {
@@ -143,10 +150,10 @@ function calculateTransactionStats(transactions, userId) {
  * @param {string} userId - User's Discord ID
  * @param {Array} transactions - User's transactions
  * @param {string} period - Report period
- * @param {Object} client - Discord client (for user lookups)
+ * @param {Object} _client - Discord client (for user lookups) - unused
  * @returns {EmbedBuilder} - Report embed
  */
-async function generateUserReport(userId, transactions, period = 'this_week', client = null) {
+async function generateUserReport(userId, transactions, period = 'this_week', _client = null) {
   const dateRange = calculateDateRange(period);
   const filteredTxs = filterTransactionsByDate(transactions, dateRange);
   const stats = calculateTransactionStats(filteredTxs, userId);

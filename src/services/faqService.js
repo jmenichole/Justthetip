@@ -252,7 +252,7 @@ function searchFAQ(query) {
   const matches = [];
   
   // Search through all categories
-  for (const [categoryKey, categoryData] of Object.entries(faqKnowledgeBase)) {
+  for (const [_categoryKey, categoryData] of Object.entries(faqKnowledgeBase)) {
     for (const faq of categoryData.questions) {
       // Calculate relevance score
       let score = 0;
@@ -346,18 +346,9 @@ function getRandomTip() {
 function analyzeIntent(message) {
   const normalized = message.toLowerCase().trim();
   
-  // FAQ/Help intent
-  if (normalized.match(/\b(how|what|when|where|why|can i|help|explain)\b/)) {
-    return {
-      type: 'faq',
-      confidence: 0.8,
-      action: 'search_faq'
-    };
-  }
-  
-  // Balance check intent
-  if (normalized.match(/\b(balance|how much|funds|check|wallet)\b/) && 
-      !normalized.match(/\b(someone|user|friend)\b/)) {
+  // Balance check intent (check before FAQ since it's more specific)
+  if (normalized.match(/\b(balance|how much|funds|check.*wallet)\b/) && 
+      !normalized.match(/\b(someone|user|friend|tip|send)\b/)) {
     return {
       type: 'balance_check',
       confidence: 0.9,
@@ -381,6 +372,15 @@ function analyzeIntent(message) {
       type: 'report',
       confidence: 0.8,
       action: 'generate_report'
+    };
+  }
+  
+  // FAQ/Help intent
+  if (normalized.match(/\b(how|what|when|where|why|can i|help|explain)\b/)) {
+    return {
+      type: 'faq',
+      confidence: 0.8,
+      action: 'search_faq'
     };
   }
   

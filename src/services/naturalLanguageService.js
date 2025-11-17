@@ -13,16 +13,14 @@
  * @returns {Object|null} - Parsed transaction details or null
  */
 function parseTransactionIntent(message) {
-  const normalized = message.toLowerCase().trim();
-  
   // Pattern: "send/tip/give X (SOL/dollars/USD/$) to @user"
   const patterns = [
     // "send 0.5 SOL to @user" or "tip 0.5 to @user"
-    /\b(send|tip|give|transfer)\s+(\d+\.?\d*)\s*(sol|dollars?|usd|\$)?\s+(to|for|@)\s*@?(\w+)/i,
+    /\b(send|tip|give|transfer)\s+(\$?)(\d+\.?\d*)\s*(sol|dollars?|usd|\$)?\s+(to|for|@)\s*@?(\w+)/i,
     // "@user 0.5 SOL" or "@user get 0.5"
     /@(\w+)\s+(get|gets|receive|receives)?\s*(\d+\.?\d*)\s*(sol|dollars?|usd|\$)?/i,
     // "0.5 SOL to @user"
-    /(\d+\.?\d*)\s*(sol|dollars?|usd|\$)?\s+(to|for)\s*@?(\w+)/i
+    /(\$?)(\d+\.?\d*)\s*(sol|dollars?|usd|\$)?\s+(to|for)\s*@?(\w+)/i
   ];
   
   for (const pattern of patterns) {
@@ -31,17 +29,19 @@ function parseTransactionIntent(message) {
       let amount, currency, recipient;
       
       if (pattern === patterns[0]) {
-        amount = parseFloat(match[2]);
-        currency = match[3] || 'SOL';
-        recipient = match[5];
+        const dollarSign = match[2];
+        amount = parseFloat(match[3]);
+        currency = match[4] || (dollarSign === '$' ? 'USD' : 'SOL');
+        recipient = match[6];
       } else if (pattern === patterns[1]) {
         recipient = match[1];
         amount = parseFloat(match[3]);
         currency = match[4] || 'SOL';
       } else {
-        amount = parseFloat(match[1]);
-        currency = match[2] || 'SOL';
-        recipient = match[4];
+        const dollarSign = match[1];
+        amount = parseFloat(match[2]);
+        currency = match[3] || (dollarSign === '$' ? 'USD' : 'SOL');
+        recipient = match[5];
       }
       
       // Normalize currency
@@ -143,12 +143,11 @@ function parseHistoryRequest(message) {
  * @returns {Object|null} - Parsed airdrop details or null
  */
 function parseAirdropIntent(message) {
-  const normalized = message.toLowerCase().trim();
-  
   // Pattern: "airdrop X to everyone" or "give everyone X"
   const patterns = [
-    /\b(airdrop|send|give)\s+(\d+\.?\d*)\s*(sol|dollars?|usd|\$)?\s+(to\s+)?(everyone|all|community|group)/i,
-    /\b(everyone|all)\s+(gets?|receives?)\s+(\d+\.?\d*)\s*(sol|dollars?|usd|\$)?/i
+    /\b(airdrop|send)\s+(\d+\.?\d*)\s*(sol|dollars?|usd|\$)?\s+(to\s+)?(everyone|all|community|group)/i,
+    /\b(everyone|all)\s+(gets?|receives?)\s+(\d+\.?\d*)\s*(sol|dollars?|usd|\$)?/i,
+    /\b(give)\s+(everyone|all)\s+(\$?)(\d+\.?\d*)\s*(sol|dollars?|usd)?/i
   ];
   
   for (const pattern of patterns) {
@@ -159,9 +158,13 @@ function parseAirdropIntent(message) {
       if (pattern === patterns[0]) {
         amount = parseFloat(match[2]);
         currency = match[3] || 'SOL';
-      } else {
+      } else if (pattern === patterns[1]) {
         amount = parseFloat(match[3]);
         currency = match[4] || 'SOL';
+      } else {
+        // patterns[2] - "give everyone $X"
+        amount = parseFloat(match[4]);
+        currency = match[3] === '$' ? 'USD' : (match[5] || 'SOL');
       }
       
       // Normalize currency

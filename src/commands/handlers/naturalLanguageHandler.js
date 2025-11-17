@@ -8,7 +8,7 @@
  */
 
 const { EmbedBuilder } = require('discord.js');
-const { processNaturalLanguage, generateBalanceResponse, isBotMentioned } = require('../../services/naturalLanguageService');
+const { processNaturalLanguage, isBotMentioned } = require('../../services/naturalLanguageService');
 const { searchFAQ, getRandomTip } = require('../../services/faqService');
 const { handleNaturalLanguageReport } = require('./reportHandler');
 
@@ -30,7 +30,7 @@ async function handleNaturalLanguageMessage(message, context) {
   
   try {
     // Remove bot mention from message
-    let cleanMessage = message.content
+    const cleanMessage = message.content
       .replace(/<@!?\d+>/g, '')
       .trim();
     
@@ -38,32 +38,38 @@ async function handleNaturalLanguageMessage(message, context) {
     const intent = processNaturalLanguage(cleanMessage);
     
     switch (intent.type) {
-      case 'balance_check':
+      case 'balance_check': {
         await handleBalanceCheck(message, context);
         break;
+      }
         
-      case 'history':
+      case 'history': {
         await handleHistoryRequest(message, context);
         break;
+      }
         
-      case 'help':
+      case 'help': {
         await handleHelpRequest(message, cleanMessage, context);
         break;
+      }
         
-      case 'tip':
+      case 'tip': {
         await handleNaturalLanguageTip(message, intent, context);
         break;
+      }
         
-      case 'airdrop':
+      case 'airdrop': {
         await handleNaturalLanguageAirdrop(message, intent, context);
         break;
+      }
         
-      case 'report':
+      case 'report': {
         await handleNaturalLanguageReport(message, context);
         break;
+      }
         
       case 'unknown':
-      default:
+      default: {
         // Try FAQ search
         const faqResults = searchFAQ(cleanMessage);
         if (faqResults.length > 0) {
@@ -82,6 +88,7 @@ async function handleNaturalLanguageMessage(message, context) {
             `"Show my transaction history"`
           );
         }
+      }
     }
     
   } catch (error) {
@@ -106,7 +113,6 @@ async function handleBalanceCheck(message, context) {
     }
     
     const balance = await context.sdk.getBalance(walletAddress);
-    const balances = await context.database.getBalances(userId);
     
     const embed = new EmbedBuilder()
       .setTitle('💰 Your Wallet Balance')
@@ -175,7 +181,7 @@ async function handleHistoryRequest(message, context) {
 /**
  * Handle help request with FAQ search
  */
-async function handleHelpRequest(message, query, context) {
+async function handleHelpRequest(message, query, _context) {
   const faqResults = searchFAQ(query);
   
   if (faqResults.length > 0) {
@@ -233,7 +239,7 @@ async function handleFAQResponse(message, faqResults) {
 /**
  * Handle natural language tip
  */
-async function handleNaturalLanguageTip(message, intent, context) {
+async function handleNaturalLanguageTip(message, intent, _context) {
   try {
     // Validate recipient exists
     const recipientMention = message.mentions.users.first();
@@ -261,7 +267,7 @@ async function handleNaturalLanguageTip(message, intent, context) {
 /**
  * Handle natural language airdrop
  */
-async function handleNaturalLanguageAirdrop(message, intent, context) {
+async function handleNaturalLanguageAirdrop(message, intent, _context) {
   return message.reply(
     `I understood: Airdrop **${intent.amount} ${intent.currency}** to everyone\n\n` +
     `To complete this airdrop, use:\n` +
