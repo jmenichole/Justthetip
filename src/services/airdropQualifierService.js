@@ -29,7 +29,7 @@ const PREMIUM_TIERS = {
     price: 29.99,
     max_airdrops_per_month: 50,
     max_recipients_per_airdrop: 200,
-    qualifiers: ['role', 'activity', 'random', 'wallet_balance', 'tenure']
+    qualifiers: ['role', 'activity', 'random', 'wallet_balance', 'tenure', 'recent_tipper', 'most_generous', 'minimum_tipped']
   },
   enterprise: {
     name: 'Enterprise',
@@ -131,6 +131,101 @@ async function checkWalletQualifier(userId, database, minBalance = 0) {
 }
 
 /**
+ * Check if user has tipped in the last X days
+ * @param {string} userId - User ID
+ * @param {Object} database - Database instance
+ * @param {number} days - Number of days to look back
+ * @returns {Promise<boolean>} True if user has tipped recently
+ */
+async function checkRecentTipperQualifier(userId, database, days = 7) {
+  try {
+    const transactions = await database.getUserTransactions(userId, 100);
+    if (!transactions || transactions.length === 0) return false;
+    
+    const cutoffTime = Date.now() / 1000 - (days * 24 * 60 * 60);
+    
+    // Check if user has sent any tips in the time period
+    const recentTips = transactions.filter(tx => {
+      const isSender = tx.sender_id === userId || tx.from_user_id === userId;
+      const timestamp = tx.timestamp || tx.created_at || 0;
+      return isSender && timestamp >= cutoffTime;
+    });
+    
+    return recentTips.length > 0;
+  } catch (error) {
+    console.error('Error checking recent tipper:', error);
+    return false;
+  }
+}
+
+/**
+ * Check if user is most generous this week
+ * @param {string} userId - User ID
+ * @param {Object} database - Database instance
+ * @param {number} topN - Top N most generous users (default 10)
+ * @returns {Promise<boolean>} True if user is in top generous tippers
+ */
+async function checkMostGenerousQualifier(userId, database, topN = 10) {
+  try {
+    const transactions = await database.getUserTransactions(userId, 100);
+    if (!transactions || transactions.length === 0) return false;
+    
+    // Get transactions from this week
+    const weekStart = Date.now() / 1000 - (7 * 24 * 60 * 60);
+    
+    // Calculate total tipped by this user this week
+    let userTotal = 0;
+    transactions.forEach(tx => {
+      const isSender = tx.sender_id === userId || tx.from_user_id === userId;
+      const timestamp = tx.timestamp || tx.created_at || 0;
+      if (isSender && timestamp >= weekStart) {
+        userTotal += parseFloat(tx.amount) || 0;
+      }
+    });
+    
+    if (userTotal === 0) return false;
+    
+    // TODO: In production, compare with other users' totals
+    // For now, return true if user has tipped at least 1 SOL this week
+    return userTotal >= 1.0;
+  } catch (error) {
+    console.error('Error checking most generous:', error);
+    return false;
+  }
+}
+
+/**
+ * Check if user has tipped a minimum amount in period
+ * @param {string} userId - User ID
+ * @param {Object} database - Database instance
+ * @param {number} minAmount - Minimum amount tipped
+ * @param {number} days - Days to look back
+ * @returns {Promise<boolean>} True if user meets minimum
+ */
+async function checkMinimumTippedQualifier(userId, database, minAmount = 0.1, days = 30) {
+  try {
+    const transactions = await database.getUserTransactions(userId, 100);
+    if (!transactions || transactions.length === 0) return false;
+    
+    const cutoffTime = Date.now() / 1000 - (days * 24 * 60 * 60);
+    
+    let totalTipped = 0;
+    transactions.forEach(tx => {
+      const isSender = tx.sender_id === userId || tx.from_user_id === userId;
+      const timestamp = tx.timestamp || tx.created_at || 0;
+      if (isSender && timestamp >= cutoffTime) {
+        totalTipped += parseFloat(tx.amount) || 0;
+      }
+    });
+    
+    return totalTipped >= minAmount;
+  } catch (error) {
+    console.error('Error checking minimum tipped:', error);
+    return false;
+  }
+}
+
+/**
  * Qualify users for airdrop
  * @param {string} airdropId - Airdrop ID
  * @param {Array} users - Array of users to check
@@ -179,6 +274,24 @@ async function qualifyUsers(airdropId, users, context) {
 
           case 'wallet_balance':
             if (!await checkWalletQualifier(user.id, database, params.min_balance || 0)) {
+              qualified = false;
+            }
+            break;
+
+          case 'recent_tipper':
+            if (!await checkRecentTipperQualifier(user.id, database, params.days || 7)) {
+              qualified = false;
+            }
+            break;
+
+          case 'most_generous':
+            if (!await checkMostGenerousQualifier(user.id, database, params.top_n || 10)) {
+              qualified = false;
+            }
+            break;
+
+          case 'minimum_tipped':
+            if (!await checkMinimumTippedQualifier(user.id, database, params.min_amount || 0.1, params.days || 30)) {
               qualified = false;
             }
             break;

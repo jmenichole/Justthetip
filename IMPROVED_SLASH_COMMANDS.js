@@ -226,6 +226,22 @@ const improvedCommands = [
         required: false,
         min_value: 1,
         max_value: 20
+      },
+      {
+        name: 'timer',
+        type: 4, // INTEGER
+        description: 'answer time per round in seconds (free: 15 or 30, premium: 10-120)',
+        required: false,
+        choices: [
+          { name: '15 seconds (Free)', value: 15 },
+          { name: '30 seconds (Free)', value: 30 },
+          { name: '10 seconds (Premium)', value: 10 },
+          { name: '20 seconds (Premium)', value: 20 },
+          { name: '45 seconds (Premium)', value: 45 },
+          { name: '60 seconds (Premium)', value: 60 },
+          { name: '90 seconds (Premium)', value: 90 },
+          { name: '120 seconds (Premium)', value: 120 }
+        ]
       }
     ]
   }

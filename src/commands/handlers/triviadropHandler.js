@@ -31,8 +31,12 @@ async function handleTriviadropCommand(interaction, context) {
   const rounds = interaction.options.getInteger('rounds') || 3;
   const totalAmount = interaction.options.getNumber('total_amount');
   const winnersPerRound = interaction.options.getInteger('winners_per_round') || 1;
+  const timer = interaction.options.getInteger('timer') || 30; // Default 30 seconds
+  
+  // TODO: Check user's premium status from database
+  const userPremiumTier = 'free'; // Default to free tier
 
-  await interaction.deferReply();
+  await interaction.deferReply({ ephemeral: true }); // Make confirmation ephemeral
 
   try {
     const userId = interaction.user.id;
@@ -73,21 +77,58 @@ async function handleTriviadropCommand(interaction, context) {
     const totalWinners = rounds * winnersPerRound;
     const amountPerWinner = totalAmount / totalWinners;
 
-    // Create triviadrop
-    const triviadrop = createTriviadrop({
-      creator_id: userId,
-      creator_name: username,
-      total_amount: totalAmount,
-      rounds,
-      topic,
-      winners_per_round: winnersPerRound,
-      guild_id: guildId,
-      channel_id: channelId
-    });
+    // Create triviadrop with timer validation
+    let triviadrop;
+    try {
+      triviadrop = createTriviadrop({
+        creator_id: userId,
+        creator_name: username,
+        total_amount: totalAmount,
+        rounds,
+        topic,
+        winners_per_round: winnersPerRound,
+        guild_id: guildId,
+        channel_id: channelId,
+        timer,
+        premium_tier: userPremiumTier
+      });
+    } catch (error) {
+      return interaction.editReply({
+        content: `❌ ${error.message}\n\n💡 Free users can use 15s or 30s timers. Upgrade to Premium for custom timers (10-120s) and fee-free transactions!`,
+        ephemeral: true
+      });
+    }
 
     activeSessions.set(channelId, triviadrop.triviadrop_id);
 
-    // Create announcement embed
+    // Build confirmation message with auto-defaults explanation
+    let confirmationMsg = `✅ **Triviadrop Configuration Confirmed** (Only you can see this)\n\n`;
+    confirmationMsg += `**Settings:**\n`;
+    confirmationMsg += `• Total Prize Pool: $${totalAmount.toFixed(2)} USD in SOL\n`;
+    confirmationMsg += `• Topic: ${topic} ${interaction.options.getString('topic') ? '' : '*(default)*'}\n`;
+    confirmationMsg += `• Rounds: ${rounds} ${interaction.options.getInteger('rounds') ? '' : '*(default)*'}\n`;
+    confirmationMsg += `• Winners per Round: ${winnersPerRound} ${interaction.options.getInteger('winners_per_round') ? '' : '*(default)*'}\n`;
+    confirmationMsg += `• Timer: ${timer} seconds ${interaction.options.getInteger('timer') ? '' : '*(default)*'}\n`;
+    confirmationMsg += `• Prize per Winner: $${amountPerWinner.toFixed(4)} USD\n`;
+    confirmationMsg += `• Fee-free: ${triviadrop.fee_free ? '✅ Yes (Premium)' : '❌ No (Free tier)'}\n`;
+    confirmationMsg += `• Premium Tier: ${userPremiumTier === 'premium' ? '⭐ Premium' : '🆓 Free'}\n\n`;
+    
+    if (userPremiumTier === 'free') {
+      confirmationMsg += `💡 **Upgrade to Premium ($14.99/month) for:**\n`;
+      confirmationMsg += `• Custom timers (10-120 seconds)\n`;
+      confirmationMsg += `• Fee-free transactions\n`;
+      confirmationMsg += `• Up to 20 rounds\n`;
+      confirmationMsg += `• Up to 50 winners per round\n\n`;
+    }
+    
+    confirmationMsg += `The game will start publicly in the channel in 5 seconds...`;
+
+    await interaction.editReply({
+      content: confirmationMsg,
+      ephemeral: true
+    });
+
+    // Create public announcement embed
     const embed = new EmbedBuilder()
       .setTitle('🎯 Triviadrop Started!')
       .setDescription(
@@ -96,13 +137,14 @@ async function handleTriviadropCommand(interaction, context) {
         `🎲 **Topic:** ${topic}\n` +
         `🔢 **Rounds:** ${rounds}\n` +
         `🏆 **Winners per Round:** ${winnersPerRound}\n` +
-        `💎 **Prize per Winner:** $${amountPerWinner.toFixed(4)} USD\n\n` +
+        `💎 **Prize per Winner:** $${amountPerWinner.toFixed(4)} USD\n` +
+        `⏱️ **Time per Question:** ${timer} seconds\n\n` +
         `Get ready! Round 1 starts in 5 seconds...`
       )
       .setColor(0x9333ea)
       .setTimestamp();
 
-    await interaction.editReply({ embeds: [embed] });
+    await interaction.channel.send({ embeds: [embed] });
 
     // Wait 5 seconds then start first round
     setTimeout(async () => {

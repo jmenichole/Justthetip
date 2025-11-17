@@ -14,6 +14,57 @@
 const activeTrivadrops = new Map();
 
 /**
+ * Premium tier configurations for triviadrop features
+ */
+const PREMIUM_TRIVIADROP_TIERS = {
+  free: {
+    name: 'Free',
+    timer_options: [15, 30], // seconds
+    custom_timers: false,
+    fee_free: false,
+    max_rounds: 5,
+    max_winners_per_round: 5
+  },
+  premium: {
+    name: 'Premium',
+    price: 14.99,
+    timer_options: [10, 15, 20, 30, 45, 60, 90, 120], // seconds
+    custom_timers: true,
+    fee_free: true,
+    max_rounds: 20,
+    max_winners_per_round: 50
+  }
+};
+
+/**
+ * Validate timer based on user's premium status
+ * @param {number} timer - Timer in seconds
+ * @param {string} tier - Premium tier
+ * @returns {Object} Validation result
+ */
+function validateTimer(timer, tier = 'free') {
+  const tierConfig = PREMIUM_TRIVIADROP_TIERS[tier] || PREMIUM_TRIVIADROP_TIERS.free;
+  
+  if (!tierConfig.timer_options.includes(timer)) {
+    return {
+      valid: false,
+      error: `Timer ${timer}s not allowed for ${tierConfig.name} tier. Allowed: ${tierConfig.timer_options.join(', ')}s`,
+      allowed: tierConfig.timer_options
+    };
+  }
+  
+  return {
+    valid: true,
+    tier: tierConfig
+  };
+}
+
+/**
+ * Triviadrop state management
+ * Stores active trivia games
+ */
+
+/**
  * Generate random trivia questions by topic
  * @param {string} topic - Topic for trivia questions
  * @param {number} count - Number of questions needed
@@ -73,8 +124,16 @@ function createTriviadrop(config) {
     topic,
     winners_per_round,
     guild_id,
-    channel_id
+    channel_id,
+    timer = 30, // Default 30 seconds
+    premium_tier = 'free'
   } = config;
+
+  // Validate timer based on premium tier
+  const timerValidation = validateTimer(timer, premium_tier);
+  if (!timerValidation.valid) {
+    throw new Error(timerValidation.error);
+  }
 
   const triviadropId = `triviadrop_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   
@@ -102,7 +161,10 @@ function createTriviadrop(config) {
     active: true,
     created_at: Date.now(),
     guild_id,
-    channel_id
+    channel_id,
+    timer, // Timer per round in seconds
+    premium_tier,
+    fee_free: timerValidation.tier.fee_free
   };
 
   activeTrivadrops.set(triviadropId, triviadrop);
@@ -131,7 +193,7 @@ function startNextRound(triviadropId) {
     total_rounds: triviadrop.rounds,
     question: currentQuestion.question,
     options: currentQuestion.options,
-    time_limit: 30 // seconds to answer
+    time_limit: triviadrop.timer // Use configured timer
   };
 }
 
@@ -351,5 +413,7 @@ module.exports = {
   getAllWinners,
   cancelTriviadrop,
   getLeaderboard,
-  activeTrivadrops
+  activeTrivadrops,
+  validateTimer,
+  PREMIUM_TRIVIADROP_TIERS
 };
