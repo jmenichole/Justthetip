@@ -59,6 +59,7 @@ function calculateDateRange(period) {
     case 'recent':
     default: {
       startDate = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000); // Last 7 days
+      endDate = today;
     }
   }
   

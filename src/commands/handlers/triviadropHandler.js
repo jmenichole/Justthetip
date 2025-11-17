@@ -21,6 +21,10 @@ const {
 // Track active trivia sessions per channel
 const activeSessions = new Map();
 
+// Round delay configuration (reduced for testing)
+const ROUND_DELAY_MS = process.env.NODE_ENV === 'test' ? 100 : 5000;
+const ROUND_DELAY_SECONDS = Math.floor(ROUND_DELAY_MS / 1000);
+
 /**
  * Handle the /triviadrop command
  * @param {Interaction} interaction - Discord interaction
@@ -139,17 +143,17 @@ async function handleTriviadropCommand(interaction, context) {
         `🏆 **Winners per Round:** ${winnersPerRound}\n` +
         `💎 **Prize per Winner:** $${amountPerWinner.toFixed(4)} USD\n` +
         `⏱️ **Time per Question:** ${timer} seconds\n\n` +
-        `Get ready! Round 1 starts in 5 seconds...`
+        `Get ready! Round 1 starts in ${ROUND_DELAY_SECONDS} seconds...`
       )
       .setColor(0x9333ea)
       .setTimestamp();
 
     await interaction.channel.send({ embeds: [embed] });
 
-    // Wait 5 seconds then start first round
+    // Wait then start first round
     setTimeout(async () => {
       await startRound(interaction.channel, triviadrop.triviadrop_id, context);
-    }, 5000);
+    }, ROUND_DELAY_MS);
 
   } catch (error) {
     console.error('Error creating triviadrop:', error);
@@ -278,11 +282,11 @@ async function startRound(channel, triviadropId, context) {
         // Clear session
         activeSessions.delete(channel.id);
       } else {
-        // Start next round after 5 seconds
-        await channel.send(`⏳ Next round starting in 5 seconds...`);
+        // Start next round after delay
+        await channel.send(`⏳ Next round starting in ${ROUND_DELAY_SECONDS} seconds...`);
         setTimeout(async () => {
           await startRound(channel, triviadropId, context);
-        }, 5000);
+        }, ROUND_DELAY_MS);
       }
     });
 
