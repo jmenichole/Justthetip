@@ -185,6 +185,49 @@ const improvedCommands = [
         ]
       }
     ]
+  },
+
+  {
+    name: 'triviadrop',
+    description: 'trivia game with prizes - test your knowledge to win',
+    options: [
+      {
+        name: 'total_amount',
+        type: 10, // NUMBER
+        description: 'total prize pool ($0.10 to $1000)',
+        required: true,
+        min_value: 0.10,
+        max_value: 1000.00
+      },
+      {
+        name: 'rounds',
+        type: 4, // INTEGER
+        description: 'number of trivia rounds (1-10, default: 3)',
+        required: false,
+        min_value: 1,
+        max_value: 10
+      },
+      {
+        name: 'topic',
+        type: 3, // STRING
+        description: 'trivia topic',
+        required: false,
+        choices: [
+          { name: 'Crypto', value: 'crypto' },
+          { name: 'General Knowledge', value: 'general' },
+          { name: 'Science', value: 'science' },
+          { name: 'Random', value: 'random' }
+        ]
+      },
+      {
+        name: 'winners_per_round',
+        type: 4, // INTEGER
+        description: 'winners per round (1-20, default: 1)',
+        required: false,
+        min_value: 1,
+        max_value: 20
+      }
+    ]
   }
 ];
 
@@ -221,6 +264,7 @@ Send SOL as easy as sending a DM.
 
 \`/tip @user <amount>\` - send sol
 \`/airdrop <amount> [claims]\` - make it rain
+\`/triviadrop <total> [rounds]\` - trivia game with prizes 🎯
 \`/register-magic\` - get wallet
 \`/status\` - check connection
 \`/logs\` - see your txs
@@ -278,6 +322,7 @@ const commandPermissions = {
     'status',
     'logs',
     'airdrop',
+    'triviadrop',
     'faq',
     'report'
   ]
@@ -291,6 +336,7 @@ const rateLimits = {
   'support': { max: 2, window: 300000 }, // 2 per 5 minutes
   'logs': { max: 5, window: 60000 }, // 5 per minute
   'airdrop': { max: 3, window: 300000 }, // 3 per 5 minutes
+  'triviadrop': { max: 2, window: 600000 }, // 2 per 10 minutes
   'faq': { max: 10, window: 60000 }, // 10 per minute
   'report': { max: 5, window: 300000 }, // 5 per 5 minutes
   default: { max: 10, window: 60000 } // 10 per minute for others

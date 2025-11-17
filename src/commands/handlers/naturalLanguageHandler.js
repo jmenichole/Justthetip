@@ -11,6 +11,7 @@ const { EmbedBuilder } = require('discord.js');
 const { processNaturalLanguage, isBotMentioned } = require('../../services/naturalLanguageService');
 const { searchFAQ, getRandomTip } = require('../../services/faqService');
 const { handleNaturalLanguageReport } = require('./reportHandler');
+const { parseRandomTipCommand, selectRandomUsers } = require('../../services/randomUserService');
 
 /**
  * Process natural language message
@@ -33,6 +34,13 @@ async function handleNaturalLanguageMessage(message, context) {
     const cleanMessage = message.content
       .replace(/<@!?\d+>/g, '')
       .trim();
+    
+    // Check for random tip command first
+    const randomTipCmd = parseRandomTipCommand(cleanMessage);
+    if (randomTipCmd) {
+      await handleRandomTipCommand(message, randomTipCmd, context);
+      return;
+    }
     
     // Process the natural language
     const intent = processNaturalLanguage(cleanMessage);
@@ -274,6 +282,53 @@ async function handleNaturalLanguageAirdrop(message, intent, _context) {
     `\`/airdrop ${intent.amount}\`\n\n` +
     `*Natural language airdrops are in beta. Use slash commands for reliable execution.*`
   );
+}
+
+/**
+ * Handle random tip command (tip X active/lucky/etc)
+ * @param {Message} message - Discord message
+ * @param {Object} command - Parsed random tip command
+ * @param {Object} context - Command context
+ */
+async function handleRandomTipCommand(message, command, context) {
+  try {
+    const { channel, guild } = message;
+    
+    if (!guild) {
+      return message.reply('❌ Random tips can only be used in server channels.');
+    }
+
+    // Select random users
+    const selectedUsers = await selectRandomUsers(channel, guild, command);
+
+    if (selectedUsers.length === 0) {
+      return message.reply('❌ No users found matching the criteria.');
+    }
+
+    const totalAmount = command.amount * selectedUsers.length;
+    const criterionText = command.isLastMessages 
+      ? `last ${command.messageCount} messages` 
+      : command.criterion;
+
+    const embed = new EmbedBuilder()
+      .setTitle('🎲 Random Tip Selection')
+      .setDescription(
+        `**Criterion:** ${criterionText}\n` +
+        `**Selected:** ${selectedUsers.length} users\n` +
+        `**Amount per user:** $${command.amount.toFixed(2)}\n` +
+        `**Total:** $${totalAmount.toFixed(2)}\n\n` +
+        `**Selected Users:**\n${selectedUsers.map(u => `• ${u.username}`).join('\n')}\n\n` +
+        `To complete this tip, use:\n` +
+        selectedUsers.map(u => `\`/tip <@${u.id}> ${command.amount}\``).join('\n')
+      )
+      .setColor(0xf59e0b)
+      .setFooter({ text: 'Random tip selections are for fun engagement!' });
+
+    return message.reply({ embeds: [embed] });
+  } catch (error) {
+    console.error('Error handling random tip:', error);
+    return message.reply('❌ Failed to process random tip selection.');
+  }
 }
 
 module.exports = {

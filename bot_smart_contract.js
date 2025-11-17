@@ -59,6 +59,7 @@ const { handleAirdropCommand } = require('./src/commands/handlers/airdropHandler
 const { handleFAQCommand } = require('./src/commands/handlers/faqHandler');
 const { handleReportCommand } = require('./src/commands/handlers/reportHandler');
 const { handleNaturalLanguageMessage } = require('./src/commands/handlers/naturalLanguageHandler');
+const { handleTriviadropCommand } = require('./src/commands/handlers/triviadropHandler');
 
 const client = new Client({
   intents: [
@@ -172,6 +173,10 @@ client.on(Events.InteractionCreate, async interaction => {
         
       case 'airdrop':
         await handleAirdropCommand(interaction, context);
+        break;
+        
+      case 'triviadrop':
+        await handleTriviadropCommand(interaction, context);
         break;
         
       case 'faq':
