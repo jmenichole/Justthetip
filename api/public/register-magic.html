@@ -140,13 +140,21 @@
                 publishableKeyPresent: !!(MAGIC_PUBLISHABLE_KEY && !MAGIC_PUBLISHABLE_KEY.includes('{{')),
                 rpcUrl: MAGIC_SOLANA_RPC_URL,
                 network: MAGIC_SOLANA_NETWORK,
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
+                deployment_info: {
+                    current_host: window.location.hostname,
+                    recommended_deployment: 'justthetip.vercel.app',
+                    deprecated_hosts: ['api.mischief-manager.com']
+                }
             });
             
             // Provide user-friendly error message based on error type
             let userMessage = 'Magic SDK initialization failed. ';
             if (!MAGIC_PUBLISHABLE_KEY || MAGIC_PUBLISHABLE_KEY.includes('{{')) {
-                userMessage += 'The service is not properly configured. Please contact support.';
+                userMessage += 'The service is not properly configured with Magic API keys. ';
+                userMessage += 'This often happens when accessing the wrong deployment URL. ';
+                userMessage += 'Please ensure you are using the correct URL: https://justthetip.vercel.app. ';
+                userMessage += 'Contact support if the problem persists.';
             } else if (error.message && error.message.includes('network')) {
                 userMessage += 'Network connection issue detected. Please check your internet connection and try again.';
             } else {
@@ -170,6 +178,11 @@
         // Register with Magic (using Discord authentication)
         async function registerWithMagic() {
             try {
+                // Verify Magic SDK is initialized
+                if (!magic) {
+                    throw new Error('Magic SDK not initialized. This usually means the service is not properly configured. Please ensure you are using the correct deployment URL: https://justthetip.vercel.app');
+                }
+                
                 // Parse registration token to get Discord info
                 const tokenData = JSON.parse(atob(registrationToken.replace(/-/g, '+').replace(/_/g, '/')));
                 const discordUsername = tokenData.discordUsername || 'user';
