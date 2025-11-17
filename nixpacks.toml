@@ -2,13 +2,13 @@
 # Runs both API server and Discord Bot
 
 [phases.setup]
-nixPkgs = ["python3", "nodejs_22", "gcc", "gnumake"]
+nixPkgs = ["python3", "nodejs_20", "gcc", "gnumake"]
 aptPkgs = ["libudev-dev", "libusb-1.0-0-dev"]
 
 [phases.install]
-# Use npm install instead of npm ci for Railway compatibility
+# Use npm install for Railway compatibility
 # Skip optional dependencies that fail (like usb module for hardware wallets)
-cmds = ["npm install --production=false --no-optional || npm install --production=false --legacy-peer-deps --no-optional"]
+cmds = ["npm install --no-optional"]
 
 [phases.build]
 cmds = []
