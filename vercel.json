@@ -11,6 +11,10 @@
           "api/middleware/**"
         ]
       }
+    },
+    {
+      "src": "docs/**",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
@@ -19,8 +23,11 @@
       "dest": "api/server.js"
     },
     {
+      "handle": "filesystem"
+    },
+    {
       "src": "/(.*)",
-      "dest": "docs/$1"
+      "dest": "/docs/$1"
     }
   ],
   "env": {
