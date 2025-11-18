@@ -8,6 +8,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <link rel="icon" href="logo.png" type="image/png">
+    
+    <!-- WalletConnect Modal CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@walletconnect/modal@2.7.0/dist/index.css">
+    
     <style>
         :root {
             --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -287,38 +291,158 @@
             font-weight: 600;
         }
 
-        .wallet-support-note {
-            text-align: center;
-            color: var(--text-secondary);
+        .note-box {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+
+        .note-box.info {
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 4px solid #3b82f6;
+        }
+
+        .note-box.success {
+            background: rgba(16, 185, 129, 0.1);
+            border-left: 4px solid #10b981;
+        }
+
+        .note-box.warning {
+            background: rgba(245, 158, 11, 0.1);
+            border-left: 4px solid #f59e0b;
+        }
+
+        .note-box h4 {
+            margin-bottom: 8px;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .note-box p {
             font-size: 14px;
-            margin-top: 10px;
+            margin: 0;
             line-height: 1.6;
         }
 
-        .wallet-support-note strong {
-            color: var(--text-primary);
-        }
+        .note-box.info h4 { color: #60a5fa; }
+        .note-box.info p { color: rgba(96, 165, 250, 0.9); }
+        
+        .note-box.success h4 { color: #34d399; }
+        .note-box.success p { color: rgba(52, 211, 153, 0.9); }
+        
+        .note-box.warning h4 { color: #fbbf24; }
+        .note-box.warning p { color: rgba(251, 191, 36, 0.9); }
 
         @media (max-width: 640px) {
+            body {
+                padding: 10px;
+                align-items: flex-start;
+            }
+
             .container {
-                padding: 30px 20px;
+                padding: 25px 16px;
+                border-radius: 16px;
+                max-width: 100%;
+                margin: 10px auto;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
             }
 
             .logo-img {
-                width: 48px;
-                height: 48px;
+                width: 44px;
+                height: 44px;
             }
 
             .logo-text {
-                font-size: 1.5rem;
+                font-size: 1.4rem;
             }
 
             .header h1 {
-                font-size: 24px;
+                font-size: 22px;
+                line-height: 1.3;
+            }
+
+            .header p {
+                font-size: 14px;
+                line-height: 1.5;
             }
 
             .button {
-                padding: 14px 20px;
+                padding: 14px 18px;
+                font-size: 14px;
+                white-space: normal;
+            }
+
+            .note-box, .info-box, .security-notice {
+                padding: 16px;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+
+            .note-box h4, .info-box h3 {
+                font-size: 16px;
+                margin-bottom: 10px;
+            }
+
+            .user-info {
+                padding: 14px;
+                font-size: 13px;
+                word-break: break-word;
+            }
+
+            .status {
+                padding: 14px;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+
+            .wallet-buttons {
+                gap: 10px;
+            }
+
+            .security-notice ul {
+                padding-left: 20px;
+                font-size: 13px;
+                line-height: 1.6;
+            }
+
+            .security-notice li {
+                margin-bottom: 8px;
+            }
+        }
+
+        /* Extra small devices */
+        @media (max-width: 375px) {
+            body {
+                padding: 5px;
+            }
+
+            .container {
+                padding: 20px 12px;
+                margin: 5px auto;
+                border-radius: 12px;
+            }
+
+            .header h1 {
+                font-size: 20px;
+            }
+
+            .logo-text {
+                font-size: 1.2rem;
+            }
+
+            .button {
+                padding: 12px 16px;
+                font-size: 13px;
+            }
+
+            .note-box, .info-box, .security-notice {
+                padding: 14px;
+                font-size: 13px;
+            }
+
+            .note-box h4, .info-box h3 {
                 font-size: 15px;
             }
         }
@@ -332,7 +456,7 @@
                 <span class="logo-text">JustTheTip</span>
             </div>
             <h1>Register Your Wallet</h1>
-            <p>Connect your Solana wallet securely to JustTheTip Bot</p>
+            <p>A Solana Trustless Agent - Sign once, tip forever without compromising security</p>
         </div>
 
         <div class="user-info" id="userInfo" style="display: none;">
@@ -350,206 +474,66 @@
             </div>
         </div>
 
-        <div id="statusMessage" class="status pending">
-            Waiting for wallet connection...
-        </div>
-
-        <div class="info-box">
-            <h3>📝 What will happen:</h3>
+        <div class="note-box info" style="margin-bottom: 25px;">
+            <h4>🤖 One Signature, All Tokens</h4>
             <p>
-                1. Connect using Phantom, Solflare, or WalletConnect (any wallet)<br>
-                2. Sign a verification message (non-custodial)<br>
-                3. Your wallet will be registered instantly
+                Your single wallet signature proves ownership of your Solana address and all tokens it holds (SOL, USDC, BONK, USDT, etc.). 
+                After this one-time registration, tip with any supported token without signing again. Your wallet stays 100% non-custodial.
             </p>
-        </div>
-
-        <button id="connectButton" class="button primary">
-            🟣 Connect Phantom Wallet
-        </button>
-
-        <button id="solflareButton" class="button primary" style="background: linear-gradient(135deg, #fc1859 0%, #f5576c 100%); box-shadow: 0 4px 12px rgba(252, 24, 89, 0.4);">
-            🟠 Connect Solflare Wallet
-        </button>
-
-        <button id="walletConnectButton" class="button primary" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); box-shadow: 0 4px 12px rgba(79, 172, 254, 0.4); margin-top: 10px;">
-            🔗 Connect with WalletConnect (Any Wallet)
-        </button>
-
-        <p class="wallet-support-note">
-            <strong>WalletConnect supports:</strong> Phantom, Solflare, Trust Wallet, and any Solana-compatible wallet on mobile or desktop.
-        </p>
-
-        <div class="security-notice">
-            <h4>🔒 Security Guarantees</h4>
-            <ul>
-                <li>Your private keys never leave your wallet</li>
-                <li>Signatures are not stored permanently</li>
-                <li>Registration links expire after 10 minutes</li>
-                <li>Non-custodial - you maintain full control</li>
-            </ul>
-        </div>
-    </div>
-        }
-
-        .status.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .status.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .button {
-            width: 100%;
-            padding: 16px;
-            font-size: 16px;
-            font-weight: 600;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 15px;
-        }
-
-        .button.primary {
-            background: #667eea;
-            color: white;
-        }
-
-        .button.primary:hover:not(:disabled) {
-            background: #5568d3;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-        }
-
-        .button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .security-notice {
-            background: #e7f3ff;
-            border: 1px solid #bee5eb;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 25px;
-        }
-
-        .security-notice h4 {
-            color: #004085;
-            font-size: 14px;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .security-notice ul {
-            margin-left: 20px;
-            color: #004085;
-            font-size: 14px;
-            line-height: 1.8;
-        }
-
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-right: 10px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .user-info {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-
-        .user-info div {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid #dee2e6;
-        }
-
-        .user-info div:last-child {
-            border-bottom: none;
-        }
-
-        .user-info label {
-            color: #666;
-            font-weight: 600;
-        }
-
-        .user-info span {
-            color: #333;
-            font-family: monospace;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>🔐 Register Your Wallet</h1>
-            <p>Connect your Solana wallet to JustTheTip Bot</p>
-        </div>
-
-        <div class="user-info" id="userInfo" style="display: none;">
-            <div>
-                <label>Discord User:</label>
-                <span id="discordUsername"></span>
-            </div>
-            <div>
-                <label>User ID:</label>
-                <span id="discordUserId"></span>
-            </div>
-            <div>
-                <label>Session:</label>
-                <span id="nonce"></span>
-            </div>
+            <p style="margin-top: 10px; font-size: 13px; opacity: 0.9;">
+                <strong>How it works:</strong> Connect wallet → Sign message → Automatic verification → Start tipping. 
+                Works seamlessly with all major Solana wallets on desktop and mobile.
+            </p>
         </div>
 
         <div id="statusMessage" class="status pending">
             Waiting for wallet connection...
-        </div>
-
-        <div class="info-box">
-            <h3>📝 What will happen:</h3>
+        </div>        <div id="noExtensionNote" class="note-box warning" style="display: none;">
+            <h4>💡 No Browser Extension Detected</h4>
             <p>
-                1. Connect using Phantom, Solflare, or WalletConnect (any wallet)<br>
-                2. Sign a verification message (non-custodial)<br>
-                3. Your wallet will be registered instantly
+                Don't have a browser extension? No problem! Use WalletConnect below to connect with your mobile wallet by scanning a QR code, 
+                or follow the manual process.
             </p>
         </div>
 
-        <button id="connectButton" class="button primary">
-            🟣 Connect Phantom Wallet
-        </button>
+        <div id="extensionNote" class="note-box success" style="display: none;">
+            <h4>✅ Wallet Extension Detected</h4>
+            <p>
+                You can use your installed wallet extension for quick registration, or use WalletConnect below.
+            </p>
+        </div>
 
-        <button id="solflareButton" class="button primary" style="background: #fc1859;">
-            🟠 Connect Solflare Wallet
-        </button>
+        <div id="desktopButtons">
+            <h3 style="margin: 20px 0 15px 0;">Quick Connect (Browser Extension)</h3>
+            <button id="connectButton" class="button primary">
+                🟣 Connect Phantom Wallet
+            </button>
 
-        <button id="walletConnectButton" class="button primary" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); margin-top: 10px;">
-            🔗 Connect with WalletConnect (Any Wallet)
-        </button>
+            <button id="solflareButton" class="button primary" style="background: linear-gradient(135deg, #fc1859 0%, #f5576c 100%); box-shadow: 0 4px 12px rgba(252, 24, 89, 0.4);">
+                🟠 Connect Solflare Wallet
+            </button>
+        </div>
 
-        <p style="text-align: center; color: #666; font-size: 14px; margin-top: 15px;">
-            <strong>WalletConnect supports:</strong> Phantom, Solflare, Trust Wallet, and any Solana-compatible wallet on mobile or desktop.
-        </p>
+        <div id="walletConnectSection" style="margin-top: 30px;">
+            <h3 style="margin: 20px 0 15px 0;">🔗 WalletConnect - All Wallets Supported</h3>
+            <button id="walletConnectButton" class="button primary" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); box-shadow: 0 4px 12px rgba(79, 172, 254, 0.4);">
+                🔗 Connect Any Solana Wallet
+            </button>
+            <p style="text-align: center; color: var(--text-secondary); font-size: 14px; margin-top: 10px;">
+                <strong>Universal protocol supporting:</strong> Phantom, Solflare, Trust Wallet, and any Solana-compatible wallet.<br>
+                Desktop users can scan a QR code with their mobile wallet app.
+            </p>
+        </div>
+
+        <div id="mobileButtons" style="display: none; margin-top: 20px;">
+            <button id="manualEntryButton" class="button primary" style="display: none; margin-top: 15px;">
+                Enter Wallet Details
+            </button>
+            
+            <button id="signatureEntryButton" class="button primary" style="background: linear-gradient(135deg, #10b981 0%, #34d399 100%); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4); display: none; margin-top: 15px;">
+                ✍️ Submit Signature
+            </button>
+        </div>
 
         <div class="security-notice">
             <h4>🔒 Security Guarantees</h4>
@@ -562,251 +546,9 @@
         </div>
     </div>
 
-    <script>
-        // API Configuration - Backend URL for wallet registration
-        // When running locally with npm start, the API is at the same origin
-        // When deployed, the API backend should be on Vercel and frontend on GitHub Pages
-        const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-            ? window.location.origin  // Local development
-            : (window.JUSTTHETIP_API_URL || 'https://justthetip.vercel.app'); // Production - can be overridden
-        
-        // Parse URL parameters
-        const urlParams = new URLSearchParams(window.location.search);
-        const discordUserId = urlParams.get('user');
-        const discordUsername = urlParams.get('username');
-        const nonce = urlParams.get('nonce');
-
-        // Display user info
-        if (discordUserId && discordUsername && nonce) {
-            document.getElementById('userInfo').style.display = 'block';
-            document.getElementById('discordUsername').textContent = discordUsername;
-            document.getElementById('discordUserId').textContent = discordUserId;
-            document.getElementById('nonce').textContent = nonce.substring(0, 8) + '...';
-        } else {
-            showStatus('error', '❌ Invalid registration link. Please request a new one from Discord.');
-            document.getElementById('connectButton').disabled = true;
-            document.getElementById('solflareButton').disabled = true;
-        }
-
-        function showStatus(type, message) {
-            const statusEl = document.getElementById('statusMessage');
-            statusEl.className = `status ${type}`;
-            statusEl.innerHTML = message;
-        }
-
-        async function connectWallet(walletType) {
-            const provider = walletType === 'phantom' ? window.solana : window.solflare;
-            
-            if (!provider) {
-                const walletName = walletType === 'phantom' ? 'Phantom' : 'Solflare';
-                const installUrl = walletType === 'phantom' 
-                    ? 'https://phantom.app/' 
-                    : 'https://solflare.com/';
-                showStatus('error', `❌ ${walletName} wallet not found. <a href="${installUrl}" target="_blank">Install ${walletName}</a>`);
-                return;
-            }
-
-            try {
-                showStatus('pending', '<span class="loading"></span>Connecting to wallet...');
-                
-                // Connect to wallet
-                const resp = await provider.connect();
-                const publicKey = resp.publicKey.toString();
-                
-                showStatus('pending', '<span class="loading"></span>Wallet connected! Preparing message to sign...');
-
-                // Create the message to sign
-                const message = {
-                    app: "JustTheTip",
-                    discord_user: discordUsername,
-                    discord_id: discordUserId,
-                    timestamp: new Date().toISOString(),
-                    nonce: nonce,
-                    purpose: "Register this wallet for deposits & withdrawals"
-                };
-
-                const messageString = JSON.stringify(message, null, 2);
-                const encodedMessage = new TextEncoder().encode(messageString);
-
-                showStatus('pending', '<span class="loading"></span>Please sign the message in your wallet...');
-
-                // Request signature
-                const signedMessage = await provider.signMessage(encodedMessage, 'utf8');
-                
-                // Convert signature to base64 for transmission
-                const signatureBase64 = btoa(String.fromCharCode(...signedMessage.signature));
-
-                showStatus('pending', '<span class="loading"></span>Verifying signature...');
-
-                // Send to backend for verification
-                const response = await fetch(`${API_BASE_URL}/api/registerwallet/verify`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        message: messageString,
-                        publicKey: publicKey,
-                        signature: signatureBase64,
-                        discordUserId: discordUserId,
-                        discordUsername: discordUsername,
-                        nonce: nonce
-                    })
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    showStatus('success', `✅ Wallet registered successfully!<br><br>Wallet: ${publicKey.substring(0, 8)}...${publicKey.substring(publicKey.length - 8)}<br><br>You can now close this window and return to Discord.`);
-                    document.getElementById('connectButton').disabled = true;
-                    document.getElementById('solflareButton').disabled = true;
-                } else {
-                    showStatus('error', `❌ Registration failed: ${result.error || 'Unknown error'}<br><br>Please try again or request a new registration link.`);
-                }
-
-            } catch (error) {
-                console.error('Wallet connection error:', error);
-                if (error.message && error.message.includes('User rejected')) {
-                    showStatus('error', '❌ Signature request was cancelled. Please try again.');
-                } else {
-                    showStatus('error', `❌ Error: ${error.message || 'Failed to connect wallet'}`);
-                }
-            }
-        }
-
-        async function connectWalletConnect() {
-            showStatus('pending', `
-                <h3 style="margin-bottom: 15px;">🔗 WalletConnect Registration</h3>
-                <p style="line-height: 1.8; text-align: left; padding: 0 20px;">
-                    <strong>For mobile wallet users:</strong><br>
-                    1. Open your Solana wallet app (Phantom, Solflare, Trust Wallet, etc.)<br>
-                    2. Copy your wallet address from the app<br>
-                    3. Paste it in the prompt when clicking "Enter Wallet Details" below<br>
-                    4. Sign the message in your wallet app<br>
-                    5. Copy and submit the signature<br><br>
-                    
-                    <strong>For desktop users with mobile wallet:</strong><br>
-                    You can scan a QR code or manually enter your wallet details following the same steps above.<br><br>
-                    
-                    <button onclick="handleManualEntry()" style="padding: 12px 24px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: 600;">
-                        📝 Enter Wallet Details
-                    </button>
-                </p>
-            `);
-        }
-
-        async function handleManualEntry() {
-            const walletAddress = prompt('Enter your Solana wallet address:');
-            
-            if (!walletAddress || walletAddress.trim().length === 0) {
-                showStatus('error', '❌ No wallet address provided. Please try again.');
-                return;
-            }
-            
-            // Validate wallet address format (basic check)
-            if (walletAddress.length < 32 || walletAddress.length > 44) {
-                showStatus('error', '❌ Invalid wallet address format. Solana addresses are 32-44 characters long.');
-                return;
-            }
-            
-            // Create the message to sign
-            const message = {
-                app: "JustTheTip",
-                discord_user: discordUsername,
-                discord_id: discordUserId,
-                timestamp: new Date().toISOString(),
-                nonce: nonce,
-                purpose: "Register this wallet for deposits & withdrawals"
-            };
-
-            const messageString = JSON.stringify(message, null, 2);
-            
-            // Show the message that needs to be signed
-            showStatus('pending', `
-                <div style="text-align: left; padding: 20px;">
-                    <h3 style="margin-bottom: 15px;">✍️ Sign This Message</h3>
-                    <p style="margin-bottom: 15px;">Copy the message below and sign it in your wallet app:</p>
-                    <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin: 15px 0; overflow-x: auto;">
-                        <pre style="margin: 0; white-space: pre-wrap; word-break: break-word; font-size: 12px; color: #333;">${messageString}</pre>
-                    </div>
-                    <button onclick="navigator.clipboard.writeText(\`${messageString.replace(/[`\\]/g, '\\$&')}\`).then(() => alert('Message copied to clipboard!'))" 
-                            style="padding: 12px 24px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; margin-bottom: 15px; font-weight: 600;">
-                        📋 Copy Message
-                    </button>
-                    <p style="margin: 15px 0;"><strong>After signing in your wallet app:</strong></p>
-                    <ol style="margin-left: 20px; line-height: 1.8;">
-                        <li>Copy the signature (base64 or base58 format)</li>
-                        <li>Click "Submit Signature" below</li>
-                        <li>Paste the signature when prompted</li>
-                    </ol>
-                    <button onclick="submitSignature('${walletAddress}')" 
-                            style="padding: 12px 24px; background: #10b981; color: white; border: none; border-radius: 8px; cursor: pointer; margin-top: 15px; font-weight: 600;">
-                        ✍️ Submit Signature
-                    </button>
-                </div>
-            `);
-        }
-
-        async function submitSignature(walletAddress) {
-            let signature = prompt('Enter the signature from your wallet (base64 or base58 format):');
-            
-            if (!signature || signature.trim().length === 0) {
-                showStatus('error', '❌ No signature provided. Please try again.');
-                return;
-            }
-            
-            signature = signature.trim();
-            
-            showStatus('pending', '⏳ Verifying signature...');
-            
-            const message = {
-                app: "JustTheTip",
-                discord_user: discordUsername,
-                discord_id: discordUserId,
-                timestamp: new Date().toISOString(),
-                nonce: nonce,
-                purpose: "Register this wallet for deposits & withdrawals"
-            };
-
-            const messageString = JSON.stringify(message, null, 2);
-            
-            try {
-                // Send to backend for verification
-                const response = await fetch(`${API_BASE_URL}/api/registerwallet/verify`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        message: messageString,
-                        publicKey: walletAddress,
-                        signature: signature,
-                        discordUserId: discordUserId,
-                        discordUsername: discordUsername,
-                        nonce: nonce
-                    })
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    showStatus('success', `✅ Wallet registered successfully!<br><br>Wallet: ${walletAddress.substring(0, 8)}...${walletAddress.substring(walletAddress.length - 8)}<br><br>You can now close this window and return to Discord.`);
-                    document.getElementById('connectButton').disabled = true;
-                    document.getElementById('solflareButton').disabled = true;
-                    document.getElementById('walletConnectButton').disabled = true;
-                } else {
-                    showStatus('error', `❌ Registration failed: ${result.error || 'Unknown error'}<br><br>Please make sure you:<br>• Signed the exact message shown<br>• Copied the complete signature<br>• Are using the correct wallet address`);
-                }
-
-            } catch (error) {
-                console.error('Signature submission error:', error);
-                showStatus('error', `❌ Error: ${error.message || 'Failed to verify signature'}`);
-            }
-        }
-
-        document.getElementById('connectButton').addEventListener('click', () => connectWallet('phantom'));
-        document.getElementById('solflareButton').addEventListener('click', () => connectWallet('solflare'));
-        document.getElementById('walletConnectButton').addEventListener('click', connectWalletConnect);
-    </script>
+    <!-- Load everything as a single module -->
+    <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@1.98.4/lib/index.iife.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script type="module" src="sign.js"></script>
 </body>
 </html>
