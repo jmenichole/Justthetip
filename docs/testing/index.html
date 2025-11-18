@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JustTheTip - Testing Documentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            padding: 40px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        h1 {
+            color: #667eea;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .intro {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border-left: 4px solid #667eea;
+        }
+
+        .file-list {
+            list-style: none;
+        }
+
+        .file-item {
+            background: #f8f9fa;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            overflow: hidden;
+        }
+
+        .file-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .file-link {
+            display: block;
+            padding: 20px;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .file-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .file-description {
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .file-meta {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+            font-size: 0.85rem;
+            color: #999;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            background: #667eea;
+            color: white;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+
+        .back-link:hover {
+            background: #764ba2;
+        }
+
+        footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🧪 Testing Documentation</h1>
+            <p class="subtitle">Environment Validation & Mock Test Results</p>
+        </header>
+
+        <div class="intro">
+            <p>
+                This directory contains testing documentation and validation reports for the JustTheTip bot. 
+                These files help ensure proper environment configuration and system functionality.
+            </p>
+        </div>
+
+        <ul class="file-list">
+            <li class="file-item">
+                <a href=".env.mock-test.js" class="file-link" download>
+                    <div class="file-name">
+                        <span class="badge">JS</span>
+                        .env.mock-test.js
+                    </div>
+                    <div class="file-description">
+                        Mock test script for NFT verification onboarding flow. Tests the complete user journey 
+                        including terms acceptance and Discord OAuth without making actual API calls.
+                    </div>
+                    <div class="file-meta">
+                        <span>📄 JavaScript Test Script</span>
+                        <span>🔧 Mock Testing</span>
+                    </div>
+                </a>
+            </li>
+
+            <li class="file-item">
+                <a href=".env.mock-test-results.md" class="file-link">
+                    <div class="file-name">
+                        <span class="badge">MD</span>
+                        .env.mock-test-results.md
+                    </div>
+                    <div class="file-description">
+                        Results and findings from the mock test execution. Contains detailed test output, 
+                        validation checks, and recommendations for environment configuration.
+                    </div>
+                    <div class="file-meta">
+                        <span>📊 Test Results</span>
+                        <span>✅ Validation Report</span>
+                    </div>
+                </a>
+            </li>
+
+            <li class="file-item">
+                <a href=".env.validation-report.md" class="file-link">
+                    <div class="file-name">
+                        <span class="badge">MD</span>
+                        .env.validation-report.md
+                    </div>
+                    <div class="file-description">
+                        Comprehensive environment validation report. Analyzes configuration requirements, 
+                        checks for missing variables, and provides setup guidance.
+                    </div>
+                    <div class="file-meta">
+                        <span>🔍 Environment Check</span>
+                        <span>📋 Configuration Guide</span>
+                    </div>
+                </a>
+            </li>
+        </ul>
+
+        <a href="../" class="back-link">← Back to Documentation Home</a>
+
+        <footer>
+            <p>
+                <strong>JustTheTip</strong> - Professional Solana Smart Contract SDK for Discord Bot Development
+            </p>
+            <p style="margin-top: 10px;">
+                <a href="https://github.com/jmenichole/Justthetip" style="color: #667eea; text-decoration: none;">
+                    View on GitHub
+                </a>
+            </p>
+        </footer>
+    </div>
+</body>
+</html>
