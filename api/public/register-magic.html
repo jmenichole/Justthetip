@@ -145,7 +145,7 @@
                 timestamp: new Date().toISOString(),
                 deployment_info: {
                     current_host: window.location.hostname,
-                    recommended_deployment: 'justthetip.vercel.app',
+                    recommended_deployment: 'justthetip-eta.vercel.app',
                     deprecated_hosts: ['api.mischief-manager.com']
                 }
             });
@@ -155,7 +155,7 @@
             if (!MAGIC_PUBLISHABLE_KEY || MAGIC_PUBLISHABLE_KEY.includes('{{')) {
                 userMessage += 'The service is not properly configured with Magic API keys. ';
                 userMessage += 'This often happens when accessing the wrong deployment URL. ';
-                userMessage += 'Please ensure you are using the correct URL: https://justthetip.vercel.app. ';
+                userMessage += 'Please ensure you are using the correct URL: https://justthetip-eta.vercel.app. ';
                 userMessage += 'Contact support if the problem persists.';
             } else if (error.message && error.message.includes('network')) {
                 userMessage += 'Network connection issue detected. Please check your internet connection and try again.';
@@ -185,7 +185,7 @@
             try {
                 // Verify Magic SDK is initialized
                 if (!magicInitialized || !magic) {
-                    throw new Error('Magic SDK not initialized. This usually means the service is not properly configured. Please ensure you are using the correct deployment URL: https://justthetip.vercel.app');
+                    throw new Error('Magic SDK not initialized. This usually means the service is not properly configured. Please ensure you are using the correct deployment URL: https://justthetip-eta.vercel.app');
                 }
                 
                 // Parse registration token to get Discord info

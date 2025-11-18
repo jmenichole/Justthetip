@@ -76,13 +76,13 @@ const smartContractCommands = improvedCommands;
 
 // Get API URL for wallet registration page (sign.html is served by API server)
 // Vercel deployment is the recommended API server for all endpoints including crypto onramp
-const API_URL = process.env.API_BASE_URL || 'https://justthetip.vercel.app';
+const API_URL = process.env.API_BASE_URL || 'https://justthetip-eta.vercel.app';
 
 // Validate API URL and warn about deprecated deployments
 if (API_URL.includes('mischief-manager')) {
   console.warn('⚠️  WARNING: You are using a deprecated API URL (mischief-manager.com)');
   console.warn('⚠️  This deployment is no longer maintained and may not have proper configuration.');
-  console.warn('⚠️  Please update API_BASE_URL to: https://justthetip.vercel.app');
+  console.warn('⚠️  Please update API_BASE_URL to: https://justthetip-eta.vercel.app');
   console.warn('⚠️  Magic wallet registration and other features may not work correctly.');
 }
 
