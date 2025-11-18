@@ -201,7 +201,7 @@ router.get('/health', (req, res) => {
       solana_rpc_url: hasSolanaRpcUrl
     },
     deployment: {
-      recommended_url: 'https://justthetip.vercel.app',
+      recommended_url: 'https://justthetip-eta.vercel.app',
       frontend_url: 'https://jmenichole.github.io/Justthetip',
       deprecated_urls: [
         'api.mischief-manager.com (no longer maintained)'

@@ -59,7 +59,7 @@ describe('Magic Routes', () => {
       });
 
       expect(response.body.deployment).toBeDefined();
-      expect(response.body.deployment.recommended_url).toBe('https://justthetip.vercel.app');
+      expect(response.body.deployment.recommended_url).toBe('https://justthetip-eta.vercel.app');
       expect(response.body.timestamp).toBeDefined();
     });
 
@@ -116,7 +116,7 @@ describe('Magic Routes', () => {
         .expect(200);
 
       expect(response.body.deployment).toMatchObject({
-        recommended_url: 'https://justthetip.vercel.app',
+        recommended_url: 'https://justthetip-eta.vercel.app',
         frontend_url: 'https://jmenichole.github.io/Justthetip',
         deprecated_urls: expect.arrayContaining([
           'api.mischief-manager.com (no longer maintained)'
@@ -200,7 +200,7 @@ describe('Magic Routes', () => {
         .get('/api/magic/health')
         .expect(200);
 
-      expect(response.body.deployment.recommended_url).toBe('https://justthetip.vercel.app');
+      expect(response.body.deployment.recommended_url).toBe('https://justthetip-eta.vercel.app');
     });
 
     test('should specify correct frontend URL', async () => {

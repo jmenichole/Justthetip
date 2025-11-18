@@ -71,7 +71,7 @@ app.use(helmet({
             connectSrc: [
                 "'self'",
                 "https://jmenichole.github.io",
-                "https://justthetip.vercel.app",
+                "https://justthetip-eta.vercel.app",
                 "https://api.mainnet-beta.solana.com",
                 "https://api.devnet.solana.com",
                 "https://phantom.app",
@@ -96,7 +96,7 @@ app.use(helmet({
 app.use(cors({
     origin: [
         'https://jmenichole.github.io',
-        'https://justthetip.vercel.app',
+        'https://justthetip-eta.vercel.app',
         'http://localhost:3000',
         'http://localhost:5500'
     ],
